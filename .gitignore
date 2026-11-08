@@ -1,0 +1,21 @@
+# shoalmark hail — what git never carries
+
+# Rust (github/gitignore Rust template, the parts that apply). Cargo.lock is kept: the workspace builds binaries
+debug/
+target/
+**/*.rs.bk
+*.pdb
+**/mutants.out*/
+
+# coverage and profiling
+*.profraw
+*.profdata
+lcov.info
+
+# editors and the OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.env
