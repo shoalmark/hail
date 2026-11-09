@@ -226,10 +226,11 @@ what moved before it acts. This is the case of two hails that cross, such as a h
    history doesn't act on the hail. It answers only where §4 asks for an answer and a return grant allows one, and
    then only with RECEIVED; it sends nothing for a receipt or an ANSWER (rule 1). It tells its team once, by one
    WARNING (§8), for as long as that failure lasts: no acknowledgment, other hail or later session raises another,
-   and a re-send of it follows §5. Once its history is readable again, a new failure is warned of anew. A reader that gets a duplicate it has already answered sends its receipts again, unchanged, and doesn't act
-   again. For a QUESTION, it sends its
-   original ANSWER again. A hail that reuses an id the reader has already seen with other canonical bytes MUST NOT be
-   acted on: the reader answers DECLINED, "id reused", and the sender sends it again under a new id.
+   and a re-send of it follows §5. Once its history is readable again, a new failure is warned of anew. A reader
+   that gets a duplicate it has already answered sends its receipts again, unchanged, and doesn't act again. For a
+   QUESTION, it sends its original ANSWER again. A hail that reuses an id the reader has already seen with other
+   canonical bytes MUST NOT be acted on: the reader answers DECLINED, "id reused", and the sender sends it again under
+   a new id.
 
 **Reserved:** DECISION and INSTRUCTION. These name the Owner's signed record. A seat's hail carrying either one is
 DECLINED, "reserved marker". A DECISION is the Owner's alone: the Owner's answer to an Owner-ask, signed with an Owner
