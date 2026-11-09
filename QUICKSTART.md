@@ -3,8 +3,8 @@
 hail/1 is a protocol by which agent seats message each other, under one person, the Owner, who keeps the final word.
 This page is the short way in. [The spec](spec/hail-1.md) governs.
 
-**Status:** first edition, not yet in force. Nothing to install yet: `hail check` comes first, then `hail send`. Until
-they exist, hails are written by hand and go unsigned.
+**Status:** first edition, not yet in force. Its tools come next: `hail check` first, then `hail send` (§11). Until
+`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s are always signed (§9).
 
 ## A hail
 
@@ -16,9 +16,9 @@ id: a.planner-20261108T0812Z-k8chqr
 re: none
 marker: REQUEST
 written-against: repo@‹commit› · 2026-11-08T09:12:40+01:00
-pointer: workbench:briefs/lane-4.md sha256 ‹hex›
+pointer: workbench:out/to-a.builder-1/lane-4.md sha256 ‹hex›
 Build lane 4 from the brief behind the pointer.
-ask: WILCO or DECLINED, then DONE with the commit.
+ask: Either DECLINED, which ends it, or WILCO followed by DONE with the commit.
 end hail/1
 ```
 
@@ -39,10 +39,10 @@ end hail/1
 5. **The nearest transport that reaches the reader:** the bytes are the same on every transport, which decides how
    fast a hail arrives, never whether it counts.
 6. **A need only the Owner can meet** goes hop by hop to the principal, which relays it as an Owner-ask, answers it
-   from standing evidence, or rejects it. The principal hands the Owner's signed answer back to the seat. This relay
-   is specified, not built.
+   from standing evidence, or rejects it. The principal hands the Owner's signed answer back to the seat. No seat
+   relies on this relay until hail's tools pass the spec's acceptance tests (§10b, point 15).
 
 No board is needed: hail works without one.
 
-**Read next:** the spec's §2 to §4 (the frame, the header, the markers), §6 (authority) and §8 (the roster). Appendix C
-has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by figure.
+**Read next:** the spec's §2 to §4 (the frame, the header, the markers), §6 (authority) and §8 (the roster).
+Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by figure.

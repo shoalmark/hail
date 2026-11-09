@@ -149,7 +149,7 @@ end hail/1
 | `re` | yes | the id or ids this answers, or `none`. A free description MUST NOT be used unless the thing answered has no id, such as a pasted relay. On a DECISION, the ask's id (§10b) |
 | `supersedes` | no | the id of the sender's own earlier hail that this one replaces. The reader treats the old one as withdrawn. On a renewed Owner-ask, it names the ask it renews; on a DECISION, the decision in force that it replaces (§10b) |
 | `marker` | yes | one of §4 |
-| `written-against` | yes | each `<repo>@<commit>` the sender relied on, any forge state it relied on (as `release v1.0.0: none`), and the time in RFC 3339 form with its numeric offset, as `date -Iseconds` prints it (for example, `2026-11-08T09:12:40+01:00`), with no `Z` and no fractional seconds. A reader also accepts the offset written `+0100`. The time is taken fresh for each hail, and `hail check` judges it fresh as §11 says. A sender MAY name the spec text it follows as `hail@<commit>`; a hail that names none follows the text its roster in force adopts (§8) |
+| `written-against` | yes | each `<repo>@<commit>` the sender relied on, any forge state it relied on (as `release v1.0.0: none`), and the time in RFC 3339 form with its numeric offset, as `date -Iseconds` prints it (for example, `2026-11-08T09:12:40+01:00`), with no `Z` and no fractional seconds. A reader also accepts the offset written `+0100`. The time is taken fresh for each hail: `hail send` writes it from its own clock when it builds the hail, and a re-send keeps it (§5). `hail check` judges it as §11 says. A sender MAY name the spec text it wrote against as `hail@<commit>`: it identifies that text, and changes no rule (§8) |
 | `model` | no | the writing session's model and effort, as `<model> <effort>` |
 | `decide-by` | on an Owner-ask | the time by which the Owner's answer is due, in `written-against`'s time form. At that time the Owner-ask expires (§10b). In this version it appears on an Owner-ask only: deadlines for other hails wait (§13) |
 | `for` | on a need of the Owner's | `owner`, on a seat's QUESTION that needs the Owner (§10b). It MUST NOT appear on any other hail |
@@ -223,8 +223,10 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 5. **Duplicates:** a duplicate is the same id with the same canonical bytes (§9), however its transport wrapped it. A
    reader knows the ids it has seen from its team's filed record and from its own history (§10), never from one
    session's memory alone, so a new session of a seat sees what earlier sessions saw. A reader that can't read its
-   history doesn't act: it answers RECEIVED and tells its principal. A reader that gets one
-   it has already answered sends its receipts again, unchanged, and doesn't act again. For a QUESTION, it sends its
+   history doesn't act on the hail. It answers only where §4 asks for an answer and a return grant allows one, and
+   then only with RECEIVED; it sends nothing for a receipt or an ANSWER (rule 1). It tells its team by a WARNING
+   (§8). A reader that gets a duplicate it has already answered sends its receipts again, unchanged, and doesn't act
+   again. For a QUESTION, it sends its
    original ANSWER again. A hail that reuses an id the reader has already seen with other canonical bytes MUST NOT be
    acted on: the reader answers DECLINED, "id reused", and the sender sends it again under a new id.
 
@@ -346,11 +348,14 @@ push says only "an ask waits" (§10b).
   - each seat's hail-signing key (§9) and encryption key (§9a);
   - the Owner's oversight keys with their class (§9a);
   - the sealing policy per channel (§9a);
-  - the exact spec text it adopts, by commit and sha256 (Status), which every hail follows unless its `written-against`
-    names another (§3);
+  - the exact spec text it adopts, by commit and sha256 (Status). A reader reads every hail under the text that its
+    roster in force adopts when it reads the hail. A `hail@<commit>` in `written-against` identifies the text the
+    sender wrote against and changes no rule; where it differs, the reader reports the difference (§3). Over the
+    record, a hail is read under the text of the roster in force when it was filed (§10);
   - the watcher interval of each seat that runs a watcher (§5);
   - the wake interval of each seat on a hosted agent platform: the longest gap between two of its turns, or 0 where a
-    message wakes it (§5);
+    message wakes it (§5); and, where a relay's notice wakes it differently, that notice's own interval (§10b,
+    point 6);
   - for each principal, its stand-in and a stand-in filer (§10b);
   - who may brief whom ("may brief"), each principal's seat definition as its own scope, and the act check's mode,
     `shadow` or `enforce` (§8a).
@@ -503,7 +508,8 @@ Signing and sealing are separate layers, with separate keys. A signing key MUST 
 - **A seat's key changes through the roster** (§8, §10b): a roster change revokes or rotates it, and counts from the
   commit that makes it on the default branch. A hail signed with the old key and filed before that commit (§10)
   stands, and is verified against the roster in force when it was filed; one filed after it is refused, and its sender
-  sends it again, signed with its new key.
+  sends it again, signed with its new key. Verifying an old hail says who signed it; a new act on it still needs the
+  current grants (§6.1).
 - **The Owner's signing keys** sign the Owner's answers, "seen"s and the signing tool's hand-overs (§10b). They are not
   the oversight keys of §9a.
   - They sit in one allowed-signers file, at the path the deployment names (the reference deployment's: Appendix D,
@@ -639,10 +645,11 @@ end hail/1 sealed
 - **Every hail and receipt is filed by its team's filer,** the seat the roster names for it. Each team files in its own
   folder of the shared private repository, one writer per folder. (The reference deployment's filers: Appendix D,
   D.10.)
-- **When a hail is filed:** when the commit that adds it to its team's folder is on the shared repository's default
-  branch. A copy on another branch or in a workbench isn't filed. Whether a hail was filed before or after another
-  change, such as a key's revocation, is read from that branch's history, by which commit comes first, never from a
-  time a sender wrote.
+- **When a hail is filed:** when the commit that adds it to its team's folder first enters the shared repository's
+  default branch. A copy on another branch or in a workbench isn't filed. The roster lives in that same repository,
+  so one history orders both. Whether a hail was filed before or after a roster change, such as a key's revocation,
+  is read from that branch's history, by which commit entered it first, never from a time a sender wrote or from
+  when a side branch was made.
 - **Every seat keeps its own history:** before it answers or acts on a hail, it keeps the hail's id and canonical
   bytes (§9), and then its own responses, where its later sessions read them (§4, point 5). Filing first also meets
   this.
@@ -806,9 +813,9 @@ The raising seat MUST check the cited evidence itself before it relies on it.
   Like every ring, it passes the 30-minute presence window and the cap; at night, its sound follows point 5.
 - **Presence.** The Owner typed in a session when the Owner sent a real message there, and the session keeps that
   message's time locally. A tool call or an agent's text MUST NOT count as the Owner typing. A session that can't
-  keep that time, or can't report it to the relay, has unknown presence, and an ordinary Owner-ask isn't sent to it:
-  the ask still reaches the raising seat's own surface and the companion app, and the Owner's digest lists that
-  session's presence as unknown. An urgent concern goes to every surface, as above.
+  keep that time, or can't report it to the relay, has unknown presence. An Owner-ask goes to it too, since the
+  Owner may have typed there, and the Owner's digest lists that session's presence as unknown. Only a session known
+  to be outside the window is left out.
 - **A card MUST carry only** who asks, the one-line why, where to clarify, the ask's options, the five answers
   (point 7) and a pointer. Who asks is shown as "‹raised-by› via ‹from›" where the ask relays a seat's need. The
   originals stay behind the pointer, sealed where §9a says. A push MUST say only "an ask waits".
@@ -816,8 +823,8 @@ The raising seat MUST check the cited evidence itself before it relies on it.
 - **Catch-up.** Every session lists the open Owner-asks when it starts; the companion app does when it opens.
 - **"Shown."** Each surface returns a "shown" receipt with the ask's id and hash. It is not a hail: it is one status
   line per surface, with the surface and the time, and it MUST NOT carry authority. The companion app has 10 minutes
-  to return it; a session on the same machine, 15 minutes; a session on a hosted agent platform, its wake interval as
-  the roster declares it plus 15 minutes, or 15 minutes where the relay's notice itself wakes it (§5, §8). Each
+  to return it; a session on the same machine, 15 minutes; a session on a hosted agent platform, the wake interval
+  the roster declares for the relay's notice to it, plus 15 minutes, or 15 minutes where none is declared (§8). Each
   window starts when the relay first makes the ask available to that surface, and a retry doesn't restart it. A
   "shown" that comes after its window still records the surface as shown. The surface keeps its "shown" line in its
   own outbox, which
@@ -959,16 +966,13 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   - the marker;
   - the body's length;
   - the pointer forms;
-  - a fresh written-against time, against a context and a clock it takes as explicit inputs, never reading a clock
-    itself:
-    - at first sending: at most 10 minutes before the send clock, and at most 2 minutes after it;
-    - on arrival: at most 2 minutes after the arrival clock. Its age isn't judged, since a transport's window can be
-      longer than any fixed limit (§5); the written-against warning light (§3) and a brief's `until` (§8a) bound what
-      a late hail can still do;
-    - a re-send of the same canonical bytes, or an original answer sent again to a duplicate, keeps its bytes (§4,
-      §5) and isn't judged again. `hail send` treats a hail as a re-send only when its own outbox holds that id with
-      the same canonical bytes;
-    - over the record, it isn't judged;
+  - the written-against time against a reference time it takes as an explicit input, never reading a clock itself:
+    the reader's clock when the hail arrives, or over the record the committer time of the commit that filed it
+    (§10). It refuses a written-against time more than 2 minutes after that reference. It never judges a hail's age:
+    a transport's window can be longer than any fixed limit (§5), and a re-send keeps its original bytes (§4, §5).
+    Given no reference time, it checks the time's form alone, and reports that it did. Age alone never expires a
+    hail: before acting on a late one, the reader still checks its own current grants and permissions (§6.1), the
+    pointer (§4) and, for an act beyond a grant, the DECISION (§6.8);
   - canonical bytes;
   - for a signed hail, the signature;
   - for a sealed hail, `sealed-to`;
@@ -990,7 +994,7 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   and each refusal it would have made is reviewed (test 37).
 - **`hail send <seat> <path>`:**
   - runs the check;
-  - computes the pointer's sha256 and the written-against line;
+  - computes the pointer's sha256 and the written-against line, its time from `hail send`'s own clock;
   - MUST refuse a home path, a private id in public text, or an Owner quote that doesn't verify;
   - MUST scan the hail, each file its pointer names and each file a pointed-at list of sha256s names, with a
     versioned set of secret patterns it takes as an input, and MUST refuse a hail in which that set finds a secret,
@@ -1022,7 +1026,7 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   12. A principal that returns while its stand-in acts takes cases over only through the handover hail.
   13. A surface that was offline catches up: it lists the open asks, and shows the answered ones as answered.
   14. Only a principal's, or its stand-in's, Owner-ask is taken in, with its signature verified where §9 requires one.
-  15. A session the Owner typed in within 30 minutes shows the ask; an unrelated session outside the window doesn't;
+  15. A session the Owner typed in within 30 minutes shows the ask; a session known to be outside the window doesn't;
       the raising seat's own surface shows it whatever the window; and unknown presence shows as unknown.
   16. Night hours and the shared cap are checked on the Owner's device, at the moment it would ring.
   17. An answer signed on the Owner's device verifies, and one over an altered hash is refused.
@@ -1050,7 +1054,9 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   31. The signed "seen" closes every notice of its concern, and authorizes nothing.
   32. A tool call or an agent's text in a session doesn't count as the Owner typing there.
   33. A "shown" line missing after 10 minutes from the companion app, after 15 minutes from a session on the same
-      machine, or after its declared wake interval plus 15 minutes from a hosted session, counted from when the ask
+      machine, or from a hosted session after the wake interval declared for the relay's notice plus 15 minutes, or
+      after 15 minutes where none is declared, also when a message wakes that seat but the notice doesn't, counted
+      from when the ask
       was first made available to that surface and not restarted by a retry, shows "unconfirmed": the raising seat
       and its principal are told, and the Owner's digest lists it. A session that never takes a turn is reported so,
       and a "shown" that comes later still records the surface as shown.
@@ -1089,9 +1095,10 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   56. A hail that reuses an id the reader has already seen with other canonical bytes (§9) is not acted on, and is
       answered DECLINED, "id reused"; the same id with the same canonical bytes is a duplicate (§4), even where its
       line endings or Unicode form arrived differently.
-  57. At first sending, a hail whose written-against time is more than 10 minutes before the send clock, or more
-      than 2 minutes after it, is refused as not fresh, and one exactly at either bound passes; `hail check` takes the
-      context and the clock only from its input.
+  57. `hail check` refuses a hail whose written-against time is more than 2 minutes after the reference time it is
+      given, and passes one exactly 2 minutes after it; it takes that time only from its input, never refuses a hail
+      for its age, and given no reference time reports that it checked the time's form alone. `hail send` writes the
+      time from its own clock when it builds a hail.
   58. A new session of a seat that gets a hail an earlier session already answered sends the same receipts again, or
       for a QUESTION its original ANSWER, and doesn't act again; a hail whose canonical bytes match a seen one's is a
       duplicate, however its transport wrapped it. This holds when the earlier session answered and stopped before
@@ -1107,20 +1114,29 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
       can't obtain or verify.
   61. A hail signed with a seat's key that a roster change revoked, and not filed before that change, is refused,
       even where a copy of it sat on another branch or in a workbench before the change; one filed before it stands,
-      and still verifies after the rotation, against the roster in force when it was filed.
+      and still verifies after the rotation, against the roster in force when it was filed. Order is read from the
+      shared repository's default branch, where the roster and the filings both live; a new act on an old hail still
+      needs the current grants.
   62. A later hail from an addressed seat whose `re` names an id stops that seat's clock for it, as a RECEIVED
       would, without claiming that its pointer was checked; every other addressee's clock runs on.
-  63. On arrival, a hail whose written-against time is more than 2 minutes after the arrival clock is refused; one
-      that arrives 29 minutes after it was written through git, or after a declared hosted wake interval longer than
-      10 minutes, passes. Over the record, the time isn't judged.
-  64. An unchanged re-send after an overdue window, and an original answer sent again to a duplicate, keep their
-      original bytes and pass at any age; a hail whose id `hail send`'s outbox doesn't hold with the same canonical
-      bytes is judged as a first sending.
-  65. A session that can't keep the time of the Owner's last message, or can't report it, gets no ordinary Owner-ask;
-      the ask still reaches the raising seat's own surface and the companion app, and the Owner's digest lists that
-      session's presence as unknown.
-  66. A hail that names no `hail@<commit>` in `written-against` is read under the spec text its roster in force
-      adopts, and the record shows which text that was.
+  63. On arrival, a hail whose written-against time is 3 minutes after the reader's clock is refused; one that
+      arrives 29 minutes after it was written through git, or after a declared hosted wake interval longer than 10
+      minutes, passes. Over the record, a hail filed a day after it was written passes, and one whose written-against
+      time is a day after the committer time of the commit that filed it is refused. A hail that arrives after its
+      sender's brief expired in transit isn't refused for its age; before acting, the reader still checks its grants,
+      the pointer and any DECISION.
+  64. An unchanged re-send after an overdue window, from a filer as from any seat, and an original answer sent again
+      to a duplicate by a later session, keep their original bytes and pass at any age; the signature, grant and act
+      checks still apply to them.
+  65. A session that can't keep the time of the Owner's last message, or can't report it, gets the Owner-ask, and the
+      Owner's digest lists that session's presence as unknown; the raising seat's own surface gets it whatever its
+      presence.
+  66. A hail is read under the spec text its reader's roster in force adopts when it reads it: one that names no
+      `hail@<commit>`, one that names that text, and one that names another, whose difference is reported and changes
+      no rule; a roster change while a hail is in transit applies at reading; over the record, a hail is read under
+      the roster in force when it was filed.
+  67. A reader that can't read its history acts on nothing: to a REQUEST it answers RECEIVED, where its return grant
+      allows, and warns its team; to an ANSWER and to each receipt it sends nothing.
 - **The act check's tests** (§8a), each run end to end through `hail send`, in enforce mode unless the test says
   otherwise:
   1. A brief whose `seat` isn't the acting seat, or whose seat its signing key can't prove (§9), is refused.
