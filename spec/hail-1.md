@@ -499,6 +499,8 @@ Signing and sealing are separate layers, with separate keys. A signing key MUST 
     under a separate OS user, in a hardware key or chip that gates each use, or in a hosted platform's per-agent
     secret store that no other agent reads.
   - Where seats share an OS user and can reach each other's keys, each key names the team, not the seat.
+  - The same holds for a seat's own history (§10): where another seat can change, erase or roll it back, as seats
+    sharing an OS user often can, its duplicate and replay checks do not hold against that seat.
 - **When:**
   - a hail that crosses teams, or travels through a host other than git's forge, MUST be signed once the roster's keys
     exist and `hail send` signs. Until then hails go unsigned;
@@ -829,10 +831,9 @@ The raising seat MUST check the cited evidence itself before it relies on it.
   the roster declares for the relay's notice to it, plus 15 minutes, or 15 minutes where none is declared (§8). Each
   window starts when the relay first makes the ask available to that surface, and a retry doesn't restart it. A
   "shown" that comes after its window still records the surface as shown. The surface keeps its "shown" line in its
-  own outbox, which
-  the Owner's digest reads, as it reads intake lines (point 13). A missing "shown" means "unconfirmed"; "shown" never
-  means seen. When no "shown" comes back within its window, the raising seat and its principal are told
-  "unconfirmed", and the Owner's digest lists it (§10a).
+  own outbox, which the Owner's digest reads, as it reads intake lines (point 13). A missing "shown" means
+  "unconfirmed"; "shown" never means seen. When no "shown" comes back within its window, the raising seat and its
+  principal are told "unconfirmed", and the Owner's digest lists it (§10a).
 - **A surface that shows only on its next turn** shows the ask then, adds an "answered" line after it once the ask is
   answered, and shows unknown presence and failed delivery as such.
 - **The same answer everywhere.** Every surface, the raising seat's own included, offers the same signed answer, and
@@ -970,11 +971,12 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   - the pointer forms;
   - the written-against time against a reference time it takes as an explicit input, never reading a clock itself:
     the reader's clock when the hail arrives, or over the record the committer time of the commit that filed it
-    (§10). It refuses a written-against time more than 2 minutes after that reference. It never judges a hail's age:
-    a transport's window can be longer than any fixed limit (§5), and a re-send keeps its original bytes (§4, §5).
-    Given no reference time, it checks the time's form alone, and reports that it did. Age alone never expires a
-    hail: before acting on a late one, the reader still checks its own current grants and permissions (§6.1), the
-    pointer (§4) and, for an act beyond a grant, the DECISION (§6.8);
+    (§10). It refuses a written-against time more than 2 minutes after that reference. The filer sets that committer
+    time, so over the record the check catches a wrong clock, not a filer who sets a false one. It never judges a
+    hail's age: a transport's window can be longer than any fixed limit (§5), and a re-send keeps its original bytes
+    (§4, §5). Given no reference time, it checks the time's form alone, and reports that it did. Age alone never
+    expires a hail: before acting on a late one, the reader still checks its own current grants and permissions
+    (§6.1), the pointer (§4) and, for an act beyond a grant, the DECISION (§6.8);
   - canonical bytes;
   - for a signed hail, the signature;
   - for a sealed hail, `sealed-to`;
@@ -1888,3 +1890,5 @@ Every open point is in §13.
 ## Changes
 
 - hail/1, first edition.
+- Before its announcement, the first edition was fixed in place after an outside review, and the fixes were reviewed
+  independently. It keeps its name.

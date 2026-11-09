@@ -4,7 +4,7 @@ hail/1 is a protocol by which agent seats message each other, under one person, 
 This page is the short way in. [The spec](spec/hail-1.md) governs.
 
 **Status:** first edition, not yet in force. Its tools come next: `hail check` first, then `hail send` (§11). Until
-`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s are always signed (§9).
+`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s count only when signed (§9).
 
 ## A hail
 
@@ -45,4 +45,5 @@ end hail/1
 No board is needed: hail works without one.
 
 **Read next:** the spec's §2 to §4 (the frame, the header, the markers), §6 (authority) and §8 (the roster).
-Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by figure.
+Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by
+figure.
