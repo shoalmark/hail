@@ -20,10 +20,10 @@ The rules are written per team and per principal, how far they reach is unknown,
 
 **Conventions.** The key words "MUST", "MUST NOT", "SHOULD", "SHOULD NOT" and "MAY" in this document are to be
 interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown
-here. Where a rule is stated in plain words, without one of these key words, the plain words are the rule. Appendices
-A, B and C are informative: where they and the body differ, the body governs. A deployment's own exceptions and
-rollout rules are in Appendix D, which is normative for the reference deployment only; the body names the D item
-where each would otherwise sit.
+here. Where a rule is stated in plain words, without one of these key words, the plain words are the rule, and bind as
+MUST does. §11's tests are how conformance is checked. Appendices A, B and C are informative: where they and the body
+differ, the body governs. A deployment's own exceptions and rollout rules are in Appendix D, which is normative for the
+reference deployment only; the body names the D item where each would otherwise sit.
 
 **Terminology:**
 - **Seat:** a role named in the roster as `<team>.<seat>`, such as `a.planner` or `b.auditor`; seats outlive sessions (§8).
@@ -38,6 +38,8 @@ where each would otherwise sit.
 - **Watcher:** a small helper that pulls, and rings the addressed seat (§10a).
 - **Act check:** the check, inside `hail send`, that a seat's hail serves the brief it names, by the brief's scope
   block (§8a).
+- **Scope:** two things. A brief's scope block is the block at its top that the act check reads (§8a). A DECISION's
+  `scope` key says whether it answers once or stands as a rule (§3, §10b).
 - **Digest:** a list read later, in place of the watcher's bell (§10a). A seat's digest holds the RECEIVED and WILCO
   that reach it; the Owner's digest is the most the Owner gets from the watchers, apart from the relay (§10b).
 - **Filer:** the seat that files its team's hails and receipts, one writer per folder (§10).
@@ -88,6 +90,9 @@ where each would otherwise sit.
   at (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
 - **Pointers, not copies.** Content lives in git, or in a file named by its sha256. A hail cannot drift from the record.
 - **Small on purpose.** A body of at most five lines, and one ask. Anything longer goes behind a pointer.
+- **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in
+  its header, its body or the content its pointer names. A pointer hides content from a host, never from a seat that
+  can read the file (§9a).
 - **A seat's definition and its brief.** A seat's **definition** is the file that defines the seat's role for its
   harness. A seat's **brief** is the task document the seat is given. Its scope block, at its top, is what the act
   check reads (§8a).
@@ -133,7 +138,8 @@ end hail/1
 - **The header always ends with the `pointer` line.** The body is every line after it, up to `ask:` or `end hail/1`.
   So a body line such as `note: …` MUST NOT be read as a header.
 - **A reader ignores a header key it does not know,** except on a DECISION: a key on the Owner's signed record
-  carries authority, so a reader MUST refuse a DECISION that carries a key it doesn't know (§2).
+  carries authority, so a reader MUST refuse a DECISION that carries a key it doesn't know (§2). A new key on a
+  DECISION therefore comes only with hail/2.
 
 | Key | Required | Value |
 |---|---|---|
@@ -143,7 +149,7 @@ end hail/1
 | `re` | yes | the id or ids this answers, or `none`. A free description MUST NOT be used unless the thing answered has no id, such as a pasted relay. On a DECISION, the ask's id (§10b) |
 | `supersedes` | no | the id of the sender's own earlier hail that this one replaces. The reader treats the old one as withdrawn. On a renewed Owner-ask, it names the ask it renews; on a DECISION, the decision in force that it replaces (§10b) |
 | `marker` | yes | one of §4 |
-| `written-against` | yes | each `<repo>@<commit>` the sender relied on, any forge state it relied on (as `release v1.0.0: none`), and the time in RFC 3339 form with its numeric offset, as `date -Iseconds` prints it (for example, `2026-11-08T09:12:40+01:00`), with no `Z` and no fractional seconds. A reader also accepts the offset written `+0100`. The time is taken fresh for each hail |
+| `written-against` | yes | each `<repo>@<commit>` the sender relied on, any forge state it relied on (as `release v1.0.0: none`), and the time in RFC 3339 form with its numeric offset, as `date -Iseconds` prints it (for example, `2026-11-08T09:12:40+01:00`), with no `Z` and no fractional seconds. A reader also accepts the offset written `+0100`. The time is taken fresh for each hail, and `hail check` judges it fresh as §11 says. A sender MAY name the spec text it follows as `hail@<commit>` |
 | `model` | no | the writing session's model and effort, as `<model> <effort>` |
 | `decide-by` | on an Owner-ask | the time by which the Owner's answer is due, in `written-against`'s time form. At that time the Owner-ask expires (§10b). In this version it appears on an Owner-ask only: deadlines for other hails wait (§13) |
 | `for` | on a need of the Owner's | `owner`, on a seat's QUESTION that needs the Owner (§10b). It MUST NOT appear on any other hail |
@@ -207,17 +213,19 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 1. **Receipts aren't receipted.**
 2. **A receipt quotes the id it answers in `re`.**
 3. **Every answer counts,** for token efficiency.
-   - Any hail from an addressed seat whose `re` names the id counts as that seat's RECEIVED, and stops its clock
-     (§5).
+   - Any hail from an addressed seat whose `re` names the id counts as that seat's RECEIVED for its clock, and stops
+     it (§5). It says the hail was read, not that its pointer was checked.
    - For a QUESTION, a REQUEST or a STOP, RECEIVED is sent only when the real answer must wait. A reader that can
      answer at once skips it.
    - For an INFORMATION, an ADVICE or a WARNING, RECEIVED is a full answer: it stops the reader's clock, and nothing
      more is due.
 4. **A reader MUST NOT act on a REQUEST whose pointer doesn't verify.**
-5. **Duplicates:** a duplicate is the same id with the same bytes. A reader that gets one it has already answered
-   sends its receipts again, unchanged, and doesn't act again. For a QUESTION, it sends its original ANSWER again. A
-   hail that reuses an id the reader has already seen with other bytes MUST NOT be acted on: the reader answers
-   DECLINED, "id reused", and the sender sends it again under a new id.
+5. **Duplicates:** a duplicate is the same id with the same canonical bytes (§9), however its transport wrapped it. A
+   reader knows the ids it has seen from its team's filed record (§10) and the hails its own workbench keeps, never
+   from one session's memory alone, so a new session of a seat sees what earlier sessions saw. A reader that gets one
+   it has already answered sends its receipts again, unchanged, and doesn't act again. For a QUESTION, it sends its
+   original ANSWER again. A hail that reuses an id the reader has already seen with other canonical bytes MUST NOT be
+   acted on: the reader answers DECLINED, "id reused", and the sender sends it again under a new id.
 
 **Reserved:** DECISION and INSTRUCTION. These name the Owner's signed record. A seat's hail carrying either one is
 DECLINED, "reserved marker". A DECISION is the Owner's alone: the Owner's answer to an Owner-ask, signed with an Owner
@@ -234,9 +242,10 @@ addressee still outstanding.
 | Transport | Window |
 |---|---|
 | a harness's own cross-session message, same machine | 15 minutes. A message is read only at the reader's next tool round, which may take minutes |
-| a hosted agent platform's own agent message | the reader's next turn plus 15 minutes |
+| a hosted agent platform's own agent message | the reader's wake interval, as the roster declares it for that seat (§8), plus 15 minutes. The interval is the longest gap between two of its turns. A seat that the message itself wakes declares 0, so its window is 15 minutes |
 | across teams, through git | the reader's watcher interval, as the roster declares it, plus 15 minutes. The interval is the *longest gap between two polls*. For example, a watcher that polls every minute gives 1 + 15 = 16 minutes. A 15-minute routine that may start up to 7 minutes early or late leaves up to 7 + 15 + 7 = 29 minutes between polls, so 29 + 15 = 44 minutes |
 
+- **A seat asleep within its declared interval is not overdue,** a principal included (§10b, point 12).
 - DONE is due by the time the ask names, if it names one. Otherwise DONE has no window.
 - **When a response is overdue,** the sender re-sends once to that seat, with the same id and the same bytes. Then it
   tells its own principal. It MUST NOT go round the reader through another seat. Readers that already answered treat
@@ -310,7 +319,7 @@ transport decides how fast a hail arrives, never whether it counts.
 | a seat on the same machine whose harness has its own cross-session message | that harness's own cross-session message |
 | a subagent | its parent's own channel to it (the reference deployment's form: Appendix D, D.10) |
 | a session that wakes only when resumed, on the same machine | a local helper resumes it with the hail |
-| a seat on a hosted agent platform, from another seat on that platform | the hosted agent platform's own agent message. Whether it delivers a frame byte for byte is open (§13) |
+| a seat on a hosted agent platform, from another seat on that platform | the hosted agent platform's own agent message. Whether it delivers a frame byte for byte is open (§13). Where it may not, the sender MAY send a pointer to the hail's filed copy (§10) instead of the frame |
 | another team, or another machine | a file in the shared private repository, read after the reader's next pull. Every hail across teams MUST go from a principal to a principal (a stand-in counts as its principal while it stands in, §10b): another seat's work crosses as a pointer in its principal's hail, and there is no courier form |
 | a person's paste | the frame unchanged; it MUST NOT be wrapped. Where a tool would wrap it, a pointer to the filed hail MUST be pasted instead of the frame |
 
@@ -334,6 +343,8 @@ push says only "an ask waits" (§10b).
   - the Owner's oversight keys with their class (§9a);
   - the sealing policy per channel (§9a);
   - the watcher interval of each seat that runs a watcher (§5);
+  - the wake interval of each seat on a hosted agent platform: the longest gap between two of its turns, or 0 where a
+    message wakes it (§5);
   - for each principal, its stand-in and a stand-in filer (§10b);
   - who may brief whom ("may brief"), each principal's seat definition as its own scope, and the act check's mode,
     `shadow` or `enforce` (§8a).
@@ -441,7 +452,8 @@ brief's sha256.
   - the snapshot's clock is before `until`.
 - **Unknown means refused.** Anything unknown, missing or ambiguous MUST be refused when enforcing, and is logged
   in shadow mode. So:
-  - where a team signs with one team-level key, the key can't prove which seat acts, and the check refuses;
+  - where a team signs with one team-level key, or with seat keys that its seats can all reach (§9), the key can't
+    prove which seat acts, and the check refuses;
   - a case these rules don't settle is refused as ambiguous. Each such case is open in §13.
 
 **5. Control acts without a brief.** Only these pass without a brief, and only to the brief's issuer or the seat's
@@ -470,6 +482,10 @@ Signing and sealing are separate layers, with separate keys. A signing key MUST 
 
 - **What it gives:** integrity, and the identity of the key that signed, against any host. It gives a *seat's*
   identity only once that seat alone can use the key.
+  - **Alone** means that no process of another seat can read the key's private half or have it sign: for example,
+    under a separate OS user, in a hardware key or chip that gates each use, or in a hosted platform's per-agent
+    secret store that no other agent reads.
+  - Where seats share an OS user and can reach each other's keys, each key names the team, not the seat.
 - **When:**
   - a hail that crosses teams, or travels through a host other than git's forge, MUST be signed once the roster's keys
     exist and `hail send` signs. Until then hails go unsigned;
@@ -478,6 +494,9 @@ Signing and sealing are separate layers, with separate keys. A signing key MUST 
 - **Keys:** one Ed25519 signing key per seat, listed in the roster. `hail check` writes the allowed-signers file that
   `ssh-keygen -Y verify` needs from the roster, so each key is written down once. (The reference deployment's own
   exception for one team: Appendix D, D.4.)
+- **A seat's key changes through the roster** (§8, §10b): a roster change revokes or rotates it, and counts from the
+  commit that makes it on the default branch. A hail signed with the old key and filed before then stands; one not yet
+  filed is refused, and its sender sends it again, signed with its new key.
 - **The Owner's signing keys** sign the Owner's answers, "seen"s and the signing tool's hand-overs (§10b). They are not
   the oversight keys of §9a.
   - They sit in one allowed-signers file, at the path the deployment names (the reference deployment's: Appendix D,
@@ -648,6 +667,9 @@ end hail/1 sealed
   - a local process MUST write its PID, MUST refuse to start while that PID lives, MUST exit on SIGTERM, MUST have a
     time limit, and MUST NOT be stopped by name;
   - a hosted platform's routine is stopped in that platform's settings.
+- **Who needs one:** a seat needs a watcher only where hails reach it through git (§7). On one machine or one hosted
+  agent platform, a team's seats hail each other by the nearest transport, and across teams only principals hail
+  (§8), so there it is the principal that runs one.
 - **Where it runs:** inside the seat it rings, as a background task of that seat's own session, so the seat is woken
   directly. It MUST NOT write anywhere but its own clone and its own state folder, MUST NOT fetch into another seat's
   repository, and MUST have a time limit. A local watcher stops by its own PID; a platform's routine, which has no local
@@ -769,8 +791,8 @@ The raising seat MUST check the cited evidence itself before it relies on it.
 - **An urgent concern** a principal sends the Owner is shown at once on every surface, the companion app included.
   Like every ring, it passes the 30-minute presence window and the cap; at night, its sound follows point 5.
 - **Presence.** The Owner typed in a session when the Owner sent a real message there, and the session keeps that
-  message's time locally. A tool call or an agent's text MUST NOT count as the Owner typing. Unknown presence shows
-  as unknown.
+  message's time locally. A tool call or an agent's text MUST NOT count as the Owner typing. A session that can't
+  keep that time, or can't report it to the relay, has unknown presence. Unknown presence shows as unknown.
 - **A card MUST carry only** who asks, the one-line why, where to clarify, the ask's options, the five answers
   (point 7) and a pointer. Who asks is shown as "‹raised-by› via ‹from›" where the ask relays a seat's need. The
   originals stay behind the pointer, sealed where §9a says. A push MUST say only "an ask waits".
@@ -917,7 +939,9 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   - the marker;
   - the body's length;
   - the pointer forms;
-  - a fresh written-against time;
+  - a fresh written-against time: at most 10 minutes before, and at most 2 minutes after, the time it is checked
+    against. That time is an explicit input, never read by the check itself: the clock at sending or at receipt, or
+    the hail's filing time when it runs over the record;
   - canonical bytes;
   - for a signed hail, the signature;
   - for a sealed hail, `sealed-to`;
@@ -941,6 +965,7 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   - runs the check;
   - computes the pointer's sha256 and the written-against line;
   - MUST refuse a home path, a private id in public text, or an Owner quote that doesn't verify;
+  - MUST refuse a hail whose bytes, or the bytes of a file its pointer names, match a known form of secret (§1);
   - checks the roster;
   - runs the act check (§8a) on the final frame and its real destination, in one step with signing and sending;
   - signs, and seals as decided;
@@ -1031,9 +1056,21 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
       and the two ids differ.
   56. A hail that reuses an id the reader has already seen with other bytes is not acted on, and is answered
       DECLINED, "id reused"; the same id with the same bytes is a duplicate (§4).
+  57. A hail checked against a time more than 10 minutes after its written-against time, or more than 2 minutes
+      before it, is refused as not fresh; `hail check` takes that time only from its input.
+  58. A new session of a seat that gets a hail an earlier session already answered sends the same receipts again, and
+      doesn't act again; a hail whose canonical bytes match a seen one's is a duplicate, however its transport wrapped
+      it.
+  59. On a hosted agent platform, a reader asleep within its declared wake interval is not overdue, and its stand-in
+      doesn't stand in; once that interval plus 15 minutes has passed with no response, it is overdue.
+  60. `hail send` refuses a hail whose header, body or pointed-at file holds a known form of secret.
+  61. A hail signed with a seat's key that a roster change revoked, and not filed before that change, is refused; one
+      filed before it stands.
+  62. A later hail from an addressed seat whose `re` names an id stops that seat's clock for it, as a RECEIVED
+      would.
 - **The act check's tests** (§8a), each run end to end through `hail send`, in enforce mode unless the test says
   otherwise:
-  1. A brief whose `seat` isn't the acting seat, or whose seat a team-level key can't prove, is refused.
+  1. A brief whose `seat` isn't the acting seat, or whose seat its signing key can't prove (§9), is refused.
   2. A brief that no signed hail from an issuer holding "may brief" for its seat delivered is refused.
   3. A STOP or a REQUEST about a work item its brief doesn't cover is refused, even when sent to the right seat.
   4. A hail whose final frame or real destination differs from the one checked is not sent: the hail that is sent
@@ -1115,7 +1152,7 @@ This section gathers rules stated elsewhere and adds none. The section named car
 - **Signing** (§9): a signature gives integrity and names the key that signed, against any host. It names a seat only
   where that seat alone can use the key. Signing and sealing use separate keys. Signing is required across teams and
   through hosts other than git's forge once the roster's keys exist and `hail send` signs; until then hails go
-  unsigned.
+  unsigned. §9 says when a seat alone can use a key.
 - **Sealing** (§9a): sealing gives confidentiality from every host that carries or stores a hail and never handles its
   plain text, and says nothing about the sender. A platform that is also an endpoint sees the plain text. Sealing hides
   a hail from another seat only where that seat can't use a reader's key. A channel whose sealing can't be done yet
@@ -1124,6 +1161,8 @@ This section gathers rules stated elsewhere and adds none. The section named car
   machine; a sealed hail is only as strong as the weakest key other than R that it goes to; a minimum class per hail,
   which the sender can raise and never lower.
 - **The transport proves nothing about the sender** (§6.5, §7): only a signature can name the key that wrote a hail.
+- **Secrets** (§1, §11): a hail carries no secret, and `hail send` refuses one. A pointer hides content from a host,
+  not from a seat that can read the file.
 - **Authority** (§6.1 to §6.3): the reader computes it, within its grants and its harness's permissions, which no hail
   can widen. The Owner's words carry authority only through the Owner's signature, and a bare quote carries no weight
   at all. A STOP needs the roster's stop grant.
@@ -1171,8 +1210,9 @@ This section gathers rules stated elsewhere and adds none. The section named car
   moment of sending, a seat's hail that doesn't serve the brief it names: the wrong seat, act, subject, target or
   time. It enforces declared constraints, not the truth of a message or the wisdom of a task. Its limits: hail's
   half checks hails only, and the git half is separate (§13); a spawn is only logged where its harness has no hook; a
-  team-level key can't prove one seat, so such a team's hails that need a brief are refused when enforcing; an
-  unsettled case is refused as ambiguous; and it starts in shadow mode, refusing nothing.
+  team-level key, or seat keys that a team's seats can all reach (§9), can't prove one seat, so such a team's hails
+  that need a brief are refused when enforcing; an unsettled case is refused as ambiguous; and it starts in shadow
+  mode, refusing nothing.
 
 ## 15. Privacy considerations
 
@@ -1495,6 +1535,8 @@ whole team.
 | `b.auditor` (principal) | hail every seat of team B, and `a.auditor`; answer the same; brief every seat of team B; STOP any seat of team B, and `a.auditor`; push for every seat of team B, the only one that does, to branches only, and a branch only once its review tier has found it ready; file into the shared private repository, fast-forward only, after its record check passes: its own records and team B's filings; check every commit of team B a second time before it pushes (hashes, the record check, no secret); run a watcher, for example a 15-minute routine that may start up to 7 minutes early or late, so up to 29 minutes between polls |
 | `b.*`, the rest of team B | hail each other and `b.auditor`; answer every seat of team B; push nothing, and hand work over to `b.auditor` by sha256 |
 
+**Wake intervals** (§5, §8): each seat of team B declares 0, since the platform's own message wakes it.
+
 **Across both teams:**
 - Every seat can answer its whole team, because any teammate can WARN it and its principal can STOP it. The principals
   also answer each other. Across teams, only the principals hail each other.
@@ -1517,8 +1559,9 @@ proposed by `b.auditor`, for the Owner's approval (Appendix D, D.12).
   (Appendix D, D.3);
 - a relay: sealed by default. None exists; it is a later tier (§7).
 
-**Keys:** each seat of team A lists its own signing key (§9); team B's seats sign with its team-level key, held by
-`b.auditor`. Each seat lists its encryption key (§9a). Every key is a placeholder until it is made.
+**Keys:** each seat of team A lists its own signing key (§9), which names the team until its seats run apart
+(Appendix D, D.4); team B's seats sign with its team-level key, held by `b.auditor`. Each seat lists its encryption
+key (§9a). Every key is a placeholder until it is made.
 The Owner's oversight keys are a K2, in the machine's own chip, and a K3, a hardware key you carry. A sealed hail goes
 to every oversight key at or above its minimum class, and to R whenever R exists; lower classes are left out. With no
 R, "K3 only" needs a second K3. The Owner's signing keys, desktop and phone, sit in their own file, not in the roster
@@ -1714,8 +1757,10 @@ body names each item where it would otherwise sit.
 - **D.3 Team B's designated hosted channel** (§9a): the agent message of the hosted agent platform that team B runs on
   is unsealed by default, because that platform is also its endpoint, so the default would hide nothing from it. A
   hail MAY still opt in. The general rule of §9a holds for every other channel.
-- **D.4 Team B's signing key** (§9): on team B, the nearest is one team-level key, held by its principal, `b.auditor`.
-  Every seat outside team B holds one signing key of its own.
+- **D.4 The teams' signing keys** (§9): on team B, the nearest is one team-level key, held by its principal,
+  `b.auditor`. Team A's seats each hold a key of their own, but they run as one OS user on one machine, so each can
+  reach the others' keys: by §9, their keys too name the team, not the seat, until the seats run apart. Until then
+  the act check (§8a) can't prove a seat on either team, so it can't enforce there.
 - **D.5 Its own seats' hails** (§10): the reference deployment's own seats' hails stay in its private record, and
   MUST NOT be in its public repository's tracker. They carry private ids, private hashes and pointers to the Owner's
   records.
