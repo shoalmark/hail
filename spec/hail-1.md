@@ -974,10 +974,9 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
     (§10). It refuses a written-against time more than 2 minutes after that reference. The filer sets that committer
     time, so over the record the check catches a wrong clock, not a filer who sets a false one. It never judges a
     hail's age: a transport's window can be longer than any fixed limit (§5), and a re-send keeps its original bytes
-    (§4, §5).
-    Given no reference time, it checks the time's form alone, and reports that it did. Age alone never expires a
-    hail: before acting on a late one, the reader still checks its own current grants and permissions (§6.1), the
-    pointer (§4) and, for an act beyond a grant, the DECISION (§6.8);
+    (§4, §5). Given no reference time, it checks the time's form alone, and reports that it did. Age alone never
+    expires a hail: before acting on a late one, the reader still checks its own current grants and permissions
+    (§6.1), the pointer (§4) and, for an act beyond a grant, the DECISION (§6.8);
   - canonical bytes;
   - for a signed hail, the signature;
   - for a sealed hail, `sealed-to`;
