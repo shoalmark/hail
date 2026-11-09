@@ -1196,6 +1196,9 @@ reference deployment's own open points for the relay are in Appendix D, D.12.
 - **S2, sealing the file behind a pointer** (§9a), for content that must not sit readable on the forge: the Owner's
   to decide, per class of record.
 - **Where users' hails live,** and how the board shows them (§10): after `hail check` exists and the trial has run.
+- **An advisory level:** whether a deployment may use the frame, `hail check` and the receipts before hail/1 takes
+  force, with no authority. A DECISION would still count only when signed (§9). Today force needs both of the Owner's
+  signatures, the companion app's among them (Status). Decided on the trial's numbers (D.8).
 - **The reference deployment's own trial and release rules** are in Appendix D, D.8 and D.9.
 - **The forms Appendix A leaves open,** given there as prose values or comments: the number after `hail/`;
   a team, seat or session name; the separator between several ids in `re`; a
@@ -1841,13 +1844,22 @@ body names each item where it would otherwise sit.
   records.
 - **D.6 When the tools come** (§11): `hail check` and `hail send` are the first milestone once this edition is out.
   The trial (D.8) runs on their first running version.
+  - **The ten-minute bar:** before that version is released, a session new to hail, on a harness other than the one
+    that built the tools and given only the repository's one page (`QUICKSTART.md`) and the tools' `--help`, sends a
+    hail and checks it within ten minutes, timed. The one page and `--help` are reviewed with the tools, against this
+    spec.
 - **D.7 How the tools are built** (§13): the choice of how `hail check` and `hail send` are built goes to the board as
   its own signed question.
 - **D.8 The trial** (§7, §13): a six-day trial on two teams, of the simplest setup of §7, on the first running
   version of `hail check` and `hail send` (D.6), counted daily. It measures round trips, the Owner's nudges and
   allows, tokens, failures and the watchers' restart overhead. It also counts the Owner's answers given as words in a
-  seat's chat against those given as signed answers: hail/1 is meant to replace the first with the second. The relay
+  seat's chat against those given as signed answers: hail/1 is meant to replace the first with the second. It
+  counts, too, hails built by the tools against hails built by hand, asks with no receipt by their overdue time (§5),
+  the Owner's pastes between sessions per day, and hail's tokens against the tokens of the work it carries. The relay
   tier of §7 is decided on its numbers.
+  - **The cut rule, set before it starts:** before the trial's first day, the Owner sets the numbers at which hail is
+    cut down, and they are filed (§10). Where hail costs the Owner more than it saves, the next edition cuts it down,
+    even where this one is right.
   - **Before it starts on team B:** team B's watcher wakes its own seat with no nudge from the Owner, and an ANSWER,
     a DECLINED or a DONE to the seat's own hail, a digest-only receipt and an overdue response are each shown once.
   - **Until the roster is in force,** a seat that needs the Owner's allow to answer counts each allow as an Owner act.
@@ -1890,5 +1902,5 @@ Every open point is in §13.
 ## Changes
 
 - hail/1, first edition.
-- Before its announcement, the first edition was fixed in place after an outside review, and the fixes were reviewed
-  independently. It keeps its name.
+- Before its announcement, the first edition was fixed and added to in place after an outside review, and the
+  changes were reviewed independently. It keeps its name.
