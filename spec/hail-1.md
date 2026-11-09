@@ -91,8 +91,8 @@ reference deployment only; the body names the D item where each would otherwise 
 - **Pointers, not copies.** Content lives in git, or in a file named by its sha256. A hail cannot drift from the record.
 - **Small on purpose.** A body of at most five lines, and one ask. Anything longer goes behind a pointer.
 - **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in
-  its header, its body or the content its pointer names. A pointer hides content from a host, never from a seat that
-  can read the file (§9a).
+  its header, its body or the content its pointer names. A pointer keeps content off the channel that carries the
+  hail; it hides nothing from whoever can read the file it names (§9a).
 - **A seat's definition and its brief.** A seat's **definition** is the file that defines the seat's role for its
   harness. A seat's **brief** is the task document the seat is given. Its scope block, at its top, is what the act
   check reads (§8a).
@@ -270,7 +270,9 @@ addressee still outstanding.
      (§9). It comes through hail itself, as a DECISION on an Owner-ask (§10b), or through the board where there is
      one. Hail works without the board. Where a deployment has both, the board's panel for hails shows hail's asks
      and answers them with the same signed answer; its form waits (§13). The board's own tracker asks stay the
-     board's. A quick word in chat stays evidence until the Owner answers an ask.
+     board's. One matter is asked in one place only: as an Owner-ask, or as an ask on the board's tracker, never both.
+     A seat that would raise a matter already asked in the other place points at that ask instead. A quick word in
+     chat stays evidence until the Owner answers an ask.
    - **What doesn't:** an unsigned filed word is evidence, not authority. Its date, its hash, and a seat's signature on
      the hail that carries it don't make it the Owner's.
    - **A bare quote carries no weight at all.**
@@ -669,7 +671,7 @@ end hail/1 sealed
   - a hosted platform's routine is stopped in that platform's settings.
 - **Who needs one:** a seat needs a watcher only where hails reach it through git (§7). On one machine or one hosted
   agent platform, a team's seats hail each other by the nearest transport, and across teams only principals hail
-  (§8), so there it is the principal that runs one.
+  (§8). So a team whose seats share one machine or one platform needs one watcher, its principal's.
 - **Where it runs:** inside the seat it rings, as a background task of that seat's own session, so the seat is woken
   directly. It MUST NOT write anywhere but its own clone and its own state folder, MUST NOT fetch into another seat's
   repository, and MUST have a time limit. A local watcher stops by its own PID; a platform's routine, which has no local
@@ -940,8 +942,9 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
   - the body's length;
   - the pointer forms;
   - a fresh written-against time: at most 10 minutes before, and at most 2 minutes after, the time it is checked
-    against. That time is an explicit input, never read by the check itself: the clock at sending or at receipt, or
-    the hail's filing time when it runs over the record;
+    against. That time is an explicit input, never read by the check itself: the clock when the hail is sent, or when
+    it arrives. Over the record, where no arrival time is kept, the check judges only that the time is at most 2
+    minutes after the hail's filing time;
   - canonical bytes;
   - for a signed hail, the signature;
   - for a sealed hail, `sealed-to`;
@@ -1161,8 +1164,8 @@ This section gathers rules stated elsewhere and adds none. The section named car
   machine; a sealed hail is only as strong as the weakest key other than R that it goes to; a minimum class per hail,
   which the sender can raise and never lower.
 - **The transport proves nothing about the sender** (§6.5, §7): only a signature can name the key that wrote a hail.
-- **Secrets** (§1, §11): a hail carries no secret, and `hail send` refuses one. A pointer hides content from a host,
-  not from a seat that can read the file.
+- **Secrets** (§1, §11): a hail carries no secret, and `hail send` refuses one. A pointer keeps content off the
+  channel that carries the hail, and hides nothing from whoever can read the file it names.
 - **Authority** (§6.1 to §6.3): the reader computes it, within its grants and its harness's permissions, which no hail
   can widen. The Owner's words carry authority only through the Owner's signature, and a bare quote carries no weight
   at all. A STOP needs the roster's stop grant.
@@ -1764,11 +1767,14 @@ body names each item where it would otherwise sit.
 - **D.5 Its own seats' hails** (§10): the reference deployment's own seats' hails stay in its private record, and
   MUST NOT be in its public repository's tracker. They carry private ids, private hashes and pointers to the Owner's
   records.
-- **D.6 When `hail send` comes** (§11): `hail send` comes after a week of use by hand and the trial's result (D.8).
+- **D.6 When the tools come** (§11): `hail check` and `hail send` are the first milestone once this edition is out.
+  The trial (D.8) runs on their first running version.
 - **D.7 How the tools are built** (§13): the choice of how `hail check` and `hail send` are built goes to the board as
   its own signed question.
-- **D.8 The trial** (§7, §13): a six-day trial on two teams, of the simplest setup of §7, counted daily. It measures
-  round trips, the Owner's nudges and allows, tokens, failures and the watchers' restart overhead. The relay tier of §7
+- **D.8 The trial** (§7, §13): a six-day trial on two teams, of the simplest setup of §7, on the first running version
+  of `hail check` and `hail send` (D.6), counted daily. It measures round trips, the Owner's nudges and allows, tokens,
+  failures and the watchers' restart overhead. It also counts the Owner's answers given as words in a seat's chat
+  against those given as signed answers: hail/1 is meant to replace the first with the second. The relay tier of §7
   is decided on its numbers.
   - **Before it starts on team B:** team B's watcher wakes its own seat with no nudge from the Owner, and an ANSWER,
     a DECLINED or a DONE to the seat's own hail, a digest-only receipt and an overdue response are each shown once.
