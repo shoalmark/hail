@@ -224,8 +224,9 @@ what moved before it acts. This is the case of two hails that cross, such as a h
    reader knows the ids it has seen from its team's filed record and from its own history (§10), never from one
    session's memory alone, so a new session of a seat sees what earlier sessions saw. A reader that can't read its
    history doesn't act on the hail. It answers only where §4 asks for an answer and a return grant allows one, and
-   then only with RECEIVED; it sends nothing for a receipt or an ANSWER (rule 1). It tells its team by a WARNING
-   (§8). A reader that gets a duplicate it has already answered sends its receipts again, unchanged, and doesn't act
+   then only with RECEIVED; it sends nothing for a receipt or an ANSWER (rule 1). It tells its team once, by one
+   WARNING (§8), for as long as that failure lasts: no acknowledgment, other hail or later session raises another,
+   and a re-send of it follows §5. Once its history is readable again, a new failure is warned of anew. A reader that gets a duplicate it has already answered sends its receipts again, unchanged, and doesn't act
    again. For a QUESTION, it sends its
    original ANSWER again. A hail that reuses an id the reader has already seen with other canonical bytes MUST NOT be
    acted on: the reader answers DECLINED, "id reused", and the sender sends it again under a new id.
@@ -1136,7 +1137,9 @@ answer. A renewed ask supersedes the old one, and names it in `supersedes`.
       no rule; a roster change while a hail is in transit applies at reading; over the record, a hail is read under
       the roster in force when it was filed.
   67. A reader that can't read its history acts on nothing: to a REQUEST it answers RECEIVED, where its return grant
-      allows, and warns its team; to an ANSWER and to each receipt it sends nothing.
+      allows, and warns its team by one WARNING; to an ANSWER and to each receipt it sends nothing. The RECEIVED its
+      team sends to that WARNING, and every later hail while the failure lasts, raise no further WARNING; after its
+      history is readable again, a new failure raises one new WARNING.
 - **The act check's tests** (§8a), each run end to end through `hail send`, in enforce mode unless the test says
   otherwise:
   1. A brief whose `seat` isn't the acting seat, or whose seat its signing key can't prove (§9), is refused.
