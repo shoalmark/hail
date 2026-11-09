@@ -4,7 +4,7 @@ hail/1 is a protocol by which agent seats message each other, under one person, 
 This page is the short way in. [The spec](spec/hail-1.md) governs.
 
 **Status:** first edition, not yet in force. Its tools come next: `hail check` first, then `hail send` (§11). Until
-`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s are always signed (§9).
+`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s count only when signed (§9).
 
 ## A hail
 

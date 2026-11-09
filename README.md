@@ -6,7 +6,7 @@ hail/1 is how shoalmark's agent seats message each other, while the final word s
 
 ## Status
 
-hail/1, first edition. Not yet in force. hail/1 takes force in a deployment only when two things hold: the Owner approves exact versions of the spec and the roster with two signatures, one on the desktop and one in the companion app on the phone, given through hail itself or through the board where there is one; and the Owner then commits the approved roster, signed, on a default branch. Its tools come next: `hail check` first, then `hail send`. Until `hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s are always signed.
+hail/1, first edition. Not yet in force. hail/1 takes force in a deployment only when two things hold: the Owner approves exact versions of the spec and the roster with two signatures, one on the desktop and one in the companion app on the phone, given through hail itself or through the board where there is one; and the Owner then commits the approved roster, signed, on a default branch. Its tools come next: `hail check` first, then `hail send`. Until `hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s count only when signed.
 
 ## What this repository holds
 
