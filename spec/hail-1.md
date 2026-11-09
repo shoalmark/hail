@@ -499,8 +499,8 @@ Signing and sealing are separate layers, with separate keys. A signing key MUST 
     under a separate OS user, in a hardware key or chip that gates each use, or in a hosted platform's per-agent
     secret store that no other agent reads.
   - Where seats share an OS user and can reach each other's keys, each key names the team, not the seat.
-  - The same holds for a seat's own history (§10): where seats share an OS user, each can change the others', so
-    duplicate and replay protection then holds for the team, not for one seat.
+  - The same holds for a seat's own history (§10): where another seat can change, erase or roll it back, as seats
+    sharing an OS user often can, its duplicate and replay checks do not hold against that seat.
 - **When:**
   - a hail that crosses teams, or travels through a host other than git's forge, MUST be signed once the roster's keys
     exist and `hail send` signs. Until then hails go unsigned;
