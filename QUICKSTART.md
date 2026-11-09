@@ -45,4 +45,5 @@ end hail/1
 No board is needed: hail works without one.
 
 **Read next:** the spec's §2 to §4 (the frame, the header, the markers), §6 (authority) and §8 (the roster).
-Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by figure.
+Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by
+figure.
