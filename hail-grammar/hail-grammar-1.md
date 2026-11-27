@@ -172,7 +172,33 @@ that grammar for filing until the review is supplied. No grammar-maker code is n
 
 ## 7. Writer duties
 
-Writer duties apply to every grammar. A structural pass alone is not a meaning review.
+Every writer keeps these rules under every grammar:
+
+- Never drop **not**, **no**, **never** or **only** when shortening a statement; keep their scope too.
+- Numbers, paths, commit ids and code stay as they are. A correction explicitly identifies the old
+  value and supplies the new one; shortening never silently changes it.
+- Write STOP and WARNING in whole sentences after each opener.
+- There is no Limit opener. A bound belongs in the line that states the work.
+- There is no Do opener. The hail's marker already says what kind of request it is.
+
+Do and Limit as opener keys are refused at F2 with `grammar openers.O: [g-reserved] O is not an
+opener of this edition; remove O and state the work and its bounds in an allowed line.` Their use
+in a body whose grammar does not define them is the ordinary B3 undefined-opener fault.
+
+At B6, when an original statement is supplied for a shortening, compare the protected words and
+literal values with it and read the scope of each negation or restriction. One lost or changed item
+prints `body line n: [g-preserve] protected text X was lost or changed; restore X with its original
+scope and bytes.` Emit one line per distinct protected item, in original occurrence order. An
+unchanged token with changed scope also fails. Without the original, preservation is not checked;
+a reader cannot certify it from the shorter statement alone. This rule neither proves the original
+true nor forbids a separately declared Correction.
+
+For STOP or WARNING, each prose line that is not a whole sentence prints `body line n: [g-sentence]
+STOP or WARNING needs a whole sentence; write the statement as a complete sentence after its opener.`
+Punctuation alone is insufficient. Imperative sentences are complete. Evaluate after opener meaning,
+then preservation, then sentence completeness. These are reader reviews; a shape-only program must
+report them not checked, never imply they are proved. The writer's duty remains even without an
+original supplied to the check. No rule silently deletes a word to fit a budget.
 
 ## 8. Starting files and later work
 
