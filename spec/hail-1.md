@@ -1579,11 +1579,19 @@ The new form and source diagnostics use these repair forms, substituting the act
 | missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
+Every data substitution in the source repair table above uses this exact escaping rule:
+replace a backslash with `\\`, a double quote with `\"`, and each character U+0000 through
+U+001F with `\u00xx`, where `xx` is its two-digit lower-case hexadecimal value (for example,
+U+0009 becomes `\u0009`, never `\t`). Preserve every other UTF-8 byte unchanged. Add no
+enclosing quotes. Apply this rule once to each substituted value, never to the fixed template
+or to the escape bytes just produced. Literal forms and placeholders that the table says to
+print are fixed template text, not data substitutions.
+
 The general malformed-value repair always prints all the forms listed in its row, in that order;
 there is no nearest-form guess. The two malformed-value rows are exclusive: use h-source-commit only for an otherwise well-formed
 `name:path` lacking `@commit`, and h-source-form for every other malformed value, including a
 malformed optional hash suffix. Here R is the supplied repository name and path, V is the complete
-supplied source value, and P is the supplied path. Escape each on one physical diagnostic line.
+supplied source value, and P is the supplied path. Render them by the substitution rule above.
 In those two repairs, `name:path@commit` and `sha256 H` are literal forms to print; H is a placeholder
 for the committed file's hash, not a hash inferred from a malformed value. The optional suffix has
 one space before `sha256` and one before H. In the required-or-wrong-hash row, substitute the hash
