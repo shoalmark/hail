@@ -1174,6 +1174,10 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
 - **A card MUST carry only** who asks, the one-line why, where to clarify, the ask's options, the five answers (point 7)
   and a source. Who asks is shown as "`raised-by` via `from`" where the ask relays a bot's need. The originals stay
   behind the source, sealed where §9a says. A push MUST say only "an ask waits".
+- **Rendered from the record.** A card is a view of the fetched landed hail, not a message carrying
+  its text on another channel. The surface obtains and checks that record before rendering. Any
+  notification to the surface contains only the record reference required by §7. A local shown
+  status is observation data only and does not carry a direction or replace a hail.
 - **Who, by id.** A surface shows who sends or asks by address: a bot's id `<team>.<handle>`, a decider's `person.<id>`
   or `owner`, which is what hail/1 reads and checks. It MAY show the bot's or the person's name or display name
   (sealanes/1 §4.2) beside the address, never in its place, and always marks a bot as a bot (sealanes/1 §4.4).
