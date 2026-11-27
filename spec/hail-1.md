@@ -529,14 +529,12 @@ name exact bots or sealanes/1's bot patterns, never a session. Control records n
 does not require its sender to claim the subject bot's work; the sender still needs a live START where its team has a
 record, except the stated startup filing exception.
 
-**Roles and routes.** Team work crosses through the lead for that team, or its principal for an organisation or audit
-team; the coordinator may route for any team. In a tracker folder that teams share, which team holds a tracker, and so
-whose lead its work crosses through, is sealanes/1 §4.2's: the tracker number's `ids` range decides. A forwarded hail
-keeps the original file unchanged, with its hash; the forwarder's text is its own summary. A direct WARNING uses the
-reach `hail.warn` gives it, including granted reach across teams. A response uses its return grant or the person-reply
-rule below. These rules give neither the auditor's findings nor a decider's hails to the coordinator as a gate: the
-auditor reports to the Owner, and answers the coordinator only on a workbench or a brief, never on a finding before its
-verdict (sealanes/1 §5.5).
+**Roles and routes.** Grants alone decide a hail's permitted route and effect. Team work crossing its
+lead is a rule for whoever writes the roster, not an extra denial a hail reader invents. A permitted
+direct grant therefore works. In a shared tracker folder the core tracker-number range still decides
+which team holds the tracker. A forwarded hail keeps the original file unchanged; the forwarder's
+summary is its own text. WARNING uses `hail.warn`, and a reply uses its return grant or the person-reply
+rule below. No inferred lead route gates the auditor's findings or narrows a decider's granted reach.
 
 **Deciders.** `from: person.<id>` is signed by that decider's `keys.signing` (§9). Its `hail.message` and `hail.answer`
 grants reach the bots of the grant's teams, leads included, and the coordinator; `hail.brief` reaches those teams' bots.
@@ -1001,7 +999,7 @@ travels back, to the bot that acts. Both legs ride the record (§10); there is n
 only the Owner's signature authorizes (§6.2).
 
 **1. Who asks.** A bot never poses a need of the Owner in its own chat alone. It raises a QUESTION `for: owner` through
-its permitted hops to the coordinator. The lead carries its team's need across teams; the coordinator is the first gate.
+its permitted hops to the coordinator. The roster writer arranges the lead route; the coordinator is the first gate. A hail reader uses the grants, not an inferred team crossing.
 While the coordinator is away each lead gates its own team, and without an organisation team it does so always. The
 auditor sends directly to the Owner, and no coordinator gate receives its verdicts. Each hop is filed, keeps the
 original file and hash, and has its return grant. Urgent or overdue hops may be skipped only along a route already
