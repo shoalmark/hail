@@ -1381,6 +1381,11 @@ checks that need that section. An invalid source label prevents citation matchin
 block, not independent header or body grammar checks. An unknown opener prevents its meaning check,
 not checks on other lines. Missing external inputs are separate not-checked reports, never a full
 pass. Do not emit a cascade of guessed faults. State which dependent checks could not run.
+The informational codes `source-labels-not-checked`, `source-count-not-checked` and
+`sources-delimiter-not-checked` distinguish citation matching suppressed by invalid labels,
+body/citation checks suppressed by an invalid count, and body/citation checks suppressed by a
+missing delimiter, respectively. Their words describe the skipped checks and cause; they are
+reports, not additional refusal faults.
 
 Print header faults in their input order (missing required keys in the key-table order), source faults
 in number order, body faults in line order, then ask faults; settings precede the frame, record-event
