@@ -19,7 +19,7 @@ takes sha256, optionally unless settings require it. Detail lives in the work: n
 solely for citation. Folders, branches, tags and notes are no sources. Ids and branch names remain
 short values in the body. Time
 adds UTC Z alongside the two numeric-offset forms already accepted. The body has no hail/1 line budget
-or ordinary request/result content requirement; a grammar supplies those. Structured protocol forms remain.
+or ordinary request/result content requirement. Structured protocol forms remain.
 Bot and decider addresses and ids replace the earlier seat-only forms. New conditional headers include
 why, clarify, for-team and min-class. The existing sealed-to header now names public recipient encodings
 rather than fingerprints. Owner choice labels narrow from A through Z to A through E.
@@ -43,9 +43,9 @@ Deciders can approach the Owner directly within their declared scope, with for-t
 the ask's record. Replies to people use their declared route. The stand-in role is removed.
 
 Record settings are defined once, carried by a governing roster or by root hail.toml without one.
-They identify bots and addresses, signing, repository short names and a grammar or none. A source can
-name any regular file in a listed repository. Unknown names are refused. No grammar is the default;
-the sender cannot select or override it. Across owners, a request remains declinable.
+They identify bots and addresses, signing and repository short names. A source can
+name any regular file in a listed repository. Unknown names are refused.
+Across owners, a request remains declinable.
 
 Grants decide routes; the roster writer arranges lead crossings. A carried hail is checked using its
 own marker and addressees. A plan matter always names its team. A decider's signed source is published
@@ -83,25 +83,6 @@ owed REQUEST by the Owner's act; it supplies no migration right or reset of hist
 
 A failed check refuses filing and gives every independent fault in one actionable line each. Dependent
 checks with unreadable inputs are reported rather than guessed. Each source has an explicit
-pass, refuse or not-checked result; missing commits never produce a pass. A grammar never voids a filed hail.
+pass, refuse or not-checked result; missing commits never produce a pass.
 The examples and introductory pages now show the current form. Old signed and sealed fixture bytes
 remain in the pinned compatibility corpus, separate from current-edition tests. References have one list.
-
-## Body grammar companion
-
-hail-grammar/1 is a testable draft with a closed JSON Schema. Grammar files hold line budgets, opener
-meanings and per-marker allowed/required openers, plus identification metadata. The five common openers
-have fixed meanings; only a batched edition change can change them. Semantic duplicates are refused by
-a reader's meaning review, beyond the schema's shape checks.
-
-The two edition-zero starting grammars cover software engineering and brand and communications.
-REQUEST begins at three body lines. Negations, restrictions and literal values survive shortening;
-STOP and WARNING use complete sentences. A bound stays in the line stating the work, with no Limit or
-Do opener. Richer content requirements, word lists, repeated answer values and per-opener lengths wait.
-Budgets, a possible Fact split, DONE requirements, allowed-answer sets and element caps remain open;
-the data-link proposals wait for their written rules to be read word for word.
-
-The next stage measures entire closed exchanges and newly added files, grammar text read per session,
-and correction/repetition hails per hundred. It compares the retained baseline and a plain brevity
-control with explicit units. This stage supplies the design and hand-run cases, not implementation or
-new shadow-use results. Independent critical review and a second implementation precede publication.

@@ -12,14 +12,9 @@ Start with [the one-page introduction](QUICKSTART.md). The single specification 
 [spec/hail-1.md](spec/hail-1.md), with its [extension key table](spec/ext-hail-keys.md) and
 [public changes by section](spec/changes.md).
 
-The hail-grammar/1 draft, its JSON Schema and the two starting grammars live on
-`draft/hail-grammar-1` in `shoalmark/hail`. Its cases live on `draft/hail-grammar-1`
-in `shoalmark/hail-tests`. A record uses no grammar by default; a sender cannot
-override its record's choice. The draft is intended for testing and use, not a claim of a finished vocabulary.
-
 This repository holds text. Conformance cases live in the separate vector repository;
 no tool implementation is shipped by this round. Independent review and implementation checks precede
-publication. The design's remaining questions are recorded in each specification.
+publication. The design's remaining questions are recorded in the specification.
 
 `Apache-2.0 OR MIT`, at your option: [LICENSE-APACHE](LICENSE-APACHE), [LICENSE-MIT](LICENSE-MIT),
 [NOTICE](NOTICE).

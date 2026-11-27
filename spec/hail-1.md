@@ -80,11 +80,10 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 - **A bot's hail carries no authority.** Authority comes from the roster and the signed records its rules accept; a
   bot's hail can only point at them (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
 - **Sources, not copies.** Sources name committed work; short values stay in the body. A hail cannot drift from the record.
-- **Body content belongs to a grammar.** hail/1 sets no body line budget, opener, required reason,
-  required result or subject for an ordinary REQUEST. A record with no grammar can ask to add 4 and 4
-  without a source or subject. A DONE needs no result source. A grammar may tighten hail/1, never loosen
-  it. Protocol form, including one ask on REQUEST or QUESTION and structured Owner choice labels,
-  remains hail/1's; the prose a body must say is solely a grammar's to define.
+- **Body content.** hail/1 sets no body line budget, opener, required reason,
+  required result or subject for an ordinary REQUEST. A request can ask to add 4 and 4
+  without a source or subject. A DONE needs no result source. Protocol form, including one ask
+  on REQUEST or QUESTION and structured Owner choice labels, remains hail/1's.
 - **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in its
   header, its body or the content its source names. A source keeps content off the channel that carries the hail; it
   hides nothing from whoever can read the file it names (§9a).
@@ -94,7 +93,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 
 **The body is enough to decide without opening a source.** This is a rule for writers. A source
 supports the body and does not carry a missing instruction or decisive value. No reader can check
-this sufficiency: passing form, source or grammar checks does not certify it. A reader missing what
+this sufficiency: passing form or source checks does not certify it. A reader missing what
 it needs asks for it in a new hail instead of guessing.
 
 ## 2. The frame
@@ -204,7 +203,7 @@ A citation is `#` followed by a maximal run of ASCII digits, bounded on both sid
 line or a character other than an ASCII letter, digit, underscore or `#`. It is valid only when the digits
 are one of 1 through 9 and that source exists. Thus #0, #01 and #10 are invalid citations, not shorter
 citations; write a work item's number as `item 7` when no source is meant. Sources and citations are checked
-by hail/1 even when no body grammar is selected. The ask is part of citation checking.
+by hail/1. The ask is part of citation checking.
 
 **Earlier editions.** A record reader selects the edition from the settings at the filing event, never by
 trying whichever parser accepts. It continues to read earlier-edition hails with their pointer line and
@@ -522,8 +521,8 @@ cannot substitute for any of them. No new service is required: a watcher can fet
 ## 8. Who may hail whom
 
 **Record settings: one definition, two carriers.** A record's settings are its bots and their addresses;
-its signing step; the repositories its hails may refer to, each under a short name; and its grammar or
-none. They are read at the filing event for a record check, and at the current counted state for a new
+its signing step; and the repositories its hails may refer to, each under a short name.
+They are read at the filing event for a record check, and at the current counted state for a new
 act. Later settings do not rewrite old hails. A governing roster wins where both carriers are present;
 `hail.toml` then supplies no second authority or fallback. An unreadable governing roster is a refusal,
 not permission to fall back to `hail.toml`.
@@ -535,12 +534,6 @@ not permission to fall back to `hail.toml`.
 | Repositories | map of short names to repository origins; empty by default; names match `[a-z][a-z0-9-]*`; each name has one origin, distinct names may alias an origin | `ext.hail.records.<team>.repositories`, each origin already declared by core places or records | `repositories` with the same map |
 | Source hashes | boolean `source-hashes`, default false; when true each whole-file source (`name:path@commit`) carries sha256; other forms never do | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
 | Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source uses §3's whole-file form, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
-
-The grammar defaults to `"none"`. A record naming none is bound by hail/1 alone. A sender chooses no
-grammar: it uses the destination record's settings, with no per-hail selector or fallback. An unknown,
-unreadable or invalid selected grammar refuses new filing, rather than silently becoming none. A
-loaded grammar is pinned by source commit and its own edition; earlier files remain readable at their
-pins. The grammar procedure is hail-grammar/1, an unsigned draft on the branch `draft/hail-grammar-1` of this repository.
 
 These values define the settings once; carriers do not change their meaning. Source names need only
 be listed here: any regular file in a listed repository may be cited, not just a place or record folder.
@@ -1085,7 +1078,7 @@ that event: the STOP was in force and its item matched that claim's matter. It d
 known-response check or need a sender's send log. The filer is trusted for that check and its commit times. A response
 discovered later does not undo the end.
 With no live claim, a session may be force-ended at once: `re: none`, with no STOP prerequisite, since it has no item
-to stop. Any requirement for a body reason belongs to the record’s grammar. From filing, all its claims are released, its slot is free, and
+to stop. From filing, all its claims are released, its slot is free, and
 all its later hails fail the live-START check, "session ended". A recorded response to STOP is not proof that the item
 stopped. A new status QUESTION or STOP follows the ordinary rules (§5).
 
@@ -1304,7 +1297,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   - `answer:` is `yes`, `no`, `option <label>`, `words`, `later <time>` or `talk`, one for each answer above. `option
     <label>` names one of the ask's option lines by its label (point 3), and `later <time>` gives the time in
     `written-against`'s time form;
-  - the Owner’s own words and reasons, if supplied, go in the body. A grammar alone may require prose;
+  - the Owner’s own words and reasons, if supplied, go in the body;
   - it is signed (§9), in the namespace `hail-decision`.
 - **Scope.** A DECISION carries `scope: once`, the default, or `scope: standing`. Only a DECISION that answers an ask of
   `kind: decide` MAY carry `scope: standing`. Only a standing DECISION may be cited by a gate as standing evidence
@@ -1447,22 +1440,18 @@ matching DECISION. The same inputs give the same result. It exits non-zero if an
 full authority verdict requires the inputs for every applicable row below. A form-only run may omit them, but reports
 the checks not made and authorises no act. Allowed-signers data is derived in memory, never written.
 
-**Filing and reading.** A failed check refuses filing. A grammar never voids a filed hail: record
-readers report grammar faults under the grammar pinned at filing, keeping the landed record intact.
-Changing a grammar later neither rechecks old hails under new rules nor erases their effect. A form
-or authority failure keeps its own rules; grammar success never grants authority.
+**Filing.** A failed check refuses filing.
 
 **One fix list.** Each fault is one line: `location: what is wrong; what to write instead.` A location
 is `header <key>`, `body line <n>`, `ask`, or `source <n>`; setting and record checks name the field or
 event. Body numbers start at 1 after the sources. Give the actual bad value and a concrete repair or
 permitted replacement form, never just a code or a reference to this text. Where the reader cannot
-know the right value, say how to supply it; do not invent it. Grammar codes follow their location as
-`[code]`. No newline is embedded in one fault; escape a hostile value visibly.
+know the right value, say how to supply it; do not invent it.
+No newline is embedded in one fault; escape a hostile value visibly.
 
 Run independent checks even after failure. An invalid frame, count or unreadable section prevents only
 checks that need that section. An invalid source label prevents citation matching for that source
-block, not independent header or body grammar checks. An unknown opener prevents its meaning check,
-not checks on other lines. Missing external inputs are separate not-checked reports, never a full
+block, not independent header or body checks. Missing external inputs are separate not-checked reports, never a full
 pass. Do not emit a cascade of guessed faults. State which dependent checks could not run.
 The informational codes `source-labels-not-checked`, `source-count-not-checked` and
 `sources-delimiter-not-checked` distinguish citation matching suppressed by invalid labels,
@@ -1476,7 +1465,7 @@ faults follow it. At one location use the order of this text's rules. Multiple i
 one location each have a line. The aim is one fix list and a next filing that goes through.
 
 **Diagnostic identity.** A fault carries its code and location as separate fields beside its printed
-line. A plain hail/1 line keeps the form above; grammar lines retain their bracketed grammar code.
+line. A hail/1 line keeps the form above.
 These codes identify the checks exercised by the current suite; they do not replace any check in
 this section. The line's location must agree with its separate location field.
 
@@ -1536,9 +1525,8 @@ addressee. Other event faults still use the location/problem/repair convention w
 
 Informational identity is separate from fault identity. Use `body-sufficiency-not-checkable` for the
 writer-duty notice, `filed-source-unavailable` for unavailable filed source bytes, and
-`signature-not-checked` for unchecked required signing. A grammar fault reported without refusing
-an already-filed hail retains its grammar code. These notices do not acquire fault status through
-their code. The dependent-check report codes above retain their meanings.
+`signature-not-checked` for unchecked required signing. These notices do not acquire fault status
+through their code. The dependent-check report codes above retain their meanings.
 
 For a selected source check, output one result per source, in ordinal order, with separate
 fields `source` (its number) and `status` (`pass`, `refuse`, or `not checked`). A proven source
@@ -1756,8 +1744,8 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
     and never acted on.
 71. An unreadable span gets no reply; a readable malformed header gets DECLINED only with a listed sender, id and a
     reply permitted by §8. Canonicalisation precedes finding a frame with trailing spaces.
-72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it. Without a grammar,
-    neither five nor six body lines fails on line count.
+72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it.
+    Neither five nor six body lines fails on line count.
 73. A source fixes committed bytes, not converted checkout bytes; an optional file hash includes signature blocks
     and a `decision` hash excludes them. A file must already be committed. A workbench source fails.
 74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider name must be committed under a conforming path before it is cited. A bad filing path is refused before it enters.
@@ -1979,7 +1967,7 @@ own words and copies no standard's prose. A named source does not add a second s
 - Unicode 13.0.0: the pinned NFC normalization tables used for canonical bytes.
 - The SSH signature and allowed-signers formats: detached hail signatures and namespace separation.
 - age version 1 and the stated recipient stanza formats: sealing under §9a.
-- TOML: record settings notation. The grammar companion has its own single source list.
+- TOML: record settings notation.
 
 ## Appendix A. The frame's grammar in ABNF (informative)
 
@@ -2205,7 +2193,7 @@ particular session.
 
 ## Appendix C. Examples (informative)
 
-The examples use a record with no roster, no grammar and signing off. Its listed bots are `a.lead` and
+The examples use a record with no roster and signing off. Its listed bots are `a.lead` and
 `b.lead`. Its repository names and addresses are supplied by §8's settings. These frames illustrate
 form, not adoption or authority. A view labels each `by the forge's access alone`.
 
