@@ -225,6 +225,7 @@ The forms are defined below; Appendix A gives their lexical grammar.
 | Form | Work named |
 |---|---|
 | `name@commit` | the commit itself |
+| `name:path@commit:first-last label` | those lines, with a label in the first line |
 | `name:path@commit:first-last` | an inclusive range of file lines |
 | `name:path@commit` | a regular file at that commit |
 
@@ -262,6 +263,14 @@ machine-integer overflow. A first number above the last gives h-source-range-ord
 a last number above the file's line count gives h-source-range-end. Equality is allowed.
 Order checking needs no file bytes; a reversed range suppresses only its end and label checks.
 Text failure suppresses the end and label checks, not independent faults.
+
+For `name:path@commit:first-last label`, apply the range checks, then require the label's
+exact UTF-8 bytes to occur as a contiguous substring of the first selected line, excluding LF.
+It need not be the whole line or a language token; case counts and no normalization is applied.
+An occurrence on another line does not suffice. Failure gives h-source-label-text. A label is
+one nonempty word: no ASCII control, DEL, C1 control or Unicode 13.0.0 White_Space character;
+Appendix A enumerates its scalar ranges. The one ASCII space before it is a delimiter.
+This same byte check serves a function, class, heading or key without reading its language.
 
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
@@ -1442,6 +1451,7 @@ this section. The line's location must agree with its separate location field.
 | h-source-text | range targets a file that is not UTF-8 text without NUL; source n |
 | h-source-range-order | range first number exceeds its last; source n |
 | h-source-range-end | range exceeds the file line count; source n |
+| h-source-label-text | label bytes are absent from the first line of a valid range; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1494,12 +1504,13 @@ The new form and source diagnostics use these repair forms, substituting the act
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
 | otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
-| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit or name:path@commit:first-last; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; range numbers are positive decimal without leading zeros; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
+| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit or name:path@commit:first-last or name:path@commit:first-last label; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; range numbers are positive decimal without leading zeros; label is one word without whitespace or controls; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
 | ambiguous or non-commit object C | `source n: C does not uniquely name a commit object; write name@commit with a unique commit id, retaining any file path or range.` |
 | non-regular path | `source n: P is not a regular file path at the named commit; write name:path@commit naming a regular file through tree directories only.` |
 | range on non-text file | `source n: P is not UTF-8 text without NUL; write name:path@commit for the whole file, or name:path@commit:first-last for a text file.` |
 | reversed range A-B | `source n: range A-B starts after it ends; write name:path@commit:first-last with 1 <= first <= last.` |
 | range ends at B beyond L lines | `source n: range ends at B but P has L lines; write name:path@commit:first-last within those lines, or name:path@commit for the whole file.` |
+| label W absent from first line A | `source n: label W is absent from first line A of the range; write name:path@commit:first-last label with the label copied from that first line, or name:path@commit:first-last without a label.` |
 | missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
@@ -2019,10 +2030,14 @@ model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
-source-value     = commit-source / file-source / range-source
+source-value     = commit-source / file-source / range-source / labeled-source
 commit-source    = repo-token "@" commit
 file-source      = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
 range-source     = repo-token ":" path "@" commit ":" line-number "-" line-number
+labeled-source   = range-source SP source-label
+source-label     = 1*(%x21-7E / %xA1-167F / %x1681-1FFF / %x200B-2027
+                   / %x202A-202E / %x2030-205E / %x2060-2FFF
+                   / %x3001-D7FF / %xE000-10FFFF)
 line-number      = %x31-39 *DIGIT
 repo-token       = %x61-7A *(%x61-7A / DIGIT / "-")
                    ; a repository short name from the record settings
