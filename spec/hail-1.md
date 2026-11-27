@@ -9,7 +9,7 @@ in `ext.hail`; sealanes/1's discovery and change rules apply. No DECISION adopts
 - **Informative:** A six-day trial on two teams measures what hail/1 costs and where it fails.
 
 **Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails through a shared record. Each owner keeps the final word for that owner’s bots. It fixes a message's frame, header, markers and receipts. Sources name committed files. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
-DECISION approves no act the bot does not already hold. Hails take the nearest transport that reaches the reader, are
+DECISION approves no act the bot does not already hold. Hail notifications take the nearest transport that reaches the reader. Hails are
 signed when §9 requires it, may be sealed to their readers and the Owner's oversight keys, and are filed and never
 amended. The record tracks sessions and their claims, one session of each bot to a matter. The rules have not been shown
 to work at every scale; hail/1 is not for swarms.
@@ -332,8 +332,7 @@ FORCED END, in contrast, releases claims and capacity from its filing (§10).
 ## 5. Overdue
 
 **Clocks run per addressed bot:** one for each pair of hail id and addressed bot. A response from one bot stops only
-that bot's clock. A retry, handover or escalation keeps every other addressee outstanding. The clock starts on sending
-on the transport used, not at the written time or a later filing. The sender logs that send and the route; a checker
+that bot's clock. A retry, handover or escalation keeps every other addressee outstanding. The clock starts on the first transport notification after landing, never before landing or at the written time. The sender logs that send and the route; a checker
 uses that log as an explicit input (§11). FORCED END has its separate filing-time trigger in §10; it does not
 change this per-bot clock.
 
@@ -374,7 +373,7 @@ within its declared interval is not overdue, a principal included.
      Owner-ask or on a tracker, never both. A bot points at an existing ask instead of opening its twin.
    - Deciders answer tracker asks only as sealanes/1 §5.7 permits. A decider's ANSWER hail is not a DECISION or a
      replacement for a tracker answer. Marks, take-ups, hand-backs and the answer in force are read on the ask itself.
-   - A quick word in chat stays evidence for other bots until given in the required signed form.
+   - A quick word in chat has no effect; file the required hail before any bot relies on it.
 3. **A STOP needs `hail.stop` reaching the bot, or the Owner, and no Owner source.**
    - A lead stops its team's bots; the coordinator stops the leads; the Owner stops any. The actual grant must reach the
      recipient: a role alone grants no STOP. One lead session may stop or force-end another session of the same bot when
@@ -382,15 +381,15 @@ within its declared interval is not overdue, a principal included.
    - A reader without its history still obeys a STOP that passes the signature and stop checks, records it locally,
      answers as §4 says, and acts on nothing else. A replay of a lifted STOP may hold work again; the reader cannot know
      it was lifted until it reads its history, or its sender or the Owner lifts it.
-   - The sender lifts its STOP by superseding it. The Owner lifts any STOP in person in the reader's session, or by a
+   - The sender lifts its STOP by superseding it. The Owner lifts any STOP by a
      verified `yes` on an `allow-once` ask whose source names that STOP's filed file. No other DECISION lifts it.
    - A sender withdraws its own REQUEST by `supersedes`, not by STOP. Stopping an item never ends a session (§10).
 4. **Consent MUST NOT be relayed.** A hail cannot approve a permission prompt, change a setting or a kind's definition,
    or stand in for the Owner's act.
 5. **Transport proves no sender.** A session's message may leave under another session's transport address. Only §9's
    signature proves the signing key, and shared keys do not prove a session.
-6. **The Owner in a bot's own session is that session's user, not a hail.** What the Owner types there is governed by
-   its runtime. It is not passed on as the Owner's word except under point 2. A tap for that bot's own act never closes
+6. **The Owner in a bot’s own session is that session’s user, not a landed hail.** Runtime consent remains local; a direction has no hail effect until it is landed under §7. It is not
+   passed on as the Owner’s word except under point 2. A tap for that bot's own act never closes
    an ask elsewhere. The Owner signs every DECISION. In a team with a record, a principal's start still needs the
    Owner-signed START; a session started by words alone works on no matter until it is filed (§10).
 7. **A bot's need of the Owner goes through its gate.** No bot poses it in its own chat alone. The coordinator is the
@@ -411,27 +410,23 @@ within its declared interval is not overdue, a principal included.
 
 ## 7. Transports
 
-**The rule:** the nearest transport that reaches the reader. The frame's bytes are the same on every transport. The
-transport decides how fast a hail arrives, never whether it counts.
+**Nothing outside a landed hail has effect.** A bot acts on no direction received only in chat,
+a session message, a hand-back, a copied frame or a notification. Another channel carries a pointer
+to the landed hail and nothing else: the record repository, filing commit, file path and addressee.
+That transport pointer is not a source line inside a hail. It carries no body, verdict, correction or
+commitment. A reader fetches the record and verifies the hail; an empty or forged notification changes
+nothing. A source file is evidence, never an independent message with effect.
 
-| Reader | Transport |
-|---|---|
-| a bot on the same machine whose runtime has its own cross-session message | that runtime's own cross-session message |
-| a subagent | its parent's own channel to it (the reference deployment's form: Appendix D, D.10) |
-| a session that wakes only when resumed, on the same machine | a local helper resumes it with the hail |
-| a bot on a hosted agent platform, from another bot on that platform | the hosted agent platform's own agent message. Whether it delivers a frame byte for byte is open (§13). Where it may not, the sender MAY send a source to the hail's filed copy (§10) instead of the frame |
-| another team, or another machine | a file in the declared record folder, read after the next pull; cross-team routing and whole-roster checks follow §8 |
-| a person's paste | the frame unchanged; it MUST NOT be wrapped. Where a tool would wrap it, a source to the filed hail MUST be pasted instead of the frame |
+The nearest transport that reaches the reader may carry that pointer: a runtime's session channel,
+a parent's channel to a child, a hosted message, a paste or a watcher. It never carries a parallel copy
+of the hail's words. The record is the single copy with effect. A view of the fetched record may render
+it, including an Owner signing surface; a notification may only point to it.
 
-**Across teams or machines, every commit a hail names is on the shared remote before the hail is sent.**
-
-**The doorbell:** a hail through git needs something to tell the reader to pull. That is a watcher (§10a). Where none
-runs, it is a one-line nudge from the Owner, which MUST NOT carry the content.
-
-**No outside service:** the simplest setup that works without new dependencies comes first: git, each runtime's own
-channel, and the watchers. Real-time delivery through a relay is a later tier; whether one is added is not decided in
-this edition. (The reference deployment's own rule for deciding it: Appendix D, D.8.) That delivery tier is not the
-Owner-ask relay of §10b, which rides the record. Any notice from the Owner-ask relay says only "an ask waits" (§10b).
+Every named source commit must be on its shared remote before sending. A hail lands when its filing
+has reached the record's remote default-branch chain (§10). A local commit or side branch is not enough.
+A blocked push gives no message effect; retry the same bytes after making the filing possible.
+Settings changes and signed authority records keep their own acceptance rules; an unfiled message
+cannot substitute for any of them. No new service is required: a watcher can fetch and list new hails.
 
 ## 8. Who may hail whom
 
@@ -801,7 +796,8 @@ sealed by this edition; sensitive content that must not sit readable on the forg
 
 ## 10. The record
 
-**Filing.** Where a team declares `record`, every hail and receipt of that team is filed there by its `filer`, under its
+**Filing.** Every effective hail has a record. With no roster it is a regular file under
+`hails/<owner>/`, one hail added per commit. With a roster, where a team declares `record`, every hail and receipt of that team is filed there by its `filer`, under its
 existing `records.file` grant and sealanes/1 §3.6's checks. A bot's filing is a checked fast-forward of single-parent
 commits confined to its allowed regular files. An Owner merge can also bring records onto the chain; that never grants a
 bot a merge. A signed hail gives no push or file right. The protocol-named home decides its event: a byte-for-byte copy
@@ -817,7 +813,7 @@ are not a second authority store. Every bot also keeps ids, canonical bytes and 
 can read, before it answers or acts; filing first meets this. A filed hail MUST NOT be amended. A correction is a new
 hail with `supersedes`. A sealed hail is filed as its sealed span.
 
-**Order.** A hail enters at the first commit on the default branch's first-parent chain whose tree holds its file. A
+**Order.** A hail enters at the first commit on the remote default branch’s first-parent chain whose tree holds its file. A
 workbench or side-branch copy is not filed. Order never comes from the written time or the side branch's age. At a
 commit, first apply the state that counts there and any cap reduction. Then order its hails by their full
 repository-relative paths as UTF-8 bytes. A record counts from that place in the order. Paths obey §3. Records in
@@ -956,7 +952,8 @@ needs no second end event and does not delay their effect. The Owner files it if
 counts until the running count is below the cap. In a repository that points, when a cap counts follows sealanes/1's pin
 rules; no hail rule cures a stale lock or gives a bot reader resolving.
 
-**No record.** A team that declares no `record` has none of these session records. Each of its bots runs one session at
+**No record.** A team that declares no `record` has none of these session records and cannot give an
+unfiled hail effect. It must name a record before using hails for directions. Until then, Each of its bots runs one session at
 a time even if its roster cap is higher. Its starter judges running state and waiting work and logs each start,
 including starter, bot, session, time, work and supplied skills, under sealanes/1 §5.6. The claim rules do not bind that
 team. The required filing of a DECISION and its use claim still binds: without a record, that team cannot use the Owner
@@ -1466,7 +1463,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 87. Filed RELEASE, END and FORCED END free claims as stated; writing or sending alone frees none.
 88. A hail on unheld work waits for the next claimer. A target session never transfers a held matter.
 89. STOP reaches every running session and ends none; its holder stops and answers. An unheld stopped item stays held
-    back when claimed. Only the sender's lift, the Owner in person, or the specified allow-once yes lifts it.
+    back when claimed. Only the sender’s landed lift or the specified landed Owner allow-once yes lifts it.
 90. At filing, FORCED END with a live claim needs a STOP still in force and the full window from the later STOP or
     current claim filing. A lift or supersession refuses even a stale retry; a reclaim or successor gets a full window.
     A known response from that exact holder blocks it, even late. Another session's receipt stops §5's bot clock but
@@ -1571,7 +1568,7 @@ feature creates no right. The separate change map records implementation gaps wi
 | Tool build choice | follow the rules by hand; no build language is authorised by this text | tool implementation and reliance on the relay |
 | S2 for pointed-at files | no such file is sealed by this protocol; sensitive bytes stay outside the hail and its sources | sealing that content as a protocol form |
 | Advisory level and trial results | a trial grants no authority; force follows the roster only | any further advisory semantics and a real-time relay tier |
-| Hosted frame fidelity | send a source to the filed hail if the platform may alter its bytes | a transport claim of byte preservation |
+| Hosted frame fidelity | send only the reference to the landed hail | a transport claim of byte preservation |
 | Oversight software | use conforming formats and proven support; unsupported sealing holds or refuses | unverified chip or hybrid support |
 | Tools and connectors | runtime permissions apply; kind skills follow sealanes/1 §5.6 | a broader enforced tool-only rule |
 | Act check for pushes and filings | sealanes/1's grants and filing rules still bind | the separate git half |
