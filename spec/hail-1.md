@@ -236,9 +236,13 @@ head, tag or workbench name substitutes for a commit. The commit fixes the work 
 committed before a hail names it, and available on the shared remote before the hail is sent. A short
 value that is the point, such as 8, a verdict or a short commit id, stays in the body.
 
-The optional sha256 is 64 lower-case hex digits and, when present, must equal the hash of the committed
-file bytes, including any signature block; checkout conversion is irrelevant. It is required only
-where the record's settings require it. Protocol references to checking a source's hash mean checking
+The optional ` sha256 H` suffix belongs to `name:path@commit` alone. H is 64 lower-case hex
+digits and, when present, must equal the hash of the whole committed file, including any signature
+block; checkout conversion is irrelevant. The source-hashes setting requires it on this file
+form only; other forms neither take nor require it. A syntactically valid hash suffix on another
+otherwise well-formed form gives h-source-hash-form, even when source-hashes is true. Strip that
+suffix only to continue independent target checks, never to accept the supplied value. A malformed
+hash suffix instead gives h-source-form and suppresses target checks. Protocol references to checking a source's hash mean checking
 its pinned bytes, plus the sha256 if present or required; they add no second mandatory hash. The
 `decision:` hash has a different purpose and still covers only canonical decision bytes.
 
@@ -509,8 +513,8 @@ not permission to fall back to `hail.toml`.
 | Bots and addresses | each exact listed bot and its owner or team; unknown sender or addressee refuses filing | core teams and bots, with their core keys | `owners.<owner>.bots`, an array of distinct bot names; address `<owner>.<bot>` |
 | Signing step | as §9; required with a roster; otherwise off initially, then on for an owner or the record | the roster itself turns signing on; core signing keys | `signing`, `"off"` or `"on"`, default `"off"`; optional `owners.<owner>.signing` may turn that owner on, never override record-wide on; `owners.<owner>.signing-key` and `owners.<owner>.keys` supply the public keys described in §9 |
 | Repositories | map of short names to repository origins; empty by default; names match `[a-z][a-z0-9-]*`; each name has one origin, distinct names may alias an origin | `ext.hail.records.<team>.repositories`, each origin already declared by core places or records | `repositories` with the same map |
-| Source hashes | boolean `source-hashes`, default false; when true each source carries sha256 | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
-| Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source follows §3, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
+| Source hashes | boolean `source-hashes`, default false; when true each whole-file source (`name:path@commit`) carries sha256; other forms never do | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
+| Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source uses §3's whole-file form, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
 
 The grammar defaults to `"none"`. A record naming none is bound by hail/1 alone. A sender chooses no
 grammar: it uses the destination record's settings, with no per-hail selector or fallback. An unknown,
@@ -1474,6 +1478,7 @@ this section. The line's location must agree with its separate location field.
 | h-source-label-text | label bytes are absent from the first line of a valid range; source n |
 | h-source-ancestry | from is not an ancestor of to in a complete supplied graph; source n |
 | h-source-change-path | file path absent at both change endpoints; source n |
+| h-source-hash-form | sha256 suffix on a form other than the whole-file source; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1535,6 +1540,7 @@ The new form and source diagnostics use these repair forms, substituting the act
 | label W absent from first line A | `source n: label W is absent from first line A of the range; write name:path@commit:first-last label with the label copied from that first line, or name:path@commit:first-last without a label.` |
 | from F is not ancestor of to T | `source n: F is not an ancestor of T; write name@from..to with from an ancestor of to, retaining any file path.` |
 | path P absent at both F and T | `source n: P is absent at both F and T; write name:path@from..to with a regular file path present at from or to.` |
+| hash on another source form | `source n: sha256 is allowed only on name:path@commit; remove the sha256 suffix, or write name:path@commit sha256 H for the whole file with its 64 lower-case hex hash.` |
 | missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
@@ -1592,7 +1598,7 @@ catches a wrong clock, not a lying filer. Sealed content without its bound openi
 (§9a). The check cannot judge the sender's record-class choice or physical key custody.
 
 **`hail send <address> <path>`** takes a draft: header without `id` or written time, then the body and
-required `ask`. It makes the id and time from one clock reading, obtains committed source bytes and adds a hash only when required or requested, reads the state in
+required `ask`. It makes the id and time from one clock reading, obtains the committed source inputs and adds a whole-file hash only when required or requested, reads the state in
 force, builds the final frame, checks it and its actual destination, signs where required, seals where required, files it, and sends
 only its landed reference by §7.
 Checking, signing and sending are one step; a check of other bytes is no check of this send. It refuses:
