@@ -1645,14 +1645,10 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 
 ## 12. Examples
 
-Appendix C gives a complete hail of each message and receipt, an Owner need, gate answer, Owner-ask, signed DECISION,
-"seen", delivery, hand-back, use claim, each session record, AWAY, BACK, a decider's hail and a sealed hail with its
-opened contents. Keys made solely for these examples let their signatures and ciphertext be checked; no real key is
-used. There is no pair or stand-in example in this edition. Appendix B supplies the roles and extension context.
-
-Examples use shadow mode: missing `brief` and ordinary STOP/REQUEST `subject` are logged, not refused on scope grounds.
-They still need their grants, session records and signatures where required. The example record context supplies the
-live session and matter states it names; a frame alone is not proof of them.
+Appendix C gives current no-roster examples. Appendix B illustrates roster roles and extension
+settings, not an adopted roster. The current vector suite supplies further form and settings cases;
+its compatibility corpus retains the previous draft's signed and sealed fixtures at their text pin.
+No modified frame is presented with an old signature. A frame alone never proves authority.
 
 ## 13. Open
 
@@ -1885,7 +1881,7 @@ sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
 source-value     = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
-repo-token       = name
+repo-token       = %x61-7A *(%x61-7A / DIGIT / "-")
                    ; a repository short name from the record settings
 path             = segment-name *("/" segment-name)
 segment-name     = 1*(ALPHA / DIGIT / "." / "_" / "-")
@@ -1928,9 +1924,9 @@ only on a workbench or brief and never takes its direction on findings.
 own signed identity and grants of `hail.message`, `hail.answer` and `hail.brief` for that scope; `hail.owner` comes by
 rule. Bots reply to it as §8's replies to people allow. No decider is given a STOP or filing.
 
-The extension below uses its actual key names and types. Keys are examples only, made for Appendix C. It has no chip, so
-K1 is permitted; R is kept apart and survives the main machine. The reader key is `b.planner`'s `keys.sealing`. Every
-listed signing public key belongs to its named example sender. Other unused sealing keys are left out.
+The extension below illustrates its declared types. The public recipient strings are retained
+example data; they are not enrollment. K1 is permitted only without a chip, and R survives loss of
+the main machine. A real deployment supplies its own signing and sealing keys.
 
 ```toml
 [roster.ext.hail]
@@ -1963,27 +1959,10 @@ wake-interval = 0
 notice-interval = 0
 ```
 
-All omitted extension values take the key table's defaults. A roster requires signed hails; its team flags are fixed true. The Owner's key file uses the `desktop` device, with `hail`, `hail-decision` and `git` permitted; its core format
-is sealanes/1's. Example public signing keys follow, as `sender public-key` lines, with no private half:
-
-```text
-owner ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBIeyit8IwFHVhn2mJSFBBTq6sqRN3WhXOKNwipmFxGh
-person.m1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINCMdkMeHUBDP47BZLpq6E0JzpncGNHlaGFvti6SAQHR
-org.coordinator ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHl5Opa/x9BV/D+k/doF3lm077ii4p5/puu9w/+gcrEK
-audit.auditor ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICJQEXNv4Smmv4eFHfk4JfNRMpaFGzMaNG47JjJfk7iH
-a.planner ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBG2m0LHF8iWCsPIMdclp7vpC53bAJCJe984oClRG8qn
-a.builder-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEq5KhRdhOpyq5cPU6w9rpU0hU7r4+r1OkByZpNlMwpY
-a.builder-2 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE1AF+dD2mYPL9ChQu9fwIFjb3x3cq7mGrmtg9URv7mW
-a.reviewer-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk+71L70PfBidNerIbVRdm92zQscpFTvaH29MSBe2ne
-a.reviewer-2 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPCw3K2oeYx2AHOeTDnpT1rkXr1mRCCS4w/uma+1ZASA
-b.planner ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGre4kr6zCb1wMhNV9DcENG4rPueTUCd7C+Ut5EzHdrc
-b.builder-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINUBpEYq/rfhJnBJXuCQAXDrfvXkTamZKG6D/9FhKZqo
-```
-
-The example reader's public sealing recipient is `age1ve2k4cl39dnxy7vsp9ssa57ksmuqjknr0m68k6nrwmkarlfah9usm7vg9j`. Every
-merge, tag, kind definition change, protected or trusted file change, force-push, release and forge setting remains the
-Owner's act under sealanes/1. A start supplies no brief and no review tier. Bot keys here do not prove which of their
-sessions used them.
+All omitted extension values take the key table's defaults. A roster requires signing. These
+illustrative settings grant nothing; a real roster also needs its complete core identities, keys,
+grants and counted adoption. A start supplies no brief and no review tier. A bot's key proves no
+particular session.
 
 ## Appendix C. Examples (informative)
 
@@ -2021,6 +2000,26 @@ sources: 0
 8.
 end hail/1
 ```
+
+A result with one source, already committed in the listed `work` repository. The value is in the body:
+
+```text
+hail/1
+from: a.lead s1
+to: b.lead
+id: a.lead-20261127T1002Z-345cde
+re: none
+marker: INFORMATION
+written-against: 2026-11-27T10:02:00Z
+sources: 1
+#1 work:result.txt@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+The result is 8, recorded in #1.
+end hail/1
+```
+
+The repeated hex is illustrative; a source check needs the supplied committed tree and bytes, as
+the vectors provide. This frame requests no receipt. A later edition's reader chooses the earlier
+edition explicitly when reading an old pointer-line hail; it never rewrites its signed bytes.
 
 The current-edition vector suite supplies further complete frames, file bytes and expected faults.
 Earlier draft signature and sealing fixtures are retained byte for byte at their own text pin; they
