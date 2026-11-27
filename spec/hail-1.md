@@ -811,7 +811,7 @@ workbench or side-branch copy is not filed. Order never comes from the written t
 commit, first apply the state that counts there and any cap reduction. Then order its hails by their full
 repository-relative paths as UTF-8 bytes. A record counts from that place in the order. Paths obey §3. Records in
 separate repositories have no invented common order; §10b.12 gives the cross-repository absence observation and §10b.9
-the use-claim observation. A record-home move follows the handoff below, without comparing repository clocks.
+the use-claim observation. This edition gives no record-home handoff.
 
 The earlier tie rule stays for distinct DECISIONs competing to end or replace the same ask, and distinct WILCO use
 claims on one DECISION or standing-evidence ANSWER: if they enter in one commit, neither wins; both are refused and the
@@ -820,27 +820,11 @@ settles session claims and the relation of a lead's hail to AWAY/BACK, not these
 reads the entering commit's committer time for expiry, future-time and use-age checks. That trusts the filer's clock:
 git records no time at which a commit joined a branch. Filers push each filing at once.
 
-**Moving a record home.** A counted roster change moving a team's record to another repository takes effect for hail
-only if the old home has no live session, claim, STOP in force, owed reply or unconsumed once DECISION immediately
-before the change's roster event. A lapsed or replaced DECISION carries no unused authority. The change MUST count
-on the old home's first-parent chain before any hail counts at the new home. The last old-home hail event is the last
-one before that roster event; hails introduced by the change's commit do not count at the old home. No later filing at
-the old home counts. The new home starts only where that same roster change counts there and the old cutoff is proved;
-its first hail event is the first new filing under that state, in the order above. Files already present there are
-copies, not new events.
-
-The reader MUST receive the counted change, the old chain through that change, its original record files and the
-counted states needed to check them, and the new chain to its counted state. Earlier homes remain part of that history.
-Original event identities and order stay intact: duplicate ids, used session ids and consumed uses never reset. A
-copied hail creates no new event, and a consumed DECISION cannot be used again at the new home. Only the new home may
-accept filings after the handoff; a reader unable to establish the cutoff refuses them. The core pin and stale-reader
-limits remain (§8).
-
-If the old home was not quiet at that event, or the handoff evidence is missing or unreadable, `hail send`, hail filing
-and matter work for that team refuse at the proposed new home. The move gives no fallback filing right at the old home.
-An active-home move requires the Owner to restore the old home by a counted change, settle its live state, then move
-again. Missing evidence requires the retained history, never an empty record. Existing STOP obedience and constrained
-history-failure replies remain (§4, §6.3).
+**Moving a record home.** This edition defines no move of the hail repository. A proposed change of
+home gives no new filing or replay right, even when the old home is quiet. An organisation that must
+move first ends every STOP and owed REQUEST by the Owner's act in the old record. That preparation is
+not a migration procedure: the old record and its original event identities remain readable, and a
+later edition must define the move. No empty repository resets claims, duplicate ids or consumed uses.
 
 **Matters and waiting work.** A matter has one stable reference, not a copy of its text:
 - `tracker:<repository-name>:<tracker-id>` for a tracker, with the sealanes/1 tracker id; in a tracker folder that
@@ -1320,7 +1304,7 @@ the checks not made and authorises no act. Allowed-signers data is derived in me
 For FORCED END, supply the STOP's status at filing and the event that began the current uninterrupted claim. The two
 filing times are §10's later STOP-or-claim starting commit and the FORCED END commit; the interval stays the one at STOP
 filing. For a cross-repository use claim, supply the co-filed `.session` observation, its recorded chain and the filer's
-fresh-read result (§10b.9). A moved record also needs §10's old and new chains and counted handoff. Matter routing needs
+fresh-read result (§10b.9). A proposed record-home move is refused under §10. Matter routing needs
 the filed bindings of all `re` ids and any explicit `matter`; free text supplies no binding (§10).
 
 The time check refuses a written time more than two minutes after its reference, and accepts exactly two. Given no
@@ -1517,10 +1501,8 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
      before acceptance is read again; an END or RELEASE there refuses it. An end after the last read does not restore
      a consumed use; acting still needs
      current START and claim. Same-commit use ties and the asking home remain unchanged, also for standing evidence.
-110. A record-home move with a live session, claim, STOP in force, owed reply or unused once authority fails for hail.
-     A quiet move needs the counted change and both chains. Hails at or after the old cutoff fail there; the new home
-     accepts only after the handoff. Copies create no events; duplicate ids, used session ids and consumed uses survive.
-     Missing old history refuses sends, filing and matter work at the new home. Startup still uses §10's existing rule.
+110. A record-home move is not defined, even from a quiet record. Changing its repository does not
+     reset history or create a filing right. Preparation ends every STOP and owed REQUEST by the Owner's act.
 111. One or several `re` ids bound to one matter route there; a different explicit matter fails. Ids bound to two
      matters require `matter` naming one: omission fails "matter required", another value fails "matter differs".
      Send and filing both refuse. A valid choice routes only to its holder, or waits for its claim; a target session
@@ -1593,7 +1575,7 @@ First enrollment, recovery with no enrolled Owner key, roster form, return of a 
 ordinary source and hash-list forms, replies to people, decider ask homes, the START of an Owner-started bot that is
 not its filer, matter bindings and the standing-evidence
 use claim are no longer open: sealanes/1 and §§3, 8, 9, 10 and 10b settle them. This includes the active STOP and its
-current holder's window, observed sender heads for cross-repository use claims, quiet record-home moves with history,
+current holder's window, observed sender heads for cross-repository use claims, no record-home move,
 and explicit matter selection for multi-thread replies and free-text orders and questions. A lost key that is still
 enrolled is handled only
 by sealanes/1's Owner change rule; this edition adds no bypass.
@@ -1621,8 +1603,7 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   repositories the replay uses the filer's observation, trusting that filer to read the head afresh.
 - **Replay and one use** (§4, §10b): history spans sessions; reused ids fail. A DECISION binds its ask's file and the
   answer; claims precede acts, same-commit use ties fail, and a crash never permits repeating an unknown outcome.
-  Cross-repository use claims replay the observed sender head, trusting the filer's fresh read (§10b.9). A quiet
-  record-home move retains the old history and its original events (§10).
+  Cross-repository use claims replay the observed sender head, trusting the filer's fresh read (§10b.9). No record-home move is defined (§10).
 - **STOP with no history** (§6.3): it may hold work again after a replay until lifted; the exception only holds back.
 - **Sealing and oversight** (§9a): a host that is also an endpoint sees plaintext. Separate keys, explicit recipients,
   minimum classes and a surviving oversight key bound access; opening is trusted for its exact binding to the span.
@@ -1991,7 +1972,7 @@ Every open point is in §13.
 - **Record and reply fixes:** holder-only STOP responses and a final filing check for FORCED END; explicit sending
   session checks and first-hail claims; SHA256SUMS resolution and scans; sealing a decider's hail left open (§13);
   replies to people, scoped `for-team` ask homes and first-hail matter bindings. FORCED END needs an active STOP and the
-  current holder's full window. Cross-repository uses keep observed sender heads; quiet record moves keep old history.
+  current holder's full window. Cross-repository uses keep observed sender heads; record moves are not defined.
   Replies spanning matters, and free-text orders and questions, require an explicit matter. The six scope cases remain
   in shadow.
 - The detailed first-edition change map, every second-edition disposition and the third-edition design map are in
