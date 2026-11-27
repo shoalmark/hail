@@ -1554,7 +1554,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 73. A source fixes committed bytes, not converted checkout bytes; an optional file hash includes signature blocks
     and a `decision` hash excludes them. A file must already be committed. A workbench source fails.
 74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider name must be committed under a conforming path before it is cited. A bad filing path is refused before it enters.
-75. All listed home-path forms fail in every scanned location on private and public routes; `~/` passes that test.
+75. All listed home-path forms fail in every scanned location on private and public routes; a tilde-relative path passes that test.
 76. A bounded private-id match fails only for a public destination; malformed prefixes block every such send; an empty
     prefix list blocks none on that ground.
 77. Every roster hail requires signing. Without a roster, each owner’s filing step decides. An unsigned
