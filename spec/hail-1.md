@@ -245,7 +245,12 @@ Use plain git object lookup and type inspection (for example `git rev-parse --di
 and `git cat-file -t <full-id>`), with replacement objects disabled. No check parses a programming
 language, executes source code, invokes an external diff driver or applies text conversion.
 For `name@commit`, that commit is the source; it needs no path or invented result file.
-For a file source, the path must name a regular file there; no component may be a link or submodule.
+For `name:path@commit`, inspect the committed tree with `git ls-tree`, following each path
+component within that tree, never through the checkout. Intermediate entries must be trees;
+the final entry must have mode 100644 or 100755 and type blob. No component may be a symbolic
+link or submodule. Read its exact bytes with `git cat-file blob`; never use converted checkout
+bytes. File sources permit binary files. A complete tree proving absence gives h-source-path;
+a present entry of the wrong kind gives h-source-kind. Missing tree/blob inputs are not checked.
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
 listed repository. A `SHA256SUMS` file is an ordinary source and is not expanded into a second list.
@@ -1421,6 +1426,7 @@ this section. The line's location must agree with its separate location field.
 | h-source-commit | incomplete committed reference; source n |
 | h-source-form | otherwise malformed source value; source n |
 | h-source-object | hex id is ambiguous or resolves to a non-commit object; source n |
+| h-source-kind | path is not a regular file, or traverses a link or submodule; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1475,7 +1481,8 @@ The new form and source diagnostics use these repair forms, substituting the act
 | otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
 | any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
 | ambiguous or non-commit object C | `source n: C does not uniquely name a commit object; write name@commit with a unique commit id, retaining any file path or range.` |
-| missing path | `source n: P is absent at the named commit; commit the file first and write that revision.` |
+| non-regular path | `source n: P is not a regular file path at the named commit; write name:path@commit naming a regular file through tree directories only.` |
+| missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
 The general malformed-value repair always prints all the forms listed in its row, in that order;
