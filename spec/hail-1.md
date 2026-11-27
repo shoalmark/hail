@@ -188,7 +188,7 @@ nothing. This rule adds no return grant.
 | `ask` | REQUEST and QUESTION only, exactly once | one non-empty line after the body; forbidden on all other markers |
 
 Every key whose Required column says `yes` is required. `ask` is a body-ending line, never a header pair. Keys scoped to
-one kind or marker MUST NOT appear on another, except where the table allows them. `grammar`, `roster`, `keys`, `acting-for` and
+one kind or marker MUST NOT appear on another, except where the table allows them. `pointer`, `grammar`, `roster`, `keys`, `acting-for` and
 `handover` are refused header keys: this edition refuses them, and refuses `kind: grant-change` and `from: owner pair`.
 A session handover is content, not a `handover` key. START's `matter` names its initial matter but claims nothing.
 Other hails may carry `matter` for routing; §10 requires it for ambiguous id lists, and for a REQUEST or QUESTION
