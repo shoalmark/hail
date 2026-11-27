@@ -40,7 +40,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 - **Scope:** a brief's scope block (§8a), a DECISION's `scope` (§10b), or a decider's teams (sealanes/1 §5.7).
 - **Digest:** a list read later in place of a bell; it carries no authority (§10a).
 - **Filer:** the team's bot named by `filer`, holding `records.file` for its record folder (sealanes/1 §4.2).
-- **Local socket:** a channel whose hail bytes stay on one machine (§9a).
+- **Local socket:** a channel whose notification stays on one machine (§7).
 - **Ask:** the `ask:` line on a REQUEST or QUESTION; an Owner-ask; or a tracker's question on its Board.
 - **Owner-ask:** a QUESTION `to: owner`, from a sender holding `hail.owner`, under §10b.
 - **Raising bot:** the bot whose need or concern a hail relays, named by `raised-by`.
@@ -746,7 +746,7 @@ when sealing: each recipient holds the per-message key, so sealing alone proves 
   It says nothing about the sender: that is §9's job. A platform that is also an endpoint, where a bot composes or reads
   its hails inside hosted prompts and tool calls, sees the plain text whatever is sealed in between. Sealing doesn't
   hide a hail from it; keep sensitive plain text out of such a platform: there, a bot MUST put sensitive content behind
-  a source. A short body that holds nothing sensitive MAY travel as plain text.
+  a source. The record can hold a plain hail where its sealing policy permits; notifications still carry only its reference.
 - **When:** opt-in, per hail or per channel. Any channel whose host is not git's forge seals by default, by the roster's
   policy. A hail in git or on the local socket MUST NOT be sealed unless it opts in.
   - **The reference deployment's own exception** for one channel is in Appendix D, D.3.
@@ -756,8 +756,7 @@ when sealing: each recipient holds the per-message key, so sealing alone proves 
   behind the source is needed is open (§13).
 - **The design:** multi-recipient key encapsulation, with the Owner as a standing, visible recipient. Not key escrow: a
   bot's private key MUST NOT be deposited.
-  - A random key per hail encrypts the hail (AEAD): the signed hail once signing is required (§9); before that, the
-    canonical unsigned hail with its `sealed-to` line.
+  - A random key per hail encrypts the signed hail (AEAD), including its `sealed-to` line.
   - It is wrapped once per reader and once per Owner oversight key.
   - **The format:** age v1 with the named stanza types, with no custom cryptography. The `age` program is one
     implementation. It uses a random file key, a ChaCha20-Poly1305 payload, and one recipient stanza per recipient: an
@@ -791,10 +790,9 @@ when sealing: each recipient holds the per-message key, so sealing alone proves 
     minimum are in [the extension key table](ext-hail-keys.md). Sealing a decider's hail is open (§13): until it is
     settled, a decider's hail MUST NOT be sealed; it is sent and filed plain, and an overseer named by `seen-by` reads
     it whole. No new core roster key is added.
-- **Order: sign, then seal,** once signing is required (§9). The signature is sealed with the hail, so the transport
-  host can't read its sender from the span. A decider's plain record header below names its sender. Before signing is
-  required, a sealed bot hail may be unsigned: sealing authenticates neither its sender nor its `sealed-to` line.
-- **On the wire:**
+- **Order: sign, then seal** (§9). The signature is sealed with the hail, so the record host cannot read its sender from the span. A decider's plain record header below names its sender. This edition’s sealing policy is roster-governed and requires signing; sealing alone authenticates
+  neither its sender nor its `sealed-to` line.
+- **The filed sealed form:**
 
 ```text
 hail/1 sealed
@@ -803,7 +801,7 @@ to-mailbox: <opaque id>
 end hail/1 sealed
 ```
 
-- **What the transport host sees:** the opaque mailbox id, the size and the time.
+- **What the record host sees:** the opaque mailbox id, the size and the time.
 - **Keeping the Owner a recipient:**
   - `hail send` MUST add the Owner's oversight keys;
   - the canonical bytes carry `sealed-to`, every recipient's age public recipient encoding, and `min-class` (§3). They
@@ -1013,7 +1011,7 @@ counts until the running count is below the cap. In a repository that points, wh
 rules; no hail rule cures a stale lock or gives a bot reader resolving.
 
 **No record.** A team that declares no `record` has none of these session records and cannot give an
-unfiled hail effect. It must name a record before using hails for directions. Until then, Each of its bots runs one session at
+unfiled hail effect. It must name a record before using hails for directions. Until then, each of its bots runs one session at
 a time even if its roster cap is higher. Its starter judges running state and waiting work and logs each start,
 including starter, bot, session, time, work and supplied skills, under sealanes/1 §5.6. The claim rules do not bind that
 team. The required filing of a DECISION and its use claim still binds: without a record, that team cannot use the Owner
@@ -1046,7 +1044,7 @@ deployment keeps its own hails private (Appendix D, D.5).
     its system's request to end, have a time limit, and never be stopped by name. A reused id alone blocks nothing;
   - a hosted platform's routine is stopped in that platform's settings.
 - **Who needs one:** a bot needs a watcher only where hails reach it through git (§7). On one machine or one hosted
-  service, a team's bots hail by the nearest transport. Its lead or principal watches its cross-team record; any other
+  service, a team’s bots notify by the nearest transport, then read the landed record. Its lead or principal watches its cross-team record; any other
   bot that receives by git needs a watcher too (§8).
 - **Where it runs:** inside the bot it rings, as a background task of that bot's own session, so the bot is woken
   directly. It MUST NOT write anywhere but its own clone and its own state folder, MUST NOT fetch into another bot's
@@ -1433,7 +1431,8 @@ catches a wrong clock, not a lying filer. Sealed content without its bound openi
 
 **`hail send <address> <path>`** takes a draft: header without `id` or written time, then the body and
 required `ask`. It makes the id and time from one clock reading, obtains committed source bytes and adds a hash only when required or requested, reads the state in
-force, builds the final frame, checks it and its actual destination, signs, seals where required, and sends by §7.
+force, builds the final frame, checks it and its actual destination, signs where required, seals where required, files it, and sends
+only its landed reference by §7.
 Checking, signing and sending are one step; a check of other bytes is no check of this send. It refuses:
 - a failed form, source, current grant, signature, session or required scope check; the session check is §10's sending
   rule, including live START, matter claims, receipts and the first-hail filing claim;
@@ -2056,7 +2055,7 @@ teams and roles of Appendix B. They are not extra adoption conditions for others
 - **D.9 Releases** (§13): one first release carries both tools after the ten-minute bar and before the trial; each tool
   remains a tracked item, and this release is not a patch. It does not wait for adoption or put a roster in force.
 - **D.10 Forms and filers** (§7, §10): A's filer is `a.planner`, B's is `b.planner`; the organisation and audit teams
-  have their own filers. A parent reaches a child by its session address; that address grants nothing.
+  have their own filers. A parent sends the landed reference to a child’s session address; that address grants nothing.
 - **D.11 Sealing support** (§13): age v1 and the required recipient types govern. The source observations were for an
   `age` 1.3 implementation, chip plugins at 0.2.1 and 1.0.1, a carried-key plugin at 0.5.1 whose tagged support was not
   released there, and a native age implementation at 0.12.0. They are observations at those versions, not claims of
