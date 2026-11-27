@@ -288,7 +288,10 @@ what moved before it acts. This is the case of two hails that cross, such as a h
      at once skips it.
    - For an INFORMATION, an ADVICE or a WARNING, RECEIVED is a full answer: it stops the reader's clock, and nothing
      more is due.
-4. **A reader MUST NOT act on a REQUEST whose source doesn't verify.**
+4. **A source target is no condition of a filed hail's effect.** Filing checks source form, availability
+   and any required hash. A later reader reports an unavailable or differing source, but does not void
+   the hail or suspend its ordinary effect on that ground. Grants, STOPs, session state and the explicit
+   binding checks for an Owner decision still apply. This rule supplies no missing authority evidence.
 5. **Duplicates:** a duplicate is the same id with the same canonical bytes (§9), however its transport wrapped it. A
    reader knows the ids it has seen from its team's filed record and from its own history (§10), never from one
    session's memory alone, so a new session of a bot sees what earlier sessions saw. A reader that can't read its
@@ -1572,7 +1575,7 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   minimum classes and a surviving oversight key bound access; opening is trusted for its exact binding to the span.
   Recipient tags alone prove no successful encryption. Unsupported sealing is held or refused, never silently plain.
 - **Secrets and content** (§1, §11): sources hide no file from its readers. A secret pattern may miss a secret, so the
-  sender's rule remains. No REQUEST acts with a bad source; the signing tool renders and hashes the ask itself, never
+  sender's rule remains. Source faults refuse filing but do not erase a landed hail; the signing tool renders the ask itself, never
   signs from a command inside it, and surfaces show its text as data.
 - **Deciders and outsiders** (§6, §8): a decider's signature has only its scope and grants. The ask's record decides
   take-ups and answers. A disclosure is checked at answering, adds no grant and never allows raw personal data.
