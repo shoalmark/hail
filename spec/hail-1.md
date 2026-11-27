@@ -457,7 +457,7 @@ The grammar defaults to `"none"`. A record naming none is bound by hail/1 alone.
 grammar: it uses the destination record's settings, with no per-hail selector or fallback. An unknown,
 unreadable or invalid selected grammar refuses new filing, rather than silently becoming none. A
 loaded grammar is pinned by source commit and its own edition; earlier files remain readable at their
-pins. The draft grammar procedure lives in [hail-grammar/1](../hail-grammar/hail-grammar-1.md).
+pins. The grammar procedure is hail-grammar/1, an unsigned draft on the branch `draft/hail-grammar-1` of this repository.
 
 These values define the settings once; carriers do not change their meaning. Source names need only
 be listed here: any regular file in a listed repository may be cited, not just a place or record folder.
