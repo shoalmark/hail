@@ -225,6 +225,7 @@ The forms are defined below; Appendix A gives their lexical grammar.
 | Form | Work named |
 |---|---|
 | `name@commit` | the commit itself |
+| `name:path@commit:first-last` | an inclusive range of file lines |
 | `name:path@commit` | a regular file at that commit |
 
 The commit is 7 to 64 lower-case hex digits and must resolve uniquely in the named repository; no branch,
@@ -251,6 +252,17 @@ the final entry must have mode 100644 or 100755 and type blob. No component may 
 link or submodule. Read its exact bytes with `git cat-file blob`; never use converted checkout
 bytes. File sources permit binary files. A complete tree proving absence gives h-source-path;
 a present entry of the wrong kind gives h-source-kind. Missing tree/blob inputs are not checked.
+For `name:path@commit:first-last`, first perform the file check above. The file must decode as
+strict UTF-8 and contain no NUL byte; otherwise it is not text for this form (h-source-text).
+Do not normalize, convert line endings or parse the file's language. Number lines from 1 by LF
+bytes: every LF ends one line; a nonempty final span without LF is one more line. An empty file
+has zero lines; a terminal LF adds no empty line. CR remains a byte in its line.
+Both endpoints are positive decimal integers with no sign or leading zero. Compare them without
+machine-integer overflow. A first number above the last gives h-source-range-order. Otherwise,
+a last number above the file's line count gives h-source-range-end. Equality is allowed.
+Order checking needs no file bytes; a reversed range suppresses only its end and label checks.
+Text failure suppresses the end and label checks, not independent faults.
+
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
 listed repository. A `SHA256SUMS` file is an ordinary source and is not expanded into a second list.
@@ -1427,6 +1439,9 @@ this section. The line's location must agree with its separate location field.
 | h-source-form | otherwise malformed source value; source n |
 | h-source-object | hex id is ambiguous or resolves to a non-commit object; source n |
 | h-source-kind | path is not a regular file, or traverses a link or submodule; source n |
+| h-source-text | range targets a file that is not UTF-8 text without NUL; source n |
+| h-source-range-order | range first number exceeds its last; source n |
+| h-source-range-end | range exceeds the file line count; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1479,9 +1494,12 @@ The new form and source diagnostics use these repair forms, substituting the act
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
 | otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
-| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
+| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit or name:path@commit:first-last; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; range numbers are positive decimal without leading zeros; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
 | ambiguous or non-commit object C | `source n: C does not uniquely name a commit object; write name@commit with a unique commit id, retaining any file path or range.` |
 | non-regular path | `source n: P is not a regular file path at the named commit; write name:path@commit naming a regular file through tree directories only.` |
+| range on non-text file | `source n: P is not UTF-8 text without NUL; write name:path@commit for the whole file, or name:path@commit:first-last for a text file.` |
+| reversed range A-B | `source n: range A-B starts after it ends; write name:path@commit:first-last with 1 <= first <= last.` |
+| range ends at B beyond L lines | `source n: range ends at B but P has L lines; write name:path@commit:first-last within those lines, or name:path@commit for the whole file.` |
 | missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
@@ -2001,9 +2019,11 @@ model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
-source-value     = commit-source / file-source
+source-value     = commit-source / file-source / range-source
 commit-source    = repo-token "@" commit
 file-source      = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
+range-source     = repo-token ":" path "@" commit ":" line-number "-" line-number
+line-number      = %x31-39 *DIGIT
 repo-token       = %x61-7A *(%x61-7A / DIGIT / "-")
                    ; a repository short name from the record settings
 path             = segment-name *("/" segment-name)
