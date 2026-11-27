@@ -88,12 +88,47 @@ an unknown opener; it tells the writer what must be supplied, without guessing t
 | F6 | required count exceeds lines, `g-capacity` | `[g-capacity] <R> required openers exceed <N> lines; increase lines to at least <R> or reduce require.` |
 | F7 | same meaning under two openers | checked by §6 |
 | B1 | more than N body lines, `g-lines` | `[g-lines] <MARKER> allows at most <N> body lines; remove or combine <excess> line(s) without dropping meaning.` Locate the first excess line, N+1; one budget fault, not one per excess line. Use singular `line` for one. |
-| B2 | line has no exact opener delimiter, `g-opener` | `[g-opener] line has no exact opener; write Opener: followed by one space and the statement.` |
-| B3 | opener not defined, `g-opener` | `[g-opener] opener <O> is not defined; use a defined opener with the intended meaning.` |
-| B4 | defined opener not in allow, `g-allow` | `[g-allow] <O> is not allowed on <MARKER>; use an allowed opener without changing the meaning.` |
-| B5 | no statement after opener, `g-empty` | `[g-empty] <O> has no statement; write the value or act after the opener.` |
+| B2 | line has no exact opener delimiter, `g-opener` | `[g-opener] line has no exact opener; <choices repair>.` |
+| B3 | opener not defined, `g-opener` | `[g-opener] opener <O> is not defined; <choices repair>.` |
+| B4 | defined opener not in allow, `g-allow` | `[g-allow] <O> is not allowed on <MARKER>; <choices repair>.` |
+| B5 | no statement after opener, `g-empty` | `[g-empty] <O> has no statement; write <O>: followed by one space and <M>.` |
 | B6 | meaning and writer duties | checked by §§5–7 |
-| B7 | missing nonempty allowed occurrence of a required opener, `g-required` | `[g-required] <MARKER> requires <O>; add a nonempty <O>: line.` |
+| B7 | missing nonempty allowed occurrence of a required opener, `g-required` | `[g-required] <MARKER> requires <O>; add <O>: followed by one space and <M>.` |
+
+These templates fix the words, punctuation and spaces of every fault line; variables alone vary.
+`M` is the exact declared meaning for O (the fixed table below for a common-set fault).
+`Q(X)` encloses X in ASCII double quotes, escaping backslash and double quote with a backslash,
+and U+0000 through U+001F as lower-case `\u00xx`. All other characters retain their UTF-8 bytes.
+For unquoted substitutions use the same escapes without the enclosing quotes. Field paths use the
+keys joined by dots, with no TOML quoting; the location of a missing field is that field's path.
+
+The **choices repair** is deterministic. In the selected marker's allow-array order, join entries
+`Q(O + ":") = Q(M)` with ` | `. Print `write one of <entries> with one space after the colon and
+a statement of that meaning; if none fits, remove this line and preserve its meaning in a hail
+whose marker allows it`. If allow is empty, print `remove this prose line and preserve its meaning
+in a hail whose marker allows it; <MARKER> allows no prose opener`. The outer template supplies
+the final period. Do not invent a different observation or commitment to fit a permitted opener.
+For example, WILCO's only choice is Next with its exact next-act meaning; an observation cannot
+be repaired merely by relabeling it Next. An optional observation can instead be preserved in an
+INFORMATION hail. Empty and required-opener repairs also print M, never just a request for text.
+
+For F2's `<the field's form from §2>`, substitute exactly the following text (the outer template
+adds the final period). For an invalid opener key use the `openers.<opener>` row's name repair;
+for its non-table value use its table repair. Unknown keys use F2's separate removal template.
+
+| Field | Exact replacement form |
+|---|---|
+| hail-grammar | `the integer 1` |
+| name | `a string of 2–32 lower-case letters, digits or hyphens, with a letter first` |
+| edition or markers.<marker>.lines | `a nonnegative integer` |
+| start | `true or false` |
+| openers | `a nonempty table of opener tables, each with only a nonempty means string` |
+| openers.<opener>, name | `an opener name matching [A-Z][a-z]*( [a-z]+){0,2}` |
+| openers.<opener>, table | `a table with only a nonempty means string` |
+| openers.<opener>.means | `a string containing a non-space character` |
+| markers | `a table with INFORMATION, ADVICE, WARNING, QUESTION, ANSWER, REQUEST, STOP, RECEIVED, WILCO, DECLINED, DONE, START, END, CLAIM, RELEASE, FORCED END, AWAY, BACK and DECISION rows, each with lines, allow and require` |
+| markers.<marker> | `a table with nonnegative integer lines and distinct opener-name arrays allow and require` |
+| markers.<marker>.allow or .require | `an array of distinct opener names` |
 
 For each line, read B2/B3 first. If its opener is known, check B4 and B5 independently; check B6 only
 when there is a nonempty statement. A forbidden opener still has a meaning, so B6 can run there.
@@ -111,8 +146,8 @@ Only the Owner changes this set by a new edition of hail-grammar, in batches. Ea
 the files pinned to them remain readable. A grammar's own new edition cannot change the common set.
 
 At F3, missing common opener O prints `grammar openers.O: [g-common-missing] common opener O is
-missing; add O with its edition-one meaning.` A changed meaning prints `grammar openers.O.means:
-[g-common-meaning] common meaning differs; write <exact meaning from the table>.` Unknown child keys
+missing; add [openers.<Q(O)>] with means = <Q(M)>.` A changed meaning prints `grammar openers.O.means:
+[g-common-meaning] common meaning differs; write means = <Q(M)>.` Unknown child keys
 are F2 shape faults; do not double-report them as changed meaning.
 
 | Opener | Exact means string |
