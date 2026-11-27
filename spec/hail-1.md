@@ -224,6 +224,7 @@ The forms are defined below; Appendix A gives their lexical grammar.
 
 | Form | Work named |
 |---|---|
+| `name:path@from..to` | the change to one file between two commits |
 | `name@from..to` | the change between two commits |
 | `name@commit` | the commit itself |
 | `name:path@commit:first-last label` | those lines, with a label in the first line |
@@ -281,6 +282,15 @@ Disable replacement objects and grafts. Parent edges are those in the original c
 The source names the endpoint tree difference (from to to), not a moving branch, merge-base
 difference or list interpreted as code. Plain `git diff-tree -r --no-renames` describes that
 difference without external drivers or text conversion. Equal endpoints name an empty change.
+
+For `name:path@from..to`, perform both commit and ancestry checks. At least one endpoint
+must contain that path as a regular file under the file rules above. Complete trees showing it
+absent at both ends give h-source-change-path. Presence at only one end permits an added or
+deleted file. If present at both ends, both entries must be regular files; a directory, link or
+submodule at either end gives one h-source-kind for this path. Use the literal same path at
+both endpoints: no rename inference, glob, pathspec magic or language analysis. An unchanged
+regular file at both ends names an empty file change and passes. The source does not assert
+that the content changed. A known non-regular path suppresses the absent-at-both fault.
 
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
@@ -1463,6 +1473,7 @@ this section. The line's location must agree with its separate location field.
 | h-source-range-end | range exceeds the file line count; source n |
 | h-source-label-text | label bytes are absent from the first line of a valid range; source n |
 | h-source-ancestry | from is not an ancestor of to in a complete supplied graph; source n |
+| h-source-change-path | file path absent at both change endpoints; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1515,14 +1526,15 @@ The new form and source diagnostics use these repair forms, substituting the act
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
 | otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
-| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit or name:path@commit:first-last or name:path@commit:first-last label or name@from..to; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; range numbers are positive decimal without leading zeros; label is one word without whitespace or controls; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
+| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit or name:path@commit:first-last or name:path@commit:first-last label or name@from..to or name:path@from..to; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; range numbers are positive decimal without leading zeros; label is one word without whitespace or controls; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
 | ambiguous or non-commit object C | `source n: C does not uniquely name a commit object; write name@commit with a unique commit id, retaining any file path or range.` |
-| non-regular path | `source n: P is not a regular file path at the named commit; write name:path@commit naming a regular file through tree directories only.` |
+| non-regular path | `source n: P is not a regular file path at the named commit; write name:path@commit naming a regular file through tree directories only. For a file change use name:path@from..to with a regular file at every endpoint where the path exists.` |
 | range on non-text file | `source n: P is not UTF-8 text without NUL; write name:path@commit for the whole file, or name:path@commit:first-last for a text file.` |
 | reversed range A-B | `source n: range A-B starts after it ends; write name:path@commit:first-last with 1 <= first <= last.` |
 | range ends at B beyond L lines | `source n: range ends at B but P has L lines; write name:path@commit:first-last within those lines, or name:path@commit for the whole file.` |
 | label W absent from first line A | `source n: label W is absent from first line A of the range; write name:path@commit:first-last label with the label copied from that first line, or name:path@commit:first-last without a label.` |
 | from F is not ancestor of to T | `source n: F is not an ancestor of T; write name@from..to with from an ancestor of to, retaining any file path.` |
+| path P absent at both F and T | `source n: P is absent at both F and T; write name:path@from..to with a regular file path present at from or to.` |
 | missing path | `source n: P is absent at the named commit; write name:path@commit with a regular file path present at that commit.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
@@ -2042,7 +2054,7 @@ model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
-source-value     = commit-source / file-source / range-source / labeled-source / change-source
+source-value     = commit-source / file-source / range-source / labeled-source / change-source / file-change-source
 commit-source    = repo-token "@" commit
 file-source      = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
 range-source     = repo-token ":" path "@" commit ":" line-number "-" line-number
@@ -2052,6 +2064,7 @@ source-label     = 1*(%x21-7E / %xA1-167F / %x1681-1FFF / %x200B-2027
                    / %x3001-D7FF / %xE000-10FFFF)
 line-number      = %x31-39 *DIGIT
 change-source    = repo-token "@" commit ".." commit
+file-change-source = repo-token ":" path "@" commit ".." commit
 repo-token       = %x61-7A *(%x61-7A / DIGIT / "-")
                    ; a repository short name from the record settings
 path             = segment-name *("/" segment-name)
