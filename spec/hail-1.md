@@ -1,6 +1,6 @@
 # ⌜hail/1⌟
 
-**Status:** hail/1, third-edition draft, unsigned. Publication requires the Owner's signed merge.
+**Status:** hail/1, third edition, signed by the Owner's merge into `main`.
 A deployment selects this edition in its record's settings (§8). Where a roster governs, the counted
 state names `spec = "hail/1"`, `edition = 3`, and `extends = { spec = "sealanes/1", edition = 1 }`
 in `ext.hail`; sealanes/1's discovery and change rules apply. No DECISION adopts a roster.
