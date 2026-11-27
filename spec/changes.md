@@ -82,7 +82,8 @@ owed REQUEST by the Owner's act; it supplies no migration right or reset of hist
 ## Checking, examples and entry pages — sections 11–16, appendices
 
 A failed check refuses filing and gives every independent fault in one actionable line each. Dependent
-checks with unreadable inputs are reported rather than guessed. A grammar never voids a filed hail.
+checks with unreadable inputs are reported rather than guessed. Each source has an explicit
+pass, refuse or not-checked result; missing commits never produce a pass. A grammar never voids a filed hail.
 The examples and introductory pages now show the current form. Old signed and sealed fixture bytes
 remain in the pinned compatibility corpus, separate from current-edition tests. References have one list.
 

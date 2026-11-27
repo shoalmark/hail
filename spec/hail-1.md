@@ -309,7 +309,13 @@ fail source syntax (h-source-form); resolving a hex id to a tag object gives h-s
 never automatic tag peeling. A folder path gives h-source-kind. A file's permitted directory
 components are not folder sources. These are the mechanical faults for excluded target kinds.
 
-Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
+When any commit, tree, blob or parent-graph input needed for a source is unavailable, that
+source is `not checked`, never `pass`. A missing commit in a reader's local objects is not proof
+that no such commit exists. Do not fetch during checking. Report what inputs must be supplied;
+a later run may check them. A complete supplied tree can prove an absent path; a complete parent
+graph can prove non-ancestry. Those are faults, not missing-input reports. An ambiguous prefix or
+an available non-commit object is likewise a fault. A form fault suppresses dependent lookups,
+so it does not also generate a speculative unavailable-commit report.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
 listed repository. A `SHA256SUMS` file that is part of the work may be a file source; it is never written solely
 for citation or expanded into a second source list.
@@ -1533,6 +1539,21 @@ writer-duty notice, `filed-source-unavailable` for unavailable filed source byte
 `signature-not-checked` for unchecked required signing. A grammar fault reported without refusing
 an already-filed hail retains its grammar code. These notices do not acquire fault status through
 their code. The dependent-check report codes above retain their meanings.
+
+For a selected source check, output one result per source, in ordinal order, with separate
+fields `source` (its number) and `status` (`pass`, `refuse`, or `not checked`). A proven source
+fault gives `refuse`; otherwise any missing required input gives `not checked`; only a complete
+successful check gives `pass`. If faults and missing inputs coexist, retain the faults and
+the missing-input report, with status refuse. The overall selected-check verdict is refuse if
+any fault exists, otherwise `not checked` if any selected check is incomplete, otherwise pass.
+Thus absence of a fault alone never produces pass. A not-checked result cannot authorize filing;
+an already-filed hail keeps its effect (§5).
+
+For each source with unavailable required inputs print one informational report, in source
+order, code `source-not-checked`, location `source n`, with fixed line:
+`source n: not checked; supply the missing commit, tree, blob or complete parent-graph inputs for this source and run the check again.`
+The report carries no refusal fault. Its exact status and location are data, not words from which
+a consumer has to guess a pass. Additional detail may identify the missing objects separately.
 
 The new form and source diagnostics use these repair forms, substituting the actual values:
 
