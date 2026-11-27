@@ -14,9 +14,8 @@ signed when §9 requires it, may be sealed to their readers and the Owner's over
 amended. The record tracks sessions and their claims, one session of each bot to a matter. The rules have not been shown
 to work at every scale; hail/1 is not for swarms.
 
-**Conventions.** The key words "MUST", "MUST NOT", "SHOULD", "SHOULD NOT" and "MAY" in this document are to be
-interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
-A rule in plain words binds as MUST does. §11 gives conformance tests. Appendices A, B and C are informative: where they
+**Conventions.** MUST requires an action, MUST NOT forbids it, SHOULD recommends it, SHOULD NOT advises
+against it, and MAY permits it. Plain rules also bind. These meanings are stated here in this text’s own words. §11 gives conformance tests. Appendices A, B and C are informative: where they
 and the body differ, the body governs. Appendix D is normative for the reference deployment only. [The extension key
 table](ext-hail-keys.md) is part of this edition's normative text.
 
@@ -81,8 +80,11 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 - **A bot's hail carries no authority.** Authority comes from the roster and the signed records its rules accept; a
   bot's hail can only point at them (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
 - **Sources, not copies.** Sources name committed files; short values stay in the body. A hail cannot drift from the record.
-- **Small on purpose.** A body of at most five lines, with one ask on REQUEST or QUESTION only. Anything longer goes
-  behind a source.
+- **Body content belongs to a grammar.** hail/1 sets no body line budget, opener, required reason,
+  required result or subject for an ordinary REQUEST. A record with no grammar can ask to add 4 and 4
+  without a source or subject. A DONE needs no result source. A grammar may tighten hail/1, never loosen
+  it. Protocol form, including one ask on REQUEST or QUESTION and structured Owner choice labels,
+  remains hail/1's; the prose a body must say is solely a grammar's to define.
 - **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in its
   header, its body or the content its source names. A source keeps content off the channel that carries the hail; it
   hides nothing from whoever can read the file it names (§9a).
@@ -96,7 +98,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 hail/1
 <header lines ending with sources: N>
 <N source lines, numbered from #1>
-<body: 0 to 5 lines>
+<body: zero or more lines>
 ask: <one line>            (required exactly once on REQUEST and QUESTION)
 end hail/1
 <signature block, if signed (§9)>
@@ -114,7 +116,7 @@ end hail/1
   - Before any roster first adopts an edition of hail/1, an edition may change forms, including DECISION keys. From the
     first such adoption, hail/1 grows only by keys and markers its readers can safely skip. A key that carries authority
     is never one a reader skips (§3). Status alone proves no global fact about adoption.
-  - A new marker must be safe to treat as INFORMATION: RECEIVED where §8 permits a reply, and no act. Reserved
+  - A new marker must be safe to treat as INFORMATION, with no act. Reserved
     markers are not unknown markers. Changes lists the forms this edition changes.
   - A revision of this text is named by its edition.
   - A change hail/1's readers can't read becomes hail/2, the next form.
@@ -180,8 +182,8 @@ nothing. This rule adds no return grant.
 | `ask` | REQUEST and QUESTION only, exactly once | one non-empty line after the body; forbidden on all other markers |
 
 Every key whose Required column says `yes` is required. `ask` is a body-ending line, never a header pair. Keys scoped to
-one kind or marker MUST NOT appear on another, except where the table allows them. `roster`, `keys`, `acting-for` and
-`handover` are retired header keys: this edition refuses them, and refuses `kind: grant-change` and `from: owner pair`.
+one kind or marker MUST NOT appear on another, except where the table allows them. `grammar`, `roster`, `keys`, `acting-for` and
+`handover` are refused header keys: this edition refuses them, and refuses `kind: grant-change` and `from: owner pair`.
 A session handover is content, not a `handover` key. START's `matter` names its initial matter but claims nothing.
 Other hails may carry `matter` for routing; §10 requires it for ambiguous id lists, and for a REQUEST or QUESTION
 with free-text `re`.
@@ -254,14 +256,14 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 | QUESTION | needs an answer | ANSWER; a `for: owner` QUESTION: the gate's ANSWER with `disposition` (§10b); an Owner-ask: the Owner's DECISION (§10b). RECEIVED MUST NOT come first unless the answer can't come right away |
 | ANSWER | answers a QUESTION | nothing |
 | REQUEST | asks the reader to act within its own grants | either DECLINED, which ends it, or WILCO followed by DONE or DECLINED "can't act" with a reason. RECEIVED MUST NOT come first unless the decision can't come right away |
-| STOP | stop one named item, record why, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED MUST NOT come first unless stopping takes time |
+| STOP | stop one named item, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED MUST NOT come first unless stopping takes time |
 
 **Receipts:**
 - **RECEIVED:** the hail was read in full, and its source's sha256 checked where the reader could. It says nothing
   about having read what the source names. A RECEIVED `from: owner`, signed, whose `re` names a concern, is the Owner's
   "seen" (§10b).
 - **WILCO:** will comply.
-- **DECLINED:** will not. The next line gives one of these reasons, or another stated plainly:
+- **DECLINED:** will not. A writer may give a reason, for example:
   - `source differs: <hex>`;
   - `commit not found: <sha>`, after one pull;
   - `malformed: <first failure>`;
@@ -273,8 +275,8 @@ what moved before it acts. This is the case of two hails that cross, such as a h
   - `can't act`, from the bot that would act on a DECISION (§10b).
 
   An act the reader's runtime refuses is DECLINED, and MUST NOT be passed to another bot.
-- **DONE:** finished. It carries a source to the result, or no sources and one line saying what changed. An
-  accepted REQUEST ends with DONE, or DECLINED "can't act" with a reason; a declined one ends with DECLINED. An ANSWER
+- **DONE:** finished. No body text or result source is required by hail/1. An
+  accepted REQUEST ends with DONE, or DECLINED "can't act"; a declined one ends with DECLINED. An ANSWER
   MUST be used only for a QUESTION.
 
 **Rules:**
@@ -936,7 +938,7 @@ that event: the STOP was in force and its item matched that claim's matter. It d
 known-response check or need a sender's send log. The filer is trusted for that check and its commit times. A response
 discovered later does not undo the end.
 With no live claim, a session may be force-ended at once: `re: none`, with no STOP prerequisite, since it has no item
-to stop. The body states the reason in either case. From filing, all its claims are released, its slot is free, and
+to stop. Any requirement for a body reason belongs to the record’s grammar. From filing, all its claims are released, its slot is free, and
 all its later hails fail the live-START check, "session ended". A recorded response to STOP is not proof that the item
 stopped. A new status QUESTION or STOP follows the ordinary rules (§5).
 
@@ -1052,7 +1054,7 @@ another sender. Each Owner-ask:
 - points at the originals unchanged with their file hashes; the one-line `why` says why the Owner must answer;
 - on `decide` only, has two to five body lines `option A:` through `option E:`, sequential and each used once. Its body
   lines are its options only: its reason goes in `why`, its detail behind the source; prose beside them is refused.
-  Other kinds have no option line, and may use up to five body lines. More than five options requires split asks;
+  Other kinds have no option line and no hail/1 body budget. More than five options requires split asks;
 - names the raising bot's surface first in `clarify`, then the gate's; for the sender's own need, its own address.
 
 A desired grant or key change is an `owner-act` request for the Owner's commit. It carries no `roster` or `keys` header
@@ -1150,8 +1152,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   - `answer:` is `yes`, `no`, `option <label>`, `words`, `later <time>` or `talk`, one for each answer above. `option
     <label>` names one of the ask's option lines by its label (point 3), and `later <time>` gives the time in
     `written-against`'s time form;
-  - the Owner's own words and reasons go in the body. A reason MUST be given with `no` and with `words`, and MAY be
-    given with the others;
+  - the Owner’s own words and reasons, if supplied, go in the body. A grammar alone may require prose;
   - it is signed (§9), in the namespace `hail-decision`.
 - **Scope.** A DECISION carries `scope: once`, the default, or `scope: standing`. Only a DECISION that answers an ask of
   `kind: decide` MAY carry `scope: standing`. Only a standing DECISION may be cited by a gate as standing evidence
@@ -1376,7 +1377,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 20. Closing, later and talk show the same state everywhere; a surface unable to sign points to one that can.
 21. A gate ANSWER has `disposition`; its source and reason match relayed, answered or rejected.
 22. A once DECISION cannot serve as standing evidence.
-23. No or words with no reason is refused; words with a reason ends the ask and permits no act.
+23. No and words need no prose reason under hail/1; words ends the ask and permits no act.
 24. A `hail` signature fails on a DECISION; `hail-decision` fails on another hail; `git` fails on both.
 25. One valid Owner signature suffices for a DECISION; `owner pair` and a second block are refused.
 26. A DECISION grants no roster change: only the Owner's counted commit does, by sealanes/1 Table 1.
@@ -1432,7 +1433,8 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 70. An unknown non-reserved marker is INFORMATION, receipted only where §8 permits a reply, and never acted on.
 71. An unreadable span gets no reply; a readable malformed header gets DECLINED only with a listed sender, id and a
     reply permitted by §8. Canonicalisation precedes finding a frame with trailing spaces.
-72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it; five body lines pass and six fail.
+72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it. Without a grammar,
+    neither five nor six body lines fails on line count.
 73. A source fixes committed bytes, not converted checkout bytes; an optional file hash includes signature blocks
     and a `decision` hash excludes them. A file must already be committed. A workbench source fails.
 74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider name must be committed under a conforming path before it is cited. A bad filing path is refused before it enters.
@@ -1683,7 +1685,7 @@ remark-char      = %x20-27 / %x2A-7E / %x80-10FFFF
                    ; no nested parentheses, no sep
 line-text        = *(WSP / VCHAR / %x80-10FFFF)
 text-char        = VCHAR / %x80-10FFFF
-body             = 0*5 body-line
+body             = *body-line
 body-line        = body-text LF
 body-text        = <line-text except exact end line or a line beginning ask:>
 ask-line         = %s"ask: " text-char line-text LF
