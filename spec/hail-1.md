@@ -183,6 +183,7 @@ nothing. This rule adds no return grant.
 | `session` | on those five markers only | the subject session's opaque id; distinct from the sender's session on a START or FORCED END |
 | `matter` | START, CLAIM, RELEASE; replies as §10 requires | one matter reference; routing and binding follow §10 |
 | `waiting` | on START only | one line naming the waiting work and its evidence, or the starter's logged judgement where the record and trackers cannot tell |
+| `receipt` | optional on messages expecting no receipt by default | `received`, requesting RECEIVED; allowed on INFORMATION, ADVICE, WARNING, QUESTION, REQUEST, STOP and unknown markers treated as INFORMATION; forbidden on ANSWER, receipts and control records |
 | `sources` | yes, last header line | one digit, `0` through `9`; the count of source lines immediately following |
 | `ask` | REQUEST and QUESTION only, exactly once | one non-empty line after the body; forbidden on all other markers |
 
@@ -255,13 +256,13 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 
 | Marker | Means | The reader answers |
 |---|---|---|
-| INFORMATION | a fact for the record | RECEIVED, or any answer |
-| ADVICE | a recommendation; the decision stays with the reader | RECEIVED, or any answer |
-| WARNING | a risk to weigh now | RECEIVED, or any answer. A concern rung to the Owner: the Owner's signed "seen" (§10b) |
-| QUESTION | needs an answer | ANSWER; a `for: owner` QUESTION: the gate's ANSWER with `disposition` (§10b); an Owner-ask: the Owner's DECISION (§10b). RECEIVED MUST NOT come first unless the answer can't come right away |
+| INFORMATION | information for the record | nothing unless `receipt: received` requests RECEIVED |
+| ADVICE | a recommendation; the decision stays with the reader | nothing unless `receipt: received` requests RECEIVED |
+| WARNING | a risk to weigh now | nothing unless `receipt: received` requests RECEIVED; an urgent Owner concern uses that request for signed seen (§10b) |
+| QUESTION | needs an answer | ANSWER; a `for: owner` QUESTION: the gate's ANSWER with `disposition` (§10b); an Owner-ask: the Owner's DECISION (§10b). RECEIVED comes first only if requested and the answer must wait |
 | ANSWER | answers a QUESTION | nothing |
-| REQUEST | asks the reader to act within its own grants | either DECLINED, which ends it, or WILCO followed by DONE or DECLINED "can't act" with a reason. RECEIVED MUST NOT come first unless the decision can't come right away |
-| STOP | stop one named item, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED MUST NOT come first unless stopping takes time |
+| REQUEST | asks the reader to act within its own grants | either DECLINED, which ends it, or WILCO followed by DONE or DECLINED "can't act" with a reason. RECEIVED comes first only if requested and the decision must wait |
+| STOP | stop one named item, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED comes first only if requested and stopping takes time |
 
 **Receipts:**
 - **RECEIVED:** the hail was read in full, and its source's sha256 checked where the reader could. It says nothing
@@ -285,16 +286,19 @@ what moved before it acts. This is the case of two hails that cross, such as a h
   MUST be used only for a QUESTION.
 
 **Rules:**
-1. **Receipts aren't receipted.**
+1. **Receipts aren't receipted.** An INFORMATION needs no RECEIVED. RECEIVED is owed only where
+   the sender's hail asks for one with `receipt: received`. The key makes the request machine-readable
+   without adding an `ask` line to a marker that forbids it. A real answer can satisfy the requested
+   receipt too; no redundant receipt is then owed.
 2. **A receipt quotes the id it answers in `re`.**
 3. **Every answer counts,** for token efficiency.
    - Any accepted hail from an addressed bot whose `re` names the id counts as that bot's RECEIVED for its clock, and
      stops it (§5). It says the hail was read, not that its source was checked. For a FORCED END trigger, only
      a response whose `from` names the holding session answers the STOP (§10).
-   - For a QUESTION, a REQUEST or a STOP, RECEIVED is sent only when the real answer must wait. A reader that can answer
+   - For a QUESTION, a REQUEST or a STOP, RECEIVED is sent only when requested and the real answer must wait. A reader that can answer
      at once skips it.
-   - For an INFORMATION, an ADVICE or a WARNING, RECEIVED is a full answer: it stops the reader's clock, and nothing
-     more is due.
+   - For an INFORMATION, an ADVICE or a WARNING with a requested receipt, RECEIVED is a full answer.
+     With none requested, no receipt or first-response clock is owed.
 4. **A source target is no condition of a filed hail's effect.** Filing checks source form, availability
    and any required hash. A later reader reports an unavailable or differing source, but does not void
    the hail or suspend its ordinary effect on that ground. Grants, STOPs, session state and the explicit
@@ -336,7 +340,7 @@ FORCED END, in contrast, releases claims and capacity from its filing (§10).
 
 ## 5. Overdue
 
-**Clocks run per addressed bot:** one for each pair of hail id and addressed bot. A response from one bot stops only
+**Clocks run only for a required answer or an explicitly requested receipt, per addressed bot:** one for each pair of hail id and addressed bot. A response from one bot stops only
 that bot's clock. A retry, handover or escalation keeps every other addressee outstanding. The clock starts on the first transport notification after landing, never before landing or at the written time. The sender logs that send and the route; a checker
 uses that log as an explicit input (§11). FORCED END has its separate filing-time trigger in §10; it does not
 change this per-bot clock.
@@ -1014,7 +1018,8 @@ deployment keeps its own hails private (Appendix D, D.5).
 
 - **What it is:** a small helper that pulls, and rings the addressed bot.
 - **What it rings for:**
-  - every hail to a local bot that §4 expects an answer to: INFORMATION, ADVICE, WARNING, QUESTION, REQUEST and STOP;
+  - every hail to a local bot that §4 expects an answer to: QUESTION, REQUEST and STOP, and an
+    INFORMATION, ADVICE or WARNING requesting a receipt;
   - an ANSWER, a DECLINED or a DONE to one of that bot's own open hails;
   - a DECISION to one of that bot's own Owner-asks, and the INFORMATION that hands one back (§10b, point 11), when it
     reaches the raising bot;
@@ -1128,7 +1133,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   lists it.
 - **A concern** is bad news a bot raises, which may ask for no decision. The bot sends it hop by hop to its gate, as a
   WARNING, with `urgent:` (§3) when it is urgent. Only a sender holding `hail.owner` sends a concern to the Owner (§8),
-  as a WARNING `to: owner`. A concern it relays from a bot carries `raised-by` (§3), naming the raising bot. A concern
+  as a WARNING `to: owner` with `receipt: received`. A concern it relays from a bot carries `raised-by` (§3), naming the raising bot. A concern
   is never a STOP.
 - **At night,** from 22:00 to 07:00, an urgent ring stays silent until 07:00, unless its hail carries `harm-by` (§3)
   with a time before that 07:00.
@@ -1474,7 +1479,8 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 68. Duplicate keys, wrong-case keys or keywords, upper-case hex, and `re: None` fail; a hyphenated bot id reads whole.
 69. `re` with one id-shaped part and free text fails; a complete `, ` id list passes form checking, with §10's matter
     rule still required; `owner` mixed with recipients fails.
-70. An unknown non-reserved marker is INFORMATION, receipted only where §8 permits a reply, and never acted on.
+70. An unknown non-reserved marker is INFORMATION, receipted only when requested and §8 permits a reply,
+    and never acted on.
 71. An unreadable span gets no reply; a readable malformed header gets DECLINED only with a listed sender, id and a
     reply permitted by §8. Canonicalisation precedes finding a frame with trailing spaces.
 72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it. Without a grammar,
