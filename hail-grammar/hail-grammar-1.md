@@ -157,7 +157,18 @@ report `meaning evidence not supplied` for checks that need it, rather than clai
 
 ## 6. Meanings in a grammar
 
-Meaning review is part of accepting a grammar, alongside its shape and references.
+In a grammar no two openers mean the same. At F7 the reader compares each pair of definitions, in
+opener-name order, considering their meaning rather than only their bytes. A synonym or paraphrase
+is not a new meaning. Overlapping subject matter is possible; the same kind of statement with the
+same purpose under two names is refused. For example, Seen defined as an observed condition and its
+measured value duplicates Fact, even though the definitions are not byte-identical.
+
+Print `grammar openers.B.means: [g-meaning] B means the same as A; remove B or give it a distinct
+meaning.` Here A is the earlier name in UTF-8 order and B the later one; one line per duplicate pair.
+A schema cannot decide this. An accepting reader must perform and record the meaning review beside
+schema validation. A program can flag identical strings, but that alone cannot claim this check
+complete. If the meaning distinction cannot be judged, report it as not checked and do not accept
+that grammar for filing until the review is supplied. No grammar-maker code is needed.
 
 ## 7. Writer duties
 
