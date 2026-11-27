@@ -1177,7 +1177,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   the window is left out.
 - **A card MUST carry only** who asks, the one-line why, where to clarify, the ask's options, the five answers (point 7)
   and a source. Who asks is shown as "`raised-by` via `from`" where the ask relays a bot's need. The originals stay
-  behind the source, sealed where §9a says. A push MUST say only "an ask waits".
+  behind the source, sealed where §9a says. A push carries only the landed record reference defined in §7.
 - **Rendered from the record.** A card is a view of the fetched landed hail, not a message carrying
   its text on another channel. The surface obtains and checks that record before rendering. Any
   notification to the surface contains only the record reference required by §7. A local shown
@@ -1759,7 +1759,7 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   content on a hosted endpoint stays behind a
   source in a suitably restricted listed repository.
 - **Cards and notices** (§10b): a card shows who (by address, any name beside it, a bot marked as a bot), why, where to
-  clarify, options, answers and a source; originals stay behind it. A notice says only "an ask waits".
+  clarify, options, answers and a source; originals stay behind it. A notice follows §7’s landed-record reference rule.
 - **Presence** (§10b): the last real Owner message's time stays locally and is reported to the relay; tool calls and bot
   output do not count. A shown line holds surface, time, ask id and hash, and proves no reading.
 - **Roster and people** (§8): sessions never enter the roster; deciders use opaque ids and signed identities. Their acts
