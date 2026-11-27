@@ -1392,6 +1392,61 @@ in number order, body faults in line order, then ask faults; settings precede th
 faults follow it. At one location use the order of this text's rules. Multiple independent faults at
 one location each have a line. The aim is one fix list and a next filing that goes through.
 
+**Diagnostic identity.** A fault carries its code and location as separate fields beside its printed
+line. A plain hail/1 line keeps the form above; grammar lines retain their bracketed grammar code.
+These codes identify the checks exercised by the current suite; they do not replace any check in
+this section. The line's location must agree with its separate location field.
+
+| Code | Fault and location |
+|---|---|
+| h-source-count | invalid source count; header sources |
+| h-sources-missing | missing source delimiter; header sources |
+| h-source-label | out-of-order source label; source n (its expected ordinal) |
+| h-source-uncited | uncited source; source n |
+| h-citation | unresolved citation; body line n or ask |
+| h-repository | unlisted repository name; source n |
+| h-source-commit | incomplete committed reference; source n |
+| h-source-path | missing path at a named commit; source n |
+| h-source-hash-required | required sha256 absent; source n |
+| h-source-hash | differing sha256; source n |
+| h-pointer | retired pointer beside a source delimiter; header pointer |
+| h-address-form | malformed bot address; header from or header to |
+| h-address-listed | unknown bot address; header from or header to |
+| h-time | invalid calendar time; header written-against |
+| h-time-offset | invalid numeric offset; header written-against |
+| h-grammar-selector | sender grammar selector; header grammar |
+| h-plan-team | missing team in plan matter; header matter |
+| h-receipt-loop | receipt asks for another receipt; header receipt |
+| h-carried-stop | carried STOP lacks its stop right; source n containing the carried hail |
+| h-publisher-bytes | changed signed decider source; source n being published |
+| h-notification | notification is not solely a complete landed reference; notification |
+| h-record-home | undefined record-home move; record home |
+| h-record-owed | unreadable owed record at session start; record owed |
+| h-roster-unreadable | unreadable governing roster; settings roster |
+| h-signing-downgrade | missing affected owner's signed downgrade; settings signing |
+| h-signature-required | required signing not verified; record signature |
+| h-roster-signing | false or mistyped roster signing flag; settings teams.<team>.signing-required |
+
+A carried-hail or publication check takes the source's ordinal as an explicit input; it must not
+guess source 1. A notification with missing reference fields and extraneous content has one
+h-notification fault: replacing the notification with its complete reference repairs both.
+The following event templates fix location and words; substitute the actual source ordinal and
+addressee. Other event faults still use the location/problem/repair convention without fixed words.
+
+| Code | Exact line |
+|---|---|
+| h-carried-stop | `source n: carried STOP has no stop right to X; obtain that right or carry a permitted hail instead.` |
+| h-publisher-bytes | `source n: publisher changed the decider’s signed bytes; publish the original signed file unchanged.` |
+| h-notification | `notification: message is not solely a complete landed record reference; write only its repository, filing commit, file path and addressee.` |
+| h-record-owed | `record owed: record is unreadable; obtain and read the landed owed record before beginning matter work.` |
+| h-signature-required | `record signature: required signature is not verified; supply the signature required at filing and verify it with the counted key.` |
+
+Informational identity is separate from fault identity. Use `body-sufficiency-not-checkable` for the
+writer-duty notice, `filed-source-unavailable` for unavailable filed source bytes, and
+`signature-not-checked` for unchecked required signing. A grammar fault reported without refusing
+an already-filed hail retains its grammar code. These notices do not acquire fault status through
+their code. The dependent-check report codes above retain their meanings.
+
 The new form and source diagnostics use these repair forms, substituting the actual values:
 
 | Fault | Repair line |
@@ -1402,9 +1457,12 @@ The new form and source diagnostics use these repair forms, substituting the act
 | uncited source | `source n: source is not cited; cite #n in the body or ask, or remove the source and renumber.` |
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
-| absent commit in a reference | `source n: committed file reference is incomplete; write name:path@ followed by its committed revision.` |
-| missing path | `source n: path is absent at the named commit; commit the file first and write that revision.` |
+| absent commit in a reference | `source n: committed file reference is incomplete; write R@ followed by its committed revision.` |
+| missing path | `source n: P is absent at the named commit; commit the file first and write that revision.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
+
+Here R is the supplied repository name and path (`name:path`), P is the supplied path, and H is
+the hash of the supplied committed bytes. Do not replace these known values with generic names.
 
 If an old pointer line is the sole attempted header delimiter, report its replacement as the single
 missing-sources fault above; do not repeat the same repair as a retired-key fault. When a sources
@@ -1415,7 +1473,8 @@ for that value; well-formed sources and independent fields still get checked.
 Other form faults follow the same location/problem/repair convention, naming the required form from
 §3. A `to` address lacking its bot component says `header to: X is not a bot address; write a listed
 owner.bot or team.handle address.` An invalid written date says `header written-against: value is not
-a calendar time; write a valid YYYY-MM-DDTHH:MM:SSZ time or numeric offset.` These are complete lines,
+a calendar time; write a valid YYYY-MM-DDTHH:MM:SSZ time or numeric offset.` Substitute the actual
+invalid date for `value`. These are complete lines,
 not a stop-at-first-error priority list.
 
 | Check | Inputs beyond the hail |
