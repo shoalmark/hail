@@ -837,6 +837,12 @@ move first ends every STOP and owed REQUEST by the Owner's act in the old record
 not a migration procedure: the old record and its original event identities remain readable, and a
 later edition must define the move. No empty repository resets claims, duplicate ids or consumed uses.
 
+**Session catch-up.** At its start, every session reads what its bot owes from the landed record:
+unanswered questions and requests, accepted requests awaiting DONE or DECLINED, STOPs awaiting response,
+and any explicitly requested receipt. It does this before matter work, including when no watcher has
+rung. A missing or unreadable record is reported, never treated as an empty owed list. This duty applies
+with either settings carrier; it creates no session claim or grant by itself.
+
 **Matters and waiting work.** A matter has one stable reference, not a copy of its text:
 - `tracker:<repository-name>:<tracker-id>` for a tracker, with the sealanes/1 tracker id; in a tracker folder that
   teams share, which team holds it is sealanes/1 §4.2's, where its number's `ids` range decides;
