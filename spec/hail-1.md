@@ -9,7 +9,7 @@ pins, locks, change control, removal and putting back follow sealanes/1 §§2–
 - **Informative:** A six-day trial on two teams measures what hail/1 costs and where it fails.
 
 **Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails under one
-Owner, who keeps the final word. It fixes a message's frame, header, markers and receipts. Content stays behind pointers
+Owner, who keeps the final word. It fixes a message's frame, header, markers and receipts. Content stays behind sources
 named by sha256. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
 DECISION approves no act the bot does not already hold. Hails take the nearest transport that reaches the reader, are
 signed when §9 requires it, may be sealed to their readers and the Owner's oversight keys, and are filed and never
@@ -34,7 +34,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 - **Roster:** `[roster]` under sealanes/1, edition one; the state in force is computed from the default branch's chain.
 - **Hail:** a span from `hail/1` through `end hail/1`, or its sealed form (§2).
 - **Receipt:** RECEIVED, WILCO, DECLINED or DONE (§4).
-- **Pointer:** a header value naming content and the sha256 of its file's bytes (§3).
+- **Source:** one numbered reference to a file (§3). The first source takes the former pointer’s place.
 - **Matter:** a tracker, an ask, a hail thread or the team's plan; the claim unit of §10.
 - **Transport:** how bytes travel. It affects the overdue window, never authority (§7).
 - **Watcher:** a helper that pulls and rings the addressed bot (§10a).
@@ -81,11 +81,11 @@ table](ext-hail-keys.md) is part of this edition's normative text.
   travel is §7's business.
 - **A bot's hail carries no authority.** Authority comes from the roster and the signed records its rules accept; a
   bot's hail can only point at them (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
-- **Pointers, not copies.** Content lives in git, or in a file named by its sha256. A hail cannot drift from the record.
+- **Sources, not copies.** Content lives in git, or in a file named by its sha256. A hail cannot drift from the record.
 - **Small on purpose.** A body of at most five lines, with one ask on REQUEST or QUESTION only. Anything longer goes
-  behind a pointer.
+  behind a source.
 - **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in its
-  header, its body or the content its pointer names. A pointer keeps content off the channel that carries the hail; it
+  header, its body or the content its source names. A source keeps content off the channel that carries the hail; it
   hides nothing from whoever can read the file it names (§9a).
 - **A bot's definition and its brief.** A bot's **definition** is the text of its kind, named by hash in sealanes/1. It
   is not a session's own file. A bot's **brief** is the task document the bot is given. Its scope block, at its top, is
@@ -95,7 +95,8 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 
 ```text
 hail/1
-<header lines>
+<header lines ending with sources: N>
+<N source lines, numbered from #1>
 <body: 0 to 5 lines>
 ask: <one line>            (required exactly once on REQUEST and QUESTION)
 end hail/1
@@ -137,8 +138,9 @@ nothing. This rule adds no return grant.
 - **Any component MAY end in one remark in parentheses:** a value, or a ` · ` continuation segment, such as `(verified
   on team B's host)`. The reader removes the remark from that component before validating it. A remark holds no ` · `
   and no further parentheses.
-- **The header always ends with the `pointer` line.** The body is every line after it, up to `ask:` or `end hail/1`. So
-  a body line such as `note: …` MUST NOT be read as a header.
+- **The header ends with a standalone `sources: N` line**, where N is one digit, 0 through 9. Exactly N
+  source lines follow it, numbered consecutively from `#1`. The body begins after those lines and ends at
+  `ask:` or `end hail/1`. A body line such as `note: …` is never a header. No other pair shares the sources line.
 - **A reader ignores a header key it does not know,** except on a DECISION: a key on the Owner's signed record carries
   authority, so a reader MUST refuse a DECISION that carries a key it doesn't know (§2). A new key on a DECISION follows
   §2's growth rule. The keys defined here for control records are checked, never skipped.
@@ -168,14 +170,14 @@ nothing. This rule adds no return grant.
 | `outcome` | no | `unknown`, on a WARNING whose `re` names a DECISION with an unknown act outcome |
 | `brief` | on a bot's non-control hail when enforcing | `<id> <sha256>` of the brief; a principal uses its kind's definition (§8a) |
 | `subject` | on STOP used by FORCED END; on STOP and REQUEST when enforcing | work items separated by `, `, as §8a; optional on other hails. A STOP always names one item, even in shadow mode; for FORCED END it is the exact matter reference (§10) |
-| `decision` | on a use the Owner approves once | `<id> <sha256>` of the DECISION's canonical bytes, without its signature block; beside `brief` where a brief is required. This is not a file pointer and adds no act |
+| `decision` | on a use the Owner approves once | `<id> <sha256>` of the DECISION's canonical bytes, without its signature block; beside `brief` where a brief is required. This is not a file source and adds no act |
 | `sealed-to` | on every sealed hail, and no plain one | every recipient's public key in its age recipient encoding, separated by `, `, inside the opened canonical bytes |
 | `min-class` | on every sealed hail, and no plain one | `K1`, `K2` or `K3`, in that order of strength; never `R` |
 | `bot` | on START, END, CLAIM, RELEASE and FORCED END only | exact subject bot id |
 | `session` | on those five markers only | the subject session's opaque id; distinct from the sender's session on a START or FORCED END |
 | `matter` | START, CLAIM, RELEASE; replies as §10 requires | one matter reference; routing and binding follow §10 |
 | `waiting` | on START only | one line naming the waiting work and its evidence, or the starter's logged judgement where the record and trackers cannot tell |
-| `pointer` | yes | `<repo>:<path>@<commit> sha256 <hex>`; `<repo>:<path> sha256 <hex>` at the reader's head; `<workbench>:<path> sha256 <hex>` for unfiled content; or `none`. Several files use a pointed-at `SHA256SUMS` list as defined below. A DECISION points to its ask's filed file, signature included |
+| `sources` | yes, last header line | one digit, `0` through `9`; the count of source lines immediately following |
 | `ask` | REQUEST and QUESTION only, exactly once | one non-empty line after the body; forbidden on all other markers |
 
 Every key whose Required column says `yes` is required. `ask` is a body-ending line, never a header pair. Keys scoped to
@@ -185,42 +187,44 @@ A session handover is content, not a `handover` key. START's `matter` names its 
 Other hails may carry `matter` for routing; §10 requires it for ambiguous id lists, and for a REQUEST or QUESTION
 with free-text `re`.
 
-**Names and bytes.** Bot, team and person ids are sealanes/1's exact lower-case ASCII ids. Session and workbench names
-use ASCII letters of either case, digits, `.`, `_`, `-`, with at least one character. Ids are read from the right: the
-stamp and random key have fixed forms, so a hyphen in a name is never cut. Each id's sender prefix matches `from`. All
-hash and commit hex is lower case. A commit in a hail pointer has 7 to 64 hex digits; it must resolve uniquely. This
-does not change sealanes/1's full-width pins. A pointer path has non-empty `/`-separated segments of ASCII letters,
-digits, `.`, `_`, `-`, with no `.` or `..` segment and no leading or trailing `/`. It holds no `@`, `:` or space. Every
-filed hail has such a path; the filing check refuses another. A pointer to other content may reach a file with a wider
-name through a conforming list of sha256s; a pointer to a filed hail always names that file directly.
+**Sources.** A source line is `#n <value>`, with one space after its number. The count is zero to nine,
+consecutively from #1, in order. There is no pointer line and no #0 in this edition. Source #1 takes every
+protocol role assigned to the pointer by an earlier edition: for example the ask file on a DECISION and the
+STOP file on a FORCED END. An ordinary hail may have no sources. Every source must be cited at least once
+in the body or ask, and every citation must name a source in this hail; a header reference alone is not a citation.
 
-**Hash lists.** A pointer whose last path segment is exactly `SHA256SUMS` names a hash list. It MUST name a
-repository file, not a workbench file. Its repository MUST occur once in `written-against`; that revision supplies the
-list and every named file. An explicit pointer commit MUST resolve to that same revision. Each UTF-8 line is exactly
-`<64 lower-case hex>  <path>`, followed by LF: two spaces after the hash, then the unescaped path through the end of the
-line. Paths may contain spaces and non-ASCII characters, but no CR, LF or NUL; there is no quoting or escape syntax.
-Each path is relative to the list's own folder in that repository. No absolute path, drive path, empty, `.` or `..`
-segment, symbolic link or submodule is allowed, at the file or any parent. The target MUST be a regular file at that
-revision. No path crosses to another repository or a workbench. A list named by a list follows these same rules at the
-same revision; cycles are refused. An empty list, malformed line, missing file or wrong hash is refused.
+A citation is `#` followed by a maximal run of ASCII digits, bounded on both sides by the start or end of a
+line or a character other than an ASCII letter, digit, underscore or `#`. It is valid only when the digits
+are one of 1 through 9 and that source exists. Thus #0, #01 and #10 are invalid citations, not shorter
+citations; write a work item's number as `item 7` when no source is meant. Sources and citations are checked
+by hail/1 even when no body grammar is selected. The ask is part of citation checking.
 
-`hail check` and `hail send` hash and scan the list and every file it names, including through another list (§11).
-They MUST NOT check only the manifest or use checkout bytes or a newer head. A filed hail still uses a direct pointer.
+**Earlier editions.** A record reader selects the edition from the settings at the filing event, never by
+trying whichever parser accepts. It continues to read earlier-edition hails with their pointer line and
+original signature bytes. A legacy frame does not become a new-edition filing by omission of sources.
+A form-only reader must be told the edition; it does not silently fall back. The earlier texts remain
+available at their edition pins; there is one current text.
 
-A repository token is `r-` followed by the sha256 of the UTF-8 origin that sealanes/1 §11.3 defines (host in lower case,
-`/`, then its path with no final `.git`). It names a repository declared by `places` or `record`, not a second roster
-list. Tools display its URL beside it. A token not derived from a declared repository is a workbench name; a workbench
-pointer with `@<commit>` is refused. The check receives the roster and the exact file bytes, not an inferred mapping. A
-forge state is text without ` · `; a mailbox id uses ASCII letters, digits, `_` and `-`.
+**Names and bytes.** Bot, team and person ids are the listed lower-case ASCII ids. Session names use ASCII
+letters of either case, digits, `.`, `_`, `-`, with at least one character. Ids are read from the right:
+the stamp and random key have fixed forms, so a hyphen in a name is never cut. Each id's sender prefix
+matches `from`. Hash and commit hex is lower case. A source path has non-empty `/`-separated segments of
+ASCII letters, digits, `.`, `_`, `-`, with no `.` or `..` segment and no leading or trailing `/`. It holds
+no `@`, `:` or space. Every filed hail has such a path; the filing check refuses another.
+
+**Source values.** A value names a repository file and its revision. The source's file bytes include any
+signature block. A `SHA256SUMS` file is an ordinary source: this edition does not expand it into a second
+reference list. List each file needed as evidence as its own source. A forge state is text without ` · `;
+a mailbox id uses ASCII letters, digits, `_` and `-`.
 
 `re` is an id list if any `, `-separated part has id form; then every part must have it. A free description contains no
 such part, and never a spelling of `none` in another case. An id's minute that differs from its written time in UTC
 passes with a report; `hail send` writes both from one clock reading.
 
-**Pointer hashes cover files.** In git the hash covers the bytes as committed, whatever a checkout converts; in a
-workbench, the file's bytes. A plain filed hail's file is exactly its canonical frame and signature block as received,
-if any, with nothing else. A sealed file is exactly its sealed span. DECISION, delivery, hand-back and forwarded
-original pointers all hash the named filed file. Only `decision:` hashes canonical bytes without the signature.
+**Source hashes cover files.** A plain filed hail's file is exactly its canonical frame and signature
+block as received, if any, with nothing else. A sealed file is exactly its sealed span. DECISION,
+delivery, hand-back and forwarded originals name the complete filed file. Only `decision:` hashes
+canonical bytes without the signature block.
 
 **The written-against warning light:** if a repository it names has moved past the commit it names, the reader is told
 what moved before it acts. This is the case of two hails that cross, such as a hold and a publish.
@@ -240,23 +244,23 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 | STOP | stop one named item, record why, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED MUST NOT come first unless stopping takes time |
 
 **Receipts:**
-- **RECEIVED:** the hail was read in full, and its pointer's sha256 checked where the reader could. It says nothing
-  about having read what the pointer names. A RECEIVED `from: owner`, signed, whose `re` names a concern, is the Owner's
+- **RECEIVED:** the hail was read in full, and its source's sha256 checked where the reader could. It says nothing
+  about having read what the source names. A RECEIVED `from: owner`, signed, whose `re` names a concern, is the Owner's
   "seen" (§10b).
 - **WILCO:** will comply.
 - **DECLINED:** will not. The next line gives one of these reasons, or another stated plainly:
-  - `pointer differs: <hex>`;
+  - `source differs: <hex>`;
   - `commit not found: <sha>`, after one pull;
   - `malformed: <first failure>`;
   - `not in the roster`;
   - `reserved marker`;
   - `unknown form`;
   - `id reused` (point 5, below);
-  - `already done at <time>`, with a pointer to the result;
+  - `already done at <time>`, with a source to the result;
   - `can't act`, from the bot that would act on a DECISION (§10b).
 
   An act the reader's runtime refuses is DECLINED, and MUST NOT be passed to another bot.
-- **DONE:** finished. It carries a pointer to the result, or `pointer: none` and one line saying what changed. An
+- **DONE:** finished. It carries a source to the result, or no sources and one line saying what changed. An
   accepted REQUEST ends with DONE, or DECLINED "can't act" with a reason; a declined one ends with DECLINED. An ANSWER
   MUST be used only for a QUESTION.
 
@@ -265,13 +269,13 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 2. **A receipt quotes the id it answers in `re`.**
 3. **Every answer counts,** for token efficiency.
    - Any accepted hail from an addressed bot whose `re` names the id counts as that bot's RECEIVED for its clock, and
-     stops it (§5). It says the hail was read, not that its pointer was checked. For a FORCED END trigger, only
+     stops it (§5). It says the hail was read, not that its source was checked. For a FORCED END trigger, only
      a response whose `from` names the holding session answers the STOP (§10).
    - For a QUESTION, a REQUEST or a STOP, RECEIVED is sent only when the real answer must wait. A reader that can answer
      at once skips it.
    - For an INFORMATION, an ADVICE or a WARNING, RECEIVED is a full answer: it stops the reader's clock, and nothing
      more is due.
-4. **A reader MUST NOT act on a REQUEST whose pointer doesn't verify.**
+4. **A reader MUST NOT act on a REQUEST whose source doesn't verify.**
 5. **Duplicates:** a duplicate is the same id with the same canonical bytes (§9), however its transport wrapped it. A
    reader knows the ids it has seen from its team's filed record and from its own history (§10), never from one
    session's memory alone, so a new session of a bot sees what earlier sessions saw. A reader that can't read its
@@ -353,7 +357,7 @@ within its declared interval is not overdue, a principal included.
    - Deciders answer tracker asks only as sealanes/1 §5.7 permits. A decider's ANSWER hail is not a DECISION or a
      replacement for a tracker answer. Marks, take-ups, hand-backs and the answer in force are read on the ask itself.
    - A quick word in chat stays evidence for other bots until given in the required signed form.
-3. **A STOP needs `hail.stop` reaching the bot, or the Owner, and no Owner pointer.**
+3. **A STOP needs `hail.stop` reaching the bot, or the Owner, and no Owner source.**
    - A lead stops its team's bots; the coordinator stops the leads; the Owner stops any. The actual grant must reach the
      recipient: a role alone grants no STOP. One lead session may stop or force-end another session of the same bot when
      its grant reaches itself. A decider holds no `hail.stop` under sealanes/1.
@@ -361,7 +365,7 @@ within its declared interval is not overdue, a principal included.
      answers as §4 says, and acts on nothing else. A replay of a lifted STOP may hold work again; the reader cannot know
      it was lifted until it reads its history, or its sender or the Owner lifts it.
    - The sender lifts its STOP by superseding it. The Owner lifts any STOP in person in the reader's session, or by a
-     verified `yes` on an `allow-once` ask whose pointer names that STOP's filed file. No other DECISION lifts it.
+     verified `yes` on an `allow-once` ask whose source names that STOP's filed file. No other DECISION lifts it.
    - A sender withdraws its own REQUEST by `supersedes`, not by STOP. Stopping an item never ends a session (§10).
 4. **Consent MUST NOT be relayed.** A hail cannot approve a permission prompt, change a setting or a kind's definition,
    or stand in for the Owner's act.
@@ -397,9 +401,9 @@ transport decides how fast a hail arrives, never whether it counts.
 | a bot on the same machine whose runtime has its own cross-session message | that runtime's own cross-session message |
 | a subagent | its parent's own channel to it (the reference deployment's form: Appendix D, D.10) |
 | a session that wakes only when resumed, on the same machine | a local helper resumes it with the hail |
-| a bot on a hosted agent platform, from another bot on that platform | the hosted agent platform's own agent message. Whether it delivers a frame byte for byte is open (§13). Where it may not, the sender MAY send a pointer to the hail's filed copy (§10) instead of the frame |
+| a bot on a hosted agent platform, from another bot on that platform | the hosted agent platform's own agent message. Whether it delivers a frame byte for byte is open (§13). Where it may not, the sender MAY send a source to the hail's filed copy (§10) instead of the frame |
 | another team, or another machine | a file in the declared record folder, read after the next pull; cross-team routing and whole-roster checks follow §8 |
-| a person's paste | the frame unchanged; it MUST NOT be wrapped. Where a tool would wrap it, a pointer to the filed hail MUST be pasted instead of the frame |
+| a person's paste | the frame unchanged; it MUST NOT be wrapped. Where a tool would wrap it, a source to the filed hail MUST be pasted instead of the frame |
 
 **Across teams or machines, every commit a hail names is on the shared remote before the hail is sent.**
 
@@ -529,7 +533,7 @@ failure. Other bots do not gain this exception merely by sharing the kind.
 **3. Every act names its brief.** A non-control bot hail carries `brief: <id> <sha256>` when enforcing. A STOP or
 REQUEST also carries `subject`, and each item must be within the brief. A use the Owner approves once carries `decision:
 <id> <sha256>` as well: the sha256 covers the DECISION's canonical bytes, without its signature block. The signature is
-checked separately. This hash is not a pointer hash (§3); the approval adds no grant and replaces no brief limit on the
+checked separately. This hash is not a source hash (§3); the approval adds no grant and replaces no brief limit on the
 subject or targets.
 
 **4. The check.** It runs inside `hail send` on the final frame and real destination, in one step with signing and
@@ -622,14 +626,14 @@ when sealing: each recipient holds the per-message key, so sealing alone proves 
   It says nothing about the sender: that is §9's job. A platform that is also an endpoint, where a bot composes or reads
   its hails inside hosted prompts and tool calls, sees the plain text whatever is sealed in between. Sealing doesn't
   hide a hail from it; keep sensitive plain text out of such a platform: there, a bot MUST put sensitive content behind
-  a pointer. A short body that holds nothing sensitive MAY travel as plain text.
+  a source. A short body that holds nothing sensitive MAY travel as plain text.
 - **When:** opt-in, per hail or per channel. Any channel whose host is not git's forge seals by default, by the roster's
   policy. A hail in git or on the local socket MUST NOT be sealed unless it opts in.
   - **The reference deployment's own exception** for one channel is in Appendix D, D.3.
   - **A channel whose sealing can't be done yet** holds its hail or refuses it. It MUST NOT send the hail unsealed in
     silence.
 - **Levels:** S0, plain (signed when §9 requires it); S1, the hail is sealed. Whether an S2 that also seals the file
-  behind the pointer is needed is open (§13).
+  behind the source is needed is open (§13).
 - **The design:** multi-recipient key encapsulation, with the Owner as a standing, visible recipient. Not key escrow: a
   bot's private key MUST NOT be deposited.
   - A random key per hail encrypts the hail (AEAD): the signed hail once signing is required (§9); before that, the
@@ -712,7 +716,7 @@ checked", and no reader acts on it.
 
 A `min-class` outside K1–K3 is refused, as is one with no eligible non-R oversight key. The minimum must also have at
 least two eligible keys, with a surviving key as above. `hail check` cannot judge whether the sender chose the right
-record class; `hail send` checks the selected record class and refuses an unknown one. No file behind a pointer is
+record class; `hail send` checks the selected record class and refuses an unknown one. No file behind a source is
 sealed by this edition; sensitive content that must not sit readable on the forge stays in a workbench (§13).
 
 ## 10. The record
@@ -782,7 +786,7 @@ to such a thread uses its bound matter for claim checks. For a non-opening hail,
 bound matter. If all name one matter, the hail uses it; an explicit `matter` MUST keep that binding. If they name
 more than one, the hail MUST carry `matter`, naming one of those bound matters. It continues only the referenced threads
 with that binding; the other references are context. Its resolved matter also binds later references to this hail.
-No thread is rebound or merged. Otherwise references are distinct: shared prose or a pointer creates no alias between
+No thread is rebound or merged. Otherwise references are distinct: shared prose or a source creates no alias between
 trackers, asks, threads or plans. A bare workbench copy creates no new matter.
 
 Free-text `re` names no existing thread and infers no binding. A REQUEST or QUESTION with free-text `re` MUST carry
@@ -846,7 +850,7 @@ but only a filed RELEASE or end frees its matter.
 
 **Forced end.** The sender needs `hail.stop` reaching the subject bot, or is the Owner. It names a session with an
 accepted live START. With a live claim, it rests on a STOP addressed to that bot and filed in the team's record like
-any hail. Its `re` names that STOP's id and its pointer names the filed STOP's file. The STOP MUST still be in force at
+any hail. Its `re` names that STOP's id and its source names the filed STOP's file. The STOP MUST still be in force at
 the FORCED END's filing: neither lifted under §6.3 nor superseded. The STOP's single `subject` item MUST equal the
 claimed matter's reference in one of the forms above; shared prose or an inferred alias is no match.
 
@@ -959,10 +963,10 @@ intake line of a bot is its own QUESTION in its outbox; no extra direct message 
 **2. The gate.** From its own context, the gate does one of three things, and files it. It replies to the `for: owner`
 QUESTION with an ANSWER whose `disposition` (§3) names what it did:
 - **`relayed`:** it relays the need, as an Owner-ask whose `re` names the bot's hail, and whose `raised-by` names the
-  raising bot (point 3). The ANSWER's pointer names the Owner-ask;
-- **`answered`:** it answers the need with standing evidence (point 4). The ANSWER's pointer names that standing
+  raising bot (point 3). The ANSWER's source names the Owner-ask;
+- **`answered`:** it answers the need with standing evidence (point 4). The ANSWER's source names that standing
   authority; or
-- **`rejected`:** it rejects the need. The ANSWER's body gives its reason, and its pointer names evidence where there is
+- **`rejected`:** it rejects the need. The ANSWER's body gives its reason, and its source names evidence where there is
   any, or is `none`.
 
 A bot between the raising bot and its gate that settles the need with standing evidence answers the same way, with
@@ -984,7 +988,7 @@ another sender. Each Owner-ask:
 - from a decider, has `for-team` naming a team in its scope, whose filer files the ask and the DECISION;
 - points at the originals unchanged with their file hashes; the one-line `why` says why the Owner must answer;
 - on `decide` only, has two to five body lines `option A:` through `option E:`, sequential and each used once. Its body
-  lines are its options only: its reason goes in `why`, its detail behind the pointer; prose beside them is refused.
+  lines are its options only: its reason goes in `why`, its detail behind the source; prose beside them is refused.
   Other kinds have no option line, and may use up to five body lines. More than five options requires split asks;
 - names the raising bot's surface first in `clarify`, then the gate's; for the sender's own need, its own address.
 
@@ -1042,8 +1046,8 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   have typed there, and the Owner's digest lists that session's presence as unknown. Only a session known to be outside
   the window is left out.
 - **A card MUST carry only** who asks, the one-line why, where to clarify, the ask's options, the five answers (point 7)
-  and a pointer. Who asks is shown as "`raised-by` via `from`" where the ask relays a bot's need. The originals stay
-  behind the pointer, sealed where §9a says. A push MUST say only "an ask waits".
+  and a source. Who asks is shown as "`raised-by` via `from`" where the ask relays a bot's need. The originals stay
+  behind the source, sealed where §9a says. A push MUST say only "an ask waits".
 - **Who, by id.** A surface shows who sends or asks by address: a bot's id `<team>.<handle>`, a decider's `person.<id>`
   or `owner`, which is what hail/1 reads and checks. It MAY show the bot's or the person's name or display name
   (sealanes/1 §4.2) beside the address, never in its place, and always marks a bot as a bot (sealanes/1 §4.4).
@@ -1079,7 +1083,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   - `from: owner <device>`, where the device is `desktop` (§9); and an id `owner-<yyyymmdd>T<hhmm>Z-<key>` (§3);
   - `to:` the ask's `from`: the bot or person that asked;
   - `re:` the ask's id;
-  - `pointer:` the ask's filed file, signature included, with its sha256;
+  - source #1 the ask's filed file, signature included, with its sha256;
   - `answer:` is `yes`, `no`, `option <label>`, `words`, `later <time>` or `talk`, one for each answer above. `option
     <label>` names one of the ask's option lines by its label (point 3), and `later <time>` gives the time in
     `written-against`'s time form;
@@ -1091,7 +1095,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   (point 4).
 - **The Owner signs, never a bot,** also in the bot's own session (§6.6).
 - **Signing what is shown.** The Owner's signing tool fetches the ask by its id, checks its hash, renders it itself, and
-  signs the ask's id, its hash and the chosen answer, which the DECISION carries in `re`, `pointer` and `answer`. It
+  signs the ask's id, its hash and the chosen answer, which the DECISION carries in `re`, source #1 and `answer`. It
   MUST NOT sign from a command or a link inside an ask.
 - **By kind:** an `allow-once` yes permits the already-held use once; `owner-act` yes ends the ask but leaves its work
   "awaiting the Owner's act", which the bot never performs; `decide` takes the chosen option. A `yes` on a `decide` ask
@@ -1101,7 +1105,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
 
 **8. Acceptance: one decision in force.**
 - A DECISION counts once it is filed and verified in the asking team's record. Verified includes its binding to its ask:
-  its `re` names the ask, its `pointer` gives the sha256 of the ask's filed file bytes (§3), and its `to` is the ask's
+  its `re` names the ask, its source #1 gives the sha256 of the ask's filed file bytes (§3), and its `to` is the ask's
   `from`. A DECISION that fails any of these is refused.
 - The first DECISION that ends the ask, on that record's default branch, wins subject to §10's tie rule; `later` and
   `talk` keep the ask open, and don't end it (point 7). A later one is refused unless it names, in `supersedes`, the
@@ -1160,12 +1164,12 @@ supersedes the old one, and names it in `supersedes`.
 **11. Delivery back.**
 - **The signing tool keeps a DECISION until it is filed.** It files it through the asking team's filer, within that
   team's push grants (§10), and retries. To hand it over, it hails that filer with an INFORMATION, `from: owner
-  <device>`, whose pointer names the DECISION, and the filer files the DECISION like any hail. That INFORMATION is a
+  <device>`, whose source names the DECISION, and the filer files the DECISION like any hail. That INFORMATION is a
   hail: it is signed in the namespace `hail` with the key of the device its `from` names (§9), and carries no authority
   of its own. The DECISION's signature is what counts. After 10 minutes unfiled, the signing tool shows "signed, not
   filed yet".
 - **The relaying gate hands an accepted answer back** to the raising bot by an INFORMATION, whose `re` names the bot's
-  QUESTION and whose pointer names the filed DECISION by its sha256. It keeps the answer until the bot claims it or
+  QUESTION and whose source names the filed DECISION by its sha256. It keeps the answer until the bot claims it or
   declines. It resends after 30 minutes. After 2 hours, the Owner's digest shows "answered, not yet reached the bot".
 
 **12. The coordinator away.** AWAY and BACK count only from the Owner's own signed commits into the organisation team's
@@ -1229,11 +1233,11 @@ the checks not made and authorises no act. Allowed-signers data is derived in me
 
 | Check | Inputs beyond the hail |
 |---|---|
-| frame, header, conditional keys, duplicates, marker, body, options, ask and pointer form | this edition and the extension key table |
+| frame, header, conditional keys, duplicates, marker, body, options, ask and source form | this edition and the extension key table |
 | sender, reach, return grant, signing flag, keys, edition and pin | sealanes/1 state in force, trusted bytes, reader kind (whole, resolving or slice), default-branch head and chain to a counted state; for a resolver, the organisation state, pin and lock |
 | live versus record | live: the checking reader's state at its head; record: the entering commit and state that counted there; new action: current state as well |
 | future written time | explicit reference time: the arrival clock, or entering commit's committer time; never the checker's own clock |
-| pointers and stale context | named committed or workbench bytes; each SHA256SUMS list and all its files at the written-against revision, with repository tree entries proving paths and regular files; commit availability and scan patterns/policy; supplied lookup results, never fetched by the check |
+| sources and stale context | named committed or workbench bytes; each SHA256SUMS list and all its files at the written-against revision, with repository tree entries proving paths and regular files; commit availability and scan patterns/policy; supplied lookup results, never fetched by the check |
 | duplicate or reused id | the bot's readable history and team record, canonical bytes and earlier responses |
 | DECISION, expiry, change of mind, standing evidence, one use | the ask's filed file and original need, decision in force, relevant filings and committer times, Owner keys then, claims and results, and current grants for an act |
 | act check | brief and its hash, signed delivery, issuer's grant, prior briefs, kind definition for a principal, mode, fixed roster and clock snapshot, and exact final destination |
@@ -1252,18 +1256,18 @@ the filed bindings of all `re` ids and any explicit `matter`; free text supplies
 
 The time check refuses a written time more than two minutes after its reference, and accepts exactly two. Given no
 reference it checks the time's form only and reports that. It never refuses age alone. A re-send keeps its original
-bytes; before a new act, the reader still checks current rights, pointer, session claim and any DECISION. The id minute
+bytes; before a new act, the reader still checks current rights, source, session claim and any DECISION. The id minute
 differing from the written minute is reported, not refused. The record-time check trusts the filer's committer time; it
 catches a wrong clock, not a lying filer. Sealed content without its bound opening is not checked and is never acted on
 (§9a). The check cannot judge the sender's record-class choice or physical key custody.
 
-**`hail send <address> <path>`** takes a draft: header without `id`, written time or pointer hash, then the body and
-required `ask`. It makes the id and time from one clock reading, obtains and hashes pointer bytes, reads the state in
+**`hail send <address> <path>`** takes a draft: header without `id`, written time or source hash, then the body and
+required `ask`. It makes the id and time from one clock reading, obtains and hashes source bytes, reads the state in
 force, builds the final frame, checks it and its actual destination, signs, seals where required, and sends by §7.
 Checking, signing and sending are one step; a check of other bytes is no check of this send. It refuses:
-- a failed form, pointer, current grant, signature, session or required scope check; the session check is §10's sending
+- a failed form, source, current grant, signature, session or required scope check; the session check is §10's sending
   rule, including live START, matter claims, receipts and the first-hail filing claim;
-- an absolute home path in the header, body, ask, or any file the pointer or its hash list names, on every destination:
+- an absolute home path in the header, body, ask, or any file the source or its hash list names, on every destination:
   `/Users/<name>/`, `/home/<name>/`, `C:\Users\<name>\` or `C:/Users/<name>/` (the last two case-insensitive), or the
   sending user's own home directory however written. A `~/` path passes this test;
 - a private id in a public-bound hail, in those same bytes. Prefixes and destinations come from the team's extension. A
@@ -1307,7 +1311,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 18. The filed DECISION has exactly the signed bytes and enters the asking team's record through a lawful filer.
 19. The acting bot verifies the answer itself and still needs its current grants.
 20. Closing, later and talk show the same state everywhere; a surface unable to sign points to one that can.
-21. A gate ANSWER has `disposition`; its pointer and reason match relayed, answered or rejected.
+21. A gate ANSWER has `disposition`; its source and reason match relayed, answered or rejected.
 22. A once DECISION cannot serve as standing evidence.
 23. No or words with no reason is refused; words with a reason ends the ask and permits no act.
 24. A `hail` signature fails on a DECISION; `hail-decision` fails on another hail; `git` fails on both.
@@ -1366,7 +1370,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 71. An unreadable span gets no reply; a readable malformed header gets DECLINED only with a listed sender, id and a
     reply permitted by §8. Canonicalisation precedes finding a frame with trailing spaces.
 72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it; five body lines pass and six fail.
-73. A pointer hashes committed bytes, not converted checkout bytes; a file pointer includes signature blocks and a
+73. A source hashes committed bytes, not converted checkout bytes; a file source includes signature blocks and a
     `decision` hash excludes them. Repository tokens derive from declared origins; a workbench with a commit fails.
 74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider content name may use a hash list, never a
     filed hail. A bad filing path is refused before it enters.
@@ -1425,9 +1429,9 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
      an ordinary hail allowed to omit it by §10, needs only START. A response with `matter` also needs the live claim
      unless it is a receipt.
      A new thread needs START and gains its claim only when its first hail is filed; competing holders fail.
-103. SHA256SUMS accepts wider relative names and hashes and scans every named file at written-against, including nested
-     lists. Bad hashes, missing files or revision, a conflicting pointer commit, malformed lines, cycles, absolute or
-     escaping paths, links and submodules fail in both tools. A secret in a listed file fails, not just in the list.
+103. The stated source count matches the following lines, numbered from #1 without gaps. Every source
+     is cited in the body or ask; every citation names a source. Zero sources pass. Ten sources, #0,
+     an uncited source, an unknown citation and an earlier-edition pointer line fail new filing.
 104. A decider's sealed hail fails: `hail send` refuses it and filing refuses it, since sealing a decider's hail is open
      (§13). A decider's plain hail is filed whole and is readable by `seen-by`.
 105. A bot may send the five allowed replies to a person's verified hail addressed to it, with matching `re`, without
@@ -1468,7 +1472,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 8. Shadow logs every scope failure without refusing on that ground; it never skips a grant or signing refusal.
 9. A missing required subject fails in enforce and is logged in shadow.
 10. A once-approved use with a missing or wrong DECISION id or canonical hash fails; a matching approval adds no act.
-11. The canonical DECISION hash stays the same regardless of its signature bytes; a file pointer hashes both. A
+11. The canonical DECISION hash stays the same regardless of its signature bytes; a file source hashes both. A
     deployment setting enforce while any of the six open cases remains is refused; a fixture setting it is test-only.
 
 ## 12. Examples
@@ -1499,7 +1503,7 @@ feature creates no right. The separate change map records implementation gaps wi
 | Tool build choice | follow the rules by hand; no build language is authorised by this text | tool implementation and reliance on the relay |
 | S2 for pointed-at files | no such file is sealed by this protocol; sensitive bytes stay in a workbench | sealing that content as a protocol form |
 | Advisory level and trial results | a trial grants no authority; force follows the roster only | any further advisory semantics and a real-time relay tier |
-| Hosted frame fidelity | send a pointer to the filed hail if the platform may alter its bytes | a transport claim of byte preservation |
+| Hosted frame fidelity | send a source to the filed hail if the platform may alter its bytes | a transport claim of byte preservation |
 | Oversight software | use conforming formats and proven support; unsupported sealing holds or refuses | unverified chip or hybrid support |
 | Tools and connectors | runtime permissions apply; kind skills follow sealanes/1 §5.6 | a broader enforced tool-only rule |
 | Act check for pushes and filings | sealanes/1's grants and filing rules still bind | the separate git half |
@@ -1518,7 +1522,7 @@ and MUST NOT set `enforce` until all six have rules and cases:
    scope act for starting work cannot grant or brief a `bot.wake`.
 
 First enrollment, recovery with no enrolled Owner key, roster form, return of a removed roster, presence storage,
-ordinary pointer and hash-list forms, replies to people, decider ask homes, the START of an Owner-started bot that is
+ordinary source and hash-list forms, replies to people, decider ask homes, the START of an Owner-started bot that is
 not its filer, matter bindings and the standing-evidence
 use claim are no longer open: sealanes/1 and §§3, 8, 9, 10 and 10b settle them. This includes the active STOP and its
 current holder's window, observed sender heads for cross-repository use claims, quiet record-home moves with history,
@@ -1555,8 +1559,8 @@ This section gathers rules stated elsewhere and adds none. The named section gov
 - **Sealing and oversight** (§9a): a host that is also an endpoint sees plaintext. Separate keys, explicit recipients,
   minimum classes and a surviving oversight key bound access; opening is trusted for its exact binding to the span.
   Recipient tags alone prove no successful encryption. Unsupported sealing is held or refused, never silently plain.
-- **Secrets and content** (§1, §11): pointers hide no file from its readers. A secret pattern may miss a secret, so the
-  sender's rule remains. No REQUEST acts with a bad pointer; the signing tool renders and hashes the ask itself, never
+- **Secrets and content** (§1, §11): sources hide no file from its readers. A secret pattern may miss a secret, so the
+  sender's rule remains. No REQUEST acts with a bad source; the signing tool renders and hashes the ask itself, never
   signs from a command inside it, and surfaces show its text as data.
 - **Deciders and outsiders** (§6, §8): a decider's signature has only its scope and grants. The ask's record decides
   take-ups and answers. A disclosure is checked at answering, adds no grant and never allows raw personal data.
@@ -1577,9 +1581,9 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   what was sealed to it. Key classes and rotation bound that risk.
 - **Plaintext** (§9a): a sealed body is not filed where anyone outside the recipients and Owner can read it. Sensitive
   content on a hosted endpoint stays behind a
-  pointer to a suitable workbench.
+  source to a suitable workbench.
 - **Cards and notices** (§10b): a card shows who (by address, any name beside it, a bot marked as a bot), why, where to
-  clarify, options, answers and a pointer; originals stay behind it. A notice says only "an ask waits".
+  clarify, options, answers and a source; originals stay behind it. A notice says only "an ask waits".
 - **Presence** (§10b): the last real Owner message's time stays locally and is reported to the relay; tool calls and bot
   output do not count. A shown line holds surface, time, ask id and hash, and proves no reading.
 - **Roster and people** (§8): sessions never enter the roster; deciders use opaque ids and signed identities. Their acts
@@ -1595,20 +1599,19 @@ Unicode 13.0.0 defines it. A prose value below names an external format or one o
 
 ```abnf
 hail             = plain-hail / sealed-hail
-plain-hail       = open-line header body [ask-line] end-line [signature-block]
+plain-hail       = open-line header *9source-line body [ask-line] end-line [signature-block]
 open-line        = %s"hail/1" LF
 end-line         = %s"end hail/1" LF
 sealed-hail      = %s"hail/1 sealed" LF mailbox-line age-armor
                    %s"end hail/1 sealed" LF
 other-form       = %s"hail/" 1*DIGIT [SP %s"sealed"] LF
                    ; form other than 1: section 2's readable-header refusal
-header           = *header-line pointer-line
+header           = *header-line sources-line
 header-line      = pair *(sep segment) LF
-pointer-line     = [pair *(sep segment) sep] pointer-pair
-                   [sep pair *(sep segment)] LF
-                   ; exactly one pointer; its line ends the header
+sources-line     = %s"sources: " %x30-39 LF
+source-line      = "#" %x31-39 SP source-value LF
+                   ; exactly the stated number, consecutive from 1
 pair             = key %s": " value
-pointer-pair     = %s"pointer: " pointer-value [[SP] remark]
 key              = 1*(%x61-7A / %x2D)
 sep              = SP %xB7 SP
 segment          = pair / continuation
@@ -1715,13 +1718,9 @@ model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
-pointer-value    = repo-token ":" path "@" commit SP %s"sha256" SP sha256-hex
-                 / repo-token ":" path SP %s"sha256" SP sha256-hex
-                 / workbench ":" path SP %s"sha256" SP sha256-hex / %s"none"
-repo-token       = %s"r-" sha256-hex
-                   ; derived from a declared place or record origin, section 3
-workbench        = opaque-name
-                   ; any name not a known repository token; no @commit
+source-value     = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
+repo-token       = name
+                   ; a repository short name from the record settings
 path             = segment-name *("/" segment-name)
 segment-name     = 1*(ALPHA / DIGIT / "." / "_" / "-")
                    ; neither . nor .. as a whole segment
@@ -1735,7 +1734,7 @@ opaque-id        = 1*(ALPHA / DIGIT / "_" / "-")
 ## Appendix B. An example roster (informative)
 
 This is content for an illustrative sealanes/1 roster, not a roster in force. All teams use the private repository
-`https://forge.example/org/records`. Its pointer token is
+`https://forge.example/org/records`. Its source token is
 `r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4`. An actual roster also needs the Owner's
 identities, trusted file hashes and complete kind definitions under sealanes/1; this appendix claims no adoption or
 executable roster fixture.
@@ -1824,902 +1823,44 @@ sessions used them.
 
 ## Appendix C. Examples (informative)
 
-All keys in this appendix were made solely for these public test vectors and have no use outside them. There is no live
-credential here. Each signature can be verified in the named namespace using Appendix B's public key; the Owner DECISION
-uses `hail-decision`, every other signed frame uses `hail`. Hashes below cover exact file bytes. To reconstruct a frame
-file, copy the code block without its fence, with one LF after the last line. A signed file has the frame plus its
-signature block. No private signing key is needed to verify any example.
+The examples use a record with no roster, no grammar and signing off. Its listed bots are `a.lead` and
+`b.lead`. Its repository names and addresses are supplied by §8's settings. These frames illustrate
+form, not adoption or authority. A view labels each `by the forge's access alone`.
 
-These are separate examples or named variants, not one claim that all events happened in the printed order. Except
-C.22–C.26 and C.30, the record context has accepted STARTs for the named bot sessions `s1` and each holds the named
-matter for its own bot; available return grants are those of Appendix B. C.22–C.26 instead begin with one other running
-builder session on a different matter, so `s2` fits the cap. C.26 is a variant after C.24 without C.25. For C.30, `c2`
-fits the coordinator's cap and its Owner-signed START is filed by `c2`, then a CLAIM must follow before matter work.
-AWAY and BACK additionally need the Owner's git signatures and counted filing context, which a hail's signature alone
-cannot prove. These examples claim byte-level checks, not a full conformance implementation.
-
-The repository files used for content pointers, each with exactly one final LF, are:
-
-`content/lane-4.md`, sha256 `9e7287b5dbf9e2233df2814074dd91fe823ed5684cc2c15e2d4b63e63a7863dc`:
-
-```text
-Lane 4: build the small parser and report its checks.
-```
-
-`content/result.md`, sha256 `bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe`:
-
-```text
-Lane 4 checks pass. No files have been published.
-```
-
-The file path printed before each frame is its illustrative record path. An example pointing to a frame uses that path
-and the hash of the complete signed file. A workbench delivery points at the same bytes before filing.
-
-**C.1 INFORMATION. A lead shares a result with another lead.**
-
-File: `records/a/a.planner-20261115T1001Z-473wvx.txt`; sha256
-`16a69c79e04994249bcc8b413999ba7aa3cf60f95f38e0cc4ae6237a11f0eed9`.
+A question with no source:
 
 ```text
 hail/1
-from: a.planner s1
-to: b.planner
-id: a.planner-20261115T1001Z-473wvx
-re: none
-marker: INFORMATION
-written-against: 2026-11-15T10:01:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-Lane 4 is built and reviewed. The result is behind the pointer.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEAlhDJ3BslWg8yCTt3pTfnc8fTTFIw/wCmFkPI+1pIutzoMEuNgewbgGU9chGn0/S
-ROWc04/NS9TcMQs/L9qXQJ
------END SSH SIGNATURE-----
-```
-
-**C.2 ADVICE. A reviewer advises its lead.**
-
-File: `records/a/a.reviewer-1-20261115T1002Z-q3hzbc.txt`; sha256
-`8e6bf87b18cc2629a2c97bce4b88b5dcbc610c0bcaf3d074603fe81e1734385c`.
-
-```text
-hail/1
-from: a.reviewer-1 s1
-to: a.planner
-id: a.reviewer-1-20261115T1002Z-q3hzbc
-re: none
-marker: ADVICE
-written-against: 2026-11-15T10:02:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-The result is ready for the next check.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAguT7vUvvQ98GJ016shtVF2b3bNC
-xykVO9ofb0xIF7ad4AAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEC+CejeenVhP9S21nod8a1DpysqjskcIFbRtvVZt2/HNOO5sc4/152/QA/BafT/V8
-peRuPs2UXDkdwP9nnTnPkN
------END SSH SIGNATURE-----
-```
-
-**C.3 WARNING. Each addressed bot has its own first-response clock.**
-
-File: `records/a/a.planner-20261115T1003Z-ber8hd.txt`; sha256
-`cd3c8df7a721d151bde30bdcfd23cfea97e41b002f8e2dfd5ca79105ec754348`.
-
-```text
-hail/1
-from: a.planner s1
-to: a.builder-1, a.builder-2, a.reviewer-1, a.reviewer-2
-id: a.planner-20261115T1003Z-ber8hd
-re: none
-marker: WARNING
-written-against: 2026-11-15T10:03:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-The forge has refused each push since 10:02.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECaVkvzREw+M8yOPaG2xtY3TxJnKVv5z4/JEFAUleM1DB4FZLI24/B+nM7wZEAW5U
-Iv8wjp1QXWRoyXb09ZbpsM
------END SSH SIGNATURE-----
-```
-
-**C.4 QUESTION. The two leads have message and return grants.**
-
-For a follow-up whose `re` names hails bound to matters M and N, omitting `matter` refuses send and filing. Choosing M
-routes to M's holder, even if `to` names N's holder's session. Choosing a third matter fails. A question with free-text
-`re` needs an explicit matter, any one, which routes it; it claims no thread. The complete frame below opens a thread
-with `re: none`.
-
-File: `records/a/a.planner-20261115T1004Z-y9c54z.txt`; sha256
-`0850d06896d6dc3f62c93b8dc173e93ce41374f6ab0ebeb7bdef64861309c48b`.
-
-```text
-hail/1
-from: a.planner s1
-to: b.planner
-id: a.planner-20261115T1004Z-y9c54z
+from: a.lead s1
+to: b.lead
+id: a.lead-20261127T1000Z-123abc
 re: none
 marker: QUESTION
-written-against: 2026-11-15T10:04:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-Lane 4 is ready for team B to read.
-ask: Did team B find a fault in the result?
+written-against: 2026-11-27T10:00:00+00:00
+sources: 0
+What is 4 plus 4?
+ask: Give the sum.
 end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEDcF3mZl38ydShrfhh0J1+56UFJvuIj4ZxdJTps0J2qE4uFz+8hPP6C7AK9obG2Wo
-mk78g5YOdnS0Fsh4SH4xgC
------END SSH SIGNATURE-----
 ```
 
-**C.5 ANSWER. A response names the QUESTION and asks nothing.**
-
-File: `records/b/b.planner-20261115T1005Z-rc5g0r.txt`; sha256
-`32396e29f03a70b5f23a0d066e689bfe283a9b8154244b8bcab74d284e584736`.
+Its answer:
 
 ```text
 hail/1
-from: b.planner s1
-to: a.planner
-id: b.planner-20261115T1005Z-rc5g0r
-re: a.planner-20261115T1004Z-y9c54z
+from: b.lead s1
+to: a.lead
+id: b.lead-20261127T1001Z-234bcd
+re: a.lead-20261127T1000Z-123abc
 marker: ANSWER
-written-against: 2026-11-15T10:05:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-No fault was found in this result.
+written-against: 2026-11-27T10:01:00+00:00
+sources: 0
+8.
 end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgat7iSvrMJvXAyE1X0NwQ0bis+5
-5NQJ3sL5S3kTMd2twAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECpyVppgemtHDumP566hkTg5N6mIZuafMOcKnsdJeaPNY5RkNqmyzHOqQgJm7B6Xg
-WPyZZfkLeZl9c9hl5aDuUD
------END SSH SIGNATURE-----
 ```
 
-**C.6 REQUEST. The lead asks its builder to act within its grants.**
-
-File: `records/a/a.planner-20261115T1006Z-ks8d3c.txt`; sha256
-`43d1b32cf0f9d938aaf9f01323175e36464e25540f2bd2437be97c3bada0c483`.
-
-```text
-hail/1
-from: a.planner s1
-to: a.builder-1
-id: a.planner-20261115T1006Z-ks8d3c
-re: none
-marker: REQUEST
-written-against: 2026-11-15T10:06:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/lane-4.md sha256 9e7287b5dbf9e2233df2814074dd91fe823ed5684cc2c15e2d4b63e63a7863dc
-Build lane 4 from the brief behind the pointer.
-Work in your own workbench.
-ask: Either decline, or send WILCO and then DONE with the result.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBP7fHf24b++ZOwAXX2Yf8QBK/tIFFOo4merFRKeW/eWIxAD8/a5xMTfFM8g7vSP2
-dF7AIwT7rzqnWApZu5e/gE
------END SSH SIGNATURE-----
-```
-
-**C.7 STOP. The coordinator holds one item through its grant to the lead.** Its `subject` names the item by its short
-id, so it holds the item but could not carry a FORCED END, which needs the claimed matter's reference in §10's form.
-
-File: `records/org/org.coordinator-20261115T1007Z-ktdhn5.txt`; sha256
-`db85369252ae472596d76e05a2156836b8a3deb2c8eb40cccbbd2db4eec50e7a`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: a.planner
-id: org.coordinator-20261115T1007Z-ktdhn5
-re: none
-marker: STOP
-written-against: 2026-11-15T10:07:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-subject: AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-Hold the push of lane 4 while the result is checked.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEA77GbuqbEN+hrDDsspU5hsQxOzZ3VIf5EKIEt9Lox/g0dSu+0kJBzh0MMgdrA3ee
-xByzlyzGo4FcAF/9KraOAC
------END SSH SIGNATURE-----
-```
-
-**C.8 RECEIVED. In this variant the lead cannot yet answer C.4.**
-
-File: `records/b/b.planner-20261115T1008Z-bnq6wz.txt`; sha256
-`d80819d86daea8f1e7070cebb34cc4ec3f2e383606f8e3cd40139b69b73dc7d0`.
-
-```text
-hail/1
-from: b.planner s1
-to: a.planner
-id: b.planner-20261115T1008Z-bnq6wz
-re: a.planner-20261115T1004Z-y9c54z
-marker: RECEIVED
-written-against: 2026-11-15T10:08:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgat7iSvrMJvXAyE1X0NwQ0bis+5
-5NQJ3sL5S3kTMd2twAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEA8V4YH78argR3xtmWm0opJUsz7J5c5KXTrm/CCU+A2Why6qdbI+XTc15fmpS7/vZ
-qzVdpFVWhX38jgW3lWkaoK
------END SSH SIGNATURE-----
-```
-
-**C.9 WILCO. The builder accepts C.6.**
-
-File: `records/a/a.builder-1-20261115T1009Z-b18r38.txt`; sha256
-`e48535465ea0e12f5d2d40dea1910bf3282fda2c96a642a322f084b516d47435`.
-
-```text
-hail/1
-from: a.builder-1 s1
-to: a.planner
-id: a.builder-1-20261115T1009Z-b18r38
-re: a.planner-20261115T1006Z-ks8d3c
-marker: WILCO
-written-against: 2026-11-15T10:09:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgSrkqFF2E6nKrlw9TrD2ulTSFTu
-vj6vU6QHJmk2UzClgAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECF8v7ipKtlwtyGzlxIF7b90RM7lXGfnuV6c3bMi3g/lRoqYBdjdln6kWuiNTkk4X
-7I3413yNsqYuWrg0IMlPAD
------END SSH SIGNATURE-----
-```
-
-**C.10 DECLINED. Alternative to C.9: the builder cannot get the pointed-at file.**
-
-File: `records/a/a.builder-1-20261115T1010Z-1sy88h.txt`; sha256
-`2080dd1ba4d2818b2c8fab3f85289371f263e3f3fce77a04fb7f395928ffeca2`.
-
-```text
-hail/1
-from: a.builder-1 s1
-to: a.planner
-id: a.builder-1-20261115T1010Z-1sy88h
-re: a.planner-20261115T1006Z-ks8d3c
-marker: DECLINED
-written-against: 2026-11-15T10:10:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-Cannot obtain the pointed-at file; no work was done.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgSrkqFF2E6nKrlw9TrD2ulTSFTu
-vj6vU6QHJmk2UzClgAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEAM4139iFFWP714aN479codMmUqmZbFQMwUE71zDb32LFAHDRUsodxproBe/0++Ck
-lYzDsTDpqZ0fcfQk50II0I
------END SSH SIGNATURE-----
-```
-
-**C.11 DONE. The lead has held the item named in C.7; its session still runs.**
-
-File: `records/a/a.planner-20261115T1011Z-spqx3p.txt`; sha256
-`3b465b49f3432440ced43b738833e238ded5a340c034b08d63c4a76fb74ae688`.
-
-```text
-hail/1
-from: a.planner s1
-to: org.coordinator
-id: a.planner-20261115T1011Z-spqx3p
-re: org.coordinator-20261115T1007Z-ktdhn5
-marker: DONE
-written-against: 2026-11-15T10:11:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-The push of lane 4 is held. Nothing was pushed.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEDiQdzpiAMyEijjkZ2oghjQPRCEqZD2GvqEfqn9B7Ah5LruDei0NbOm/gLIeVxLZY
-Kj/g9uE2twxLry9dq1eksC
------END SSH SIGNATURE-----
-```
-
-**C.12 The signed frame. C.7 again, byte for byte; this is a duplicate, not a new STOP.**
-
-File: `records/org/org.coordinator-20261115T1007Z-ktdhn5.txt`; sha256
-`db85369252ae472596d76e05a2156836b8a3deb2c8eb40cccbbd2db4eec50e7a`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: a.planner
-id: org.coordinator-20261115T1007Z-ktdhn5
-re: none
-marker: STOP
-written-against: 2026-11-15T10:07:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-subject: AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-Hold the push of lane 4 while the result is checked.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEA77GbuqbEN+hrDDsspU5hsQxOzZ3VIf5EKIEt9Lox/g0dSu+0kJBzh0MMgdrA3ee
-xByzlyzGo4FcAF/9KraOAC
------END SSH SIGNATURE-----
-```
-
-**C.13 A for: owner QUESTION. The lead raises its own need to the coordinator.**
-
-File: `records/a/a.planner-20261115T1013Z-7eqxmv.txt`; sha256
-`a06be2e9b03fcd577386049c4a4becf8a9b95981040ffd4bc9bfd40ea025a186`.
-
-```text
-hail/1
-from: a.planner s1
-to: org.coordinator
-id: a.planner-20261115T1013Z-7eqxmv
-re: none
-marker: QUESTION
-written-against: 2026-11-15T10:13:00+00:00
-for: owner
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/lane-4.md sha256 9e7287b5dbf9e2233df2814074dd91fe823ed5684cc2c15e2d4b63e63a7863dc
-Both options fit the grants; the choice belongs to the Owner.
-ask: Ask the Owner whether to do the small check now or keep it queued.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBUeNI9k4RiFzox3qHrWWLALvRckDniSIrsc8Os6L3R1rLBKl/kP8/beVgOEQFpt6
-SgHRYJnrRFvLCQoPgw7DcN
------END SSH SIGNATURE-----
-```
-
-**C.14 The gate ANSWER. It points at the filed Owner-ask C.15.**
-
-File: `records/org/org.coordinator-20261115T1016Z-44xnfe.txt`; sha256
-`d522e2002717cc9bb70578bd053374b1c98efe48e2a4b1bf006ee112b3746146`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: a.planner
-id: org.coordinator-20261115T1016Z-44xnfe
-re: a.planner-20261115T1013Z-7eqxmv
-marker: ANSWER
-written-against: 2026-11-15T10:16:00+00:00
-disposition: relayed
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:records/org/org.coordinator-20261115T1015Z-pxm2zd.txt sha256 5ff1b2e7029c69cba579210b96acb0d76ae06aa78fb8b0e5f6c08dae01d6c1eb
-The choice is with the Owner.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBa/VCprma2tB6uQdQMgbSSXLQ83y0WujccAVp5gPjRmJMonDwSwrkMQUofnc5ZqT
-P24WRirqq61HDLG7iH+dgO
------END SSH SIGNATURE-----
-```
-
-**C.15 The Owner-ask. Only decide has option lines.**
-
-File: `records/org/org.coordinator-20261115T1015Z-pxm2zd.txt`; sha256
-`5ff1b2e7029c69cba579210b96acb0d76ae06aa78fb8b0e5f6c08dae01d6c1eb`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: owner
-id: org.coordinator-20261115T1015Z-pxm2zd
-re: a.planner-20261115T1013Z-7eqxmv
-marker: QUESTION
-written-against: 2026-11-15T10:15:00+00:00
-kind: decide
-why: The Owner must set which of these two allowed tasks comes first.
-clarify: a.planner, org.coordinator
-raised-by: a.planner
-decide-by: 2026-11-16T10:00:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:records/a/a.planner-20261115T1013Z-7eqxmv.txt sha256 a06be2e9b03fcd577386049c4a4becf8a9b95981040ffd4bc9bfd40ea025a186
-option A: Do the small check now.
-option B: Keep the check queued.
-ask: Choose A or B.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECIGhvxssGk+W/cAaxMMCZ1swkRN+Xe2YzkwQcD9FJMnJeBTZ8J5E2ijP83pNcWs2
-KoG45CW9QHUdPffPHrBQQE
------END SSH SIGNATURE-----
-```
-
-**C.16 DECISION. One Owner signature in hail-decision selects option A.**
-
-File: `records/org/decision.txt`; sha256 `34c733a1db80d2212d65495f501dac99a66b5ae4c71590abd0feec562bf029ff`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator s1
-id: owner-20261115T1017Z-9t70kw
-re: org.coordinator-20261115T1015Z-pxm2zd
-marker: DECISION
-written-against: 2026-11-15T10:17:00+00:00
-answer: option A
-scope: once
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:records/org/org.coordinator-20261115T1015Z-pxm2zd.txt sha256 5ff1b2e7029c69cba579210b96acb0d76ae06aa78fb8b0e5f6c08dae01d6c1eb
-Do the small check now.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAANaGFpbC1kZWNpc2lvbgAAAAAAAAAGc2hhNTEyAAAAUwAAAAtz
-c2gtZWQyNTUxOQAAAEA5rBz0yfEP8QMwnB9XUkB33ie9lzzUmEPE49Eeu1Z1W+tmY+yrBx
-6VUicjlw+V9ry+cEc9oYuAknNolwqGh3oK
------END SSH SIGNATURE-----
-```
-
-**C.17 An urgent concern. It holds no STOP and asks no decision.**
-
-File: `records/org/org.coordinator-20261115T1017Z-b6xh68.txt`; sha256
-`1956c6512f234bd5bc8e246a3f6185b0067032857e97530b87fc60c60fc1790c`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: owner
-id: org.coordinator-20261115T1017Z-b6xh68
-re: none
-marker: WARNING
-written-against: 2026-11-15T10:17:00+00:00
-urgent: A pending filing may miss its window.
-harm-by: 2026-11-15T11:00:00+00:00
-pointer: none
-The record cannot be reached from the working team.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEAH9EoWvJPoNEFGzohnj44Fsqhb7nCkSvX68AXpnX17+vnej2i8h4cvFed+h6Mwml
-6yTR0GC3OZrSNkhLZVCcYF
------END SSH SIGNATURE-----
-```
-
-**C.18 The Owner seen. A signed RECEIVED closes concern notices only.**
-
-File: `records/org/owner-20261115T1018Z-gtexqy.txt`; sha256
-`b7caeb943a7b07be9a23a9283c5426e12686773ca81deac148e5c58f8dadf368`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator
-id: owner-20261115T1018Z-gtexqy
-re: org.coordinator-20261115T1017Z-b6xh68
-marker: RECEIVED
-written-against: 2026-11-15T10:18:00+00:00
-pointer: none
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBqgUSJ57ZAp1EhouH4w/HUgqLeBKj0Ql4D0rSvcZ8dIRZiqtP0W5EXA0AwktPHZT
-EflVEfyQhRYmPTw4pkZSAH
------END SSH SIGNATURE-----
-```
-
-**C.19 Delivery to the filer. This variant is before C.16 is filed.**
-
-File: `records/org/owner-20261115T1019Z-bfh75n.txt`; sha256
-`0f22018b25a77ccd601b7df12c93218301e54b77df21579ff4ba8fcb6551908f`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator
-id: owner-20261115T1019Z-bfh75n
-re: none
-marker: INFORMATION
-written-against: 2026-11-15T10:19:00+00:00
-pointer: workbench:c16.txt sha256 34c733a1db80d2212d65495f501dac99a66b5ae4c71590abd0feec562bf029ff
-File this signed answer in the asking team record.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECcPBDy2fmw5caDazZuMH/z1X7UEyOYfEq+d5+i1RHXoD21MoHLeegk6ZRANnwp0x
-g+1yipn1uIk+PNA4vUutIH
------END SSH SIGNATURE-----
-```
-
-**C.20 Hand-back. The gate returns the accepted answer to the raising lead.**
-
-File: `records/org/org.coordinator-20261115T1020Z-qndkrn.txt`; sha256
-`fd67b008bc0d3f2051d99e248e2bd984ff88590da2e248c35e96998c962a6d53`.
-
-```text
-hail/1
-from: org.coordinator s1
-to: a.planner
-id: org.coordinator-20261115T1020Z-qndkrn
-re: a.planner-20261115T1013Z-7eqxmv
-marker: INFORMATION
-written-against: 2026-11-15T10:20:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:records/org/decision.txt sha256 34c733a1db80d2212d65495f501dac99a66b5ae4c71590abd0feec562bf029ff
-The Owner chose A. Check the signed answer before acting.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgeXk6lr/H0FX8P6T92gXeWbTvuK
-Linn+m673D/6BysQoAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECZKRCPB1BNx+qsVQLhsEa+tV5ljb3vLXdujPnfWNHl9nUE6lR/CJR/8ES3qSMlsu
-P+g52GDqNbpN+e4Oq0Am0K
------END SSH SIGNATURE-----
-```
-
-**C.21 Use claim. This WILCO consumes C.16 once; it is not a session CLAIM.**
-
-Appendix B puts both records in one repository, so its chain orders this use. If the sender's record were in another
-repository, the filer would co-file `records/org/use.txt.session`, naming its observed `sender-head` (§10b.9). A head
-with the sender's live START and matter claim passes those checks; one after its END fails. Replay uses the observed
-head even after the sender ends; the use remains consumed. The signed WILCO's bytes need no observation header.
-
-File: `records/org/use.txt`; sha256 `e09da49f4f56ca98d29e99a95c76ae2a2e5645f5044edd44f16cc544347361e5`.
-
-```text
-hail/1
-from: a.planner s1
-to: org.coordinator
-id: a.planner-20261115T1021Z-rvcgap
-re: owner-20261115T1017Z-9t70kw
-marker: WILCO
-written-against: 2026-11-15T10:21:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:records/org/decision.txt sha256 34c733a1db80d2212d65495f501dac99a66b5ae4c71590abd0feec562bf029ff
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEA9TkN03/j/vrtV8WsBI6+HfM0wLjCiJy9YAXzH9Dz30AtrU1vANAAGC/TNjHFCp6
-2/xQ7rmn7CmKAwHJzjYJ4B
------END SSH SIGNATURE-----
-```
-
-**C.22 START. A lead starts a second builder session where the cap is two.**
-
-File: `records/a/a.planner-20261115T1022Z-jte0h3.txt`; sha256
-`8f8690207d46e0953f5c6fb695bc68f69c4e547c6a0a35473388c0b8779e88af`.
-
-```text
-hail/1
-from: a.planner s1
-to: a.builder-1
-id: a.planner-20261115T1022Z-jte0h3
-re: none
-marker: START
-written-against: 2026-11-15T10:22:00+00:00
-bot: a.builder-1
-session: s2
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-waiting: AA-4 is open for this bot and no session of it holds AA-4.
-pointer: none
-The starter supplied the kind definition and its current declared skills.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBLT537kJVevitDGOhSUBnxR1UtJBUO0uOGX3cgKZTp3XF77NvG4vnjRwiQ3qhaY0
-yIPh+I5SVSQe7/vfBYcwoP
------END SSH SIGNATURE-----
-```
-
-**C.23 CLAIM. Filed after C.22; only then may s2 work on this matter.**
-
-File: `records/a/a.builder-1-20261115T1023Z-8er13k.txt`; sha256
-`cc649df8c12bcc01eb4ff6e9096186be110016c61ef47d68c006de442a349f13`.
-
-```text
-hail/1
-from: a.builder-1 s2
-to: a.planner
-id: a.builder-1-20261115T1023Z-8er13k
-re: a.planner-20261115T1022Z-jte0h3
-marker: CLAIM
-written-against: 2026-11-15T10:23:00+00:00
-bot: a.builder-1
-session: s2
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgSrkqFF2E6nKrlw9TrD2ulTSFTu
-vj6vU6QHJmk2UzClgAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEASHJPGVy1cFWvPurI0Anl34ml/7WEx/HAxUS43lV7hqpc+tQ2B32dFr16Gyxysqc
-kEGRG+i/NYQgNseqcOV5wO
------END SSH SIGNATURE-----
-```
-
-**C.24 RELEASE. It frees only this session matter claim.**
-
-File: `records/a/a.builder-1-20261115T1024Z-e12e21.txt`; sha256
-`b2c6812aa3834be557c8795877816713ec44996cc70fff3a88dbcb4a9cb88978`.
-
-```text
-hail/1
-from: a.builder-1 s2
-to: a.planner
-id: a.builder-1-20261115T1024Z-e12e21
-re: a.builder-1-20261115T1023Z-8er13k
-marker: RELEASE
-written-against: 2026-11-15T10:24:00+00:00
-bot: a.builder-1
-session: s2
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgSrkqFF2E6nKrlw9TrD2ulTSFTu
-vj6vU6QHJmk2UzClgAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEAROyms4kD3CJmdx4/k9Td7gUyI6Jk/7M8Jk3ss0djnxN7QBHA5gkG5uqE/0u0I4+
-uoEGjo9KYXX8ov7XJJqXMG
------END SSH SIGNATURE-----
-```
-
-**C.25 END. The session ends after its release.**
-
-This END alone does not permit moving team a's record: the example context still has other live sessions. Once all
-sessions, claims, STOPs in force, owed replies and unused once authority are gone, a counted move can close the old
-home (§10). The new reader needs that old chain through the move, even with an empty new folder. Session `s2` stays
-used, and any consumed decision stays consumed; copying either record creates no new event.
-
-File: `records/a/a.builder-1-20261115T1025Z-nffasm.txt`; sha256
-`a89fcc8661baf4b354369a5ec5174a2de3d60f3e93c936208821919acd9646a5`.
-
-```text
-hail/1
-from: a.builder-1 s2
-to: a.planner
-id: a.builder-1-20261115T1025Z-nffasm
-re: a.builder-1-20261115T1024Z-e12e21
-marker: END
-written-against: 2026-11-15T10:25:00+00:00
-bot: a.builder-1
-session: s2
-pointer: none
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgSrkqFF2E6nKrlw9TrD2ulTSFTu
-vj6vU6QHJmk2UzClgAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECgRcflhZsBEFOQ32oCWEfk+poVqzGF/Jg5anyx+HGRcYPo2CEF7febD37rjVZLA2
-3BtouJSdJ51zl610o7X7gE
------END SSH SIGNATURE-----
-```
-
-**C.26 FORCED END. Alternative after C.24, with no END and no live claim: no STOP is needed.**
-
-With a live claim instead, a STOP lifted after an earlier holder released cannot end `s2`. If the STOP remains in
-force and `s2` claims later, its full window begins at that claim's filing, even on a stale end retry. Only `s2`'s
-response blocks this trigger; the earlier holder's response does not. The no-claim frame below is unchanged.
-
-File: `records/a/a.planner-20261115T1026Z-jnq6h9.txt`; sha256
-`4745ca0d50c8910f29af89f69551a91abbaf39dec82b0a4e482a6df5c4540237`.
-
-```text
-hail/1
-from: a.planner s1
-to: a.builder-1
-id: a.planner-20261115T1026Z-jnq6h9
-re: none
-marker: FORCED END
-written-against: 2026-11-15T10:26:00+00:00
-bot: a.builder-1
-session: s2
-pointer: none
-The unclaimed session no longer answers; free its slot.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEBTG7wiSQzIzTkwkRs3uTrekcrGHYihS0GSX7mJXXNqXIJfVt9tIgx557qD1xKB/T
-mC+Mz3HgbX8Nfq3/rX4DkE
------END SSH SIGNATURE-----
-```
-
-**C.27 AWAY. This signed hail is filed by the Owner own signed commit.**
-
-File: `records/org/owner-20261115T1027Z-3vyt0r.txt`; sha256
-`bddd6802bad28c8985149c2a7a4e794255383cc2fe8d03131071b4e798badf20`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator
-id: owner-20261115T1027Z-3vyt0r
-re: none
-marker: AWAY
-written-against: 2026-11-15T10:27:00+00:00
-pointer: none
-The coordinator is away.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECY2794zHv6FfW0adFOboe+25Jbl4iu5EoqrrXaq/aKKGU88onrDM3uVlkUMdMwWg
-xVlCHLRNgB7J2QWe6mVKMJ
------END SSH SIGNATURE-----
-```
-
-**C.28 BACK. The Owner own signed commit ends the away interval.**
-
-File: `records/org/owner-20261115T1028Z-6wfcs1.txt`; sha256
-`1c4b962c966ab9f37c6cc64496c766b71388c10d3c4e60314b22d733e55e87b6`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator
-id: owner-20261115T1028Z-6wfcs1
-re: owner-20261115T1027Z-3vyt0r
-marker: BACK
-written-against: 2026-11-15T10:28:00+00:00
-pointer: none
-The coordinator is present.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEA4sLMMskvqziJHNt7t0bFKjbslv949ckUdZH5J7zdQv1A/a5UQyhat5TzN49aHQp
-vXokAPVu7Cyjhl/+JKbooK
------END SSH SIGNATURE-----
-```
-
-**C.29 A decider hail. Its message grant reaches team A; it is signed even with flags false.**
-
-File: `records/a/person.m1-20261115T1029Z-zepwv9.txt`; sha256
-`3ea655ae0dc0b01fb9c427fcfdd7f8a7b11b1f24eefdc7b094922d9f9da60d27`.
-
-```text
-hail/1
-from: person.m1
-to: a.planner
-id: person.m1-20261115T1029Z-zepwv9
-re: none
-marker: INFORMATION
-written-against: 2026-11-15T10:29:00+00:00
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: none
-The team may keep the small check within its current scope.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg0Ix2Qx4dQEM/jsFkumroTQnOmd
-wY0eVoYW+2LpIBAdEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECl3gfoZ2TbvpbQm8Q+MtFrmi37JBvdvXBouA6w6mIWsj5nsVwxa/kYxthxCY1QiV
-x/pmD08jmYIqV3bWm9tK4K
------END SSH SIGNATURE-----
-```
-
-**C.30 The Owner START. The coordinator filer session c2 files it, then its own CLAIM.**
-
-File: `records/org/owner-20261115T1030Z-113mj3.txt`; sha256
-`03670cfd08b0408abd03ff8b01df34b7da548795456c8891f3be6c81fbfd1188`.
-
-```text
-hail/1
-from: owner desktop
-to: org.coordinator
-id: owner-20261115T1030Z-113mj3
-re: none
-marker: START
-written-against: 2026-11-15T10:30:00+00:00
-bot: org.coordinator
-session: c2
-matter: thread:org.coordinator-20261115T1017Z-b6xh68
-waiting: This concern remains open for the coordinator and is unheld.
-pointer: none
-The launcher signed this start for the Owner.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEh7KK3wjAUdWGfaYlIUEFOrqyp
-E3daFc4o3CKmYXEaEAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAEDvBdxOxMl9q+KaF36uHmhndg06SB8QukoshHDdnGLmcG5uJo9fnnr29UKDWn65Jk
-na9f+WwYFFAUvZlM5TMaEG
------END SSH SIGNATURE-----
-```
-
-**C.31 A sealed hail, opened. The fixture has no chip and uses K1 plus R.**
-
-The sealed wire span is:
-
-```text
-hail/1 sealed
-to-mailbox: example-box
------BEGIN AGE ENCRYPTED FILE-----
-YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA1ZnphR29hLytjWjdzVkp1
-ZS9pc1JLbWVBZ0REcTlMWDd6enVTaUVDaFdzClcrZkU1SEMzUDB3akExTVRjOFNT
-eGZLSkFna2pRZGJmMWc5Zi9IM2h3MGsKLT4gWDI1NTE5IFgyV2FFbkNnYTd3aHpt
-Z0xBY1haWmV3M1Y2UXNJQ1A3T1BaK1ROSjVjUUUKVktoQlJ5ZFY4YnBIeUJtclB0
-TmVvVUZaY0NwR3NUeTdSTld5S1VDRkNDNAotPiBYMjU1MTkgVU05WStCQU14WE1j
-aDB5T3RJK3IwRTYrY0ZkdWlXOTZXU1lDVDJFclhtdwowcG5Ub0c4Q2szWlUwbHkx
-aFZadUtva2U2c0dVd1BmQkpoRC9xN0svVHFBCi0tLSAzcld1Qkl0ZGZPZWwzL2p1
-Tk5aNUtpcVFJWXRKMjN5cWJGL1hIQWZ5MFc4CrxvjpAfDF7WebR9BneSvUHwXhgv
-2es4V8Gv2Eo7gFVDNbBNSBwY15WGhuxGvqYaqnFKGC/3uK2qM1G7kaEFtKWSBk/F
-/KEyxYY4ckntcxDWfBZumSmwXUtR8Kc/E0ExD7YbTb8bE2cCCNs0TPnIDVSZ9oSH
-bdQQi0RYRwOFraOOALtXphxVsapBnQbu1hH2UkvX9Tgc9GGKAAcqJ1cnKgELQyCU
-N6/1qD0o9Kpzn+H0EHo5lG7ZNl29Wa6jP8Cpyz4Xbyp+b5M0XcpjSyJ7p+yGaeeC
-RbLKowpMyfQZyPJYQynMl4lAS373KfVoa8x2ihg1+pNFDi5geod7xtJRycfeJsCq
-jM0g6Cs43wCvNyMw2oPZPzIR8qUZpinpidQcemvnjrNbIwYqgNbXiIdGVRgNFLpr
-DZFMWB7s378XdXV4F1Sjm4/U5u/9Rg/3P5834YqJOKcGbCotAsS9j6QnWUwa8Vbs
-eJ/j+TFf6+j1UxbmN57Ob+7tyOPhN28fv5AKs8EUNPvV9fNwTpAswp8SAkgN7h/4
-Bo0Ae5U4Qu4sXeX2R+8cdJVWmrjPgcT8u6hB04P1JpRpnrxciV+LUzAJ9ms/6wKl
-HnR1gBr0N5XJG0unbS/29UsHPn1++5eP6hJ5mBlPMAumFDJGc+jObxeykK6UEchg
-jSiRCvpygBuKrQcySiHeWoRgrJHP7NaB7suSrCoQzySXoNZEN2mdrOjoFoubJoQB
-OwQbDho013CWVJR8eObKhPc3PTyPzjq6t5H8j1lzcRVaIOifcGqS3SdovQvf12Pm
-OAoIOcRxIGDnEUTpyuvd9HWm4NwutxUABXvmsQD5KLiQMJERfsjp1HbW4Q15edTM
-jvyr9wBozaI0p1i3/sFatlVeO8maG9T0gnvWly0pK8ptj90ZtWf/qhu921l8vEf3
-yDVA8p9EggFUG0skc1ExCKsVSOSVbX0nXKLWFxMzrKPcQviyDrlB3b6QDYaa1UkP
-Nnzp8EBz3JjdClJnWX21Brxpy0MI/sLfaUoyt7P4hgb0IaF+Ei8cSkhItc0Rc7FC
-us1n/R5aAa1B4xM2khVZlM8BWNc025Qb525R6U5o6SOY2D/dh2i9BrunP5xuJ1dQ
-0aChvwtGloWERbdunIQ5SPkw6woKjncdeqBqbiXNYez63yBge9m62JdlTm+ZRe/5
-+oYcmg01vYOgEibcxf+S7T/cSWTqeuQJDss2wtqW9YPZT39e4gX9znD4saH10i/p
-DfKzfnhkF0uKS+TIOU/9eh0MnMfzf5KVzsvn6ZHz0heGOmNINGrr+tKoI6G4j1Yo
-jP2xj7cS8/Ed8A==
------END AGE ENCRYPTED FILE-----
-end hail/1 sealed
-```
-
-**Public fixture key.** The following decryption key belongs only to this public test vector, never to a real use:
-
-```text
-AGE-SECRET-KEY-1CPFV45Q9YQ52TNU0VM38KJYNWGY2VH8KKRLSPZDERQP8Q0E4Q6VS5ADFTN
-```
-
-Opening the span with that example key gives exactly this signed file. There is no tagged stanza here; a chip-class
-example would also compare its tag with the listed public oversight key, as §9a says.
-
-Sealed file: `records/a/a.planner-20261115T1031Z-79jmfc.txt`; sha256
-`c8a6848f0ac5d0d49375cbf23e856e281a74240a56ce3054ec264ff2017d00a7`. The opened signed bytes below have sha256
-`fe3f4cae211a19ff057a3c4d7ebf9450b0e35ea568eaf99c7efa06711af67373`; these are not filed as plaintext.
-
-```text
-hail/1
-from: a.planner s1
-to: b.planner
-id: a.planner-20261115T1031Z-79jmfc
-re: none
-marker: INFORMATION
-written-against: 2026-11-15T10:31:00+00:00
-sealed-to: age1ve2k4cl39dnxy7vsp9ssa57ksmuqjknr0m68k6nrwmkarlfah9usm7vg9j, age1609060eu4z03gcdlrxk4n5wws3ywe83z895rx4tgkkc5vp97pfvqaua0dn, age1e5sqhu32t2e9xng9f3fxwkrzz2tj02xnxze67d6hphrzxfy87pfsjejcsr
-min-class: K1
-matter: tracker:r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:AA-4
-pointer: r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4:content/result.md sha256 bb37b06bc40a7e20bc5cbbd2d0adff727ad2b9c5c15a41533724de9d63c31dbe
-The small result is ready to read.
-end hail/1
------BEGIN SSH SIGNATURE-----
-U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgEbabQscXyJYKw8gx1yWnu+kLnd
-sAkIl73zigKVEbyqcAAAAEaGFpbAAAAAAAAAAGc2hhNTEyAAAAUwAAAAtzc2gtZWQyNTUx
-OQAAAECqWjw8gxG0tBvyQ+jJ8cpcjoE0PiFetoyl94hcptMV24gE58VE3Pe5JPkTm1Uqlp
-ceNV009YidJDtf3lqqCMME
------END SSH SIGNATURE-----
-```
-
-C.31 uses three X25519 recipient stanzas: its reader, K1 and R. The unsealed contents are printed here solely as a
-public test vector; a real sealed hail's body stays ciphertext.
-No two-signature or case-handover form exists.
+The current-edition vector suite supplies further complete frames, file bytes and expected faults.
+Earlier draft signature and sealing fixtures are retained byte for byte at their own text pin; they
+are not examples to copy when writing a new hail.
 
 ## Appendix D. The reference deployment (normative for that deployment only)
 
@@ -2773,7 +1914,7 @@ Every open point is in §13.
   end marker or app condition remains.
 - **Changed forms before first adoption (§2):** the bot term and scope `bot` field; decider sender and id; START, END,
   CLAIM, RELEASE, FORCED END, AWAY and BACK with session fields; `why`, `clarify`, `for-team`, `sealed-to` and
-  `min-class`; exact conditional keys, options A–E, pointer file hashes and repository tokens; one signature, desktop
+  `min-class`; exact conditional keys, options A–E, source file hashes and repository tokens; one signature, desktop
   only; retired
   `roster`, `keys`, `acting-for`, `handover`, `grant-change` and `owner pair`. Grammar and examples follow each change.
   This list claims no global adoption fact; §2's growth limit still binds.
