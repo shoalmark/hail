@@ -49,7 +49,8 @@ The body line number starts at 1. Sources, the header and the ask are not body l
 body line counts, even an empty one. There is no line-character budget in this edition.
 
 A prose line is exactly `Opener: said`, with one space after the colon and nonempty said after
-trimming spaces. No leading space, opener case folding, multi-opener splitting or prefix guessing
+trimming spaces. The canonical empty form `Opener:` is recognized as an empty statement at B5, because hail
+canonicalization removes its trailing space; it is not also a delimiter fault. No leading space, opener case folding, multi-opener splitting or prefix guessing
 is done. A second colon is part of said. An opener can occur several times unless a later edition
 says otherwise; a required opener needs at least one nonempty permitted occurrence.
 
@@ -71,8 +72,9 @@ located at `grammar <field>`. Body faults use `body line n`; missing required op
 Print `location: [code] problem; repair.` on one physical line. Substitute actual values for variables.
 Order grammar shape errors by UTF-8 field path, then common-set errors in common-set order, then
 marker references in the marker order above (allow before require, array order), then conflicts,
-then meaning pairs in opener-name order. Body order is budget first, then each line in order (form,
-permission, meaning), then missing required openers in require-array order. Preserve separate lines
+then meaning pairs in opener-name order. Collect body faults in procedure order, then print them in hail/1 location order: header faults
+first (re before marker), then body line numbers. At one body line, budget precedes form, permission,
+empty statement and meaning. Required-opener faults at header marker follow require-array order. Preserve separate lines
 for independent faults. A missing required opener remains a distinct fault when another line has
 an unknown opener; it tells the writer what must be supplied, without guessing their intent.
 
@@ -95,7 +97,7 @@ an unknown opener; it tells the writer what must be supplied, without guessing t
 
 For each line, read B2/B3 first. If its opener is known, check B4 and B5 independently; check B6 only
 when there is a nonempty statement. A forbidden opener still has a meaning, so B6 can run there.
-A missing statement does not count toward B7. F5 only compares defined openers; F6 can run when the
+A missing statement does not count toward B7. F7 skips invalid or reserved opener definitions. F5 only compares defined openers; F6 can run when the
 require list and lines are well formed. This limits cascades while retaining independent faults.
 
 ## 5. Common openers
