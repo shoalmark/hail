@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hail-grammar/1 grammar file",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hail-grammar",
+    "name",
+    "edition",
+    "start",
+    "openers",
+    "markers"
+  ],
+  "properties": {
+    "hail-grammar": {
+      "const": 1,
+      "type": "integer"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32,
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "edition": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "start": {
+      "type": "boolean"
+    },
+    "openers": {
+      "type": "object",
+      "minProperties": 5,
+      "propertyNames": {
+        "$ref": "#/$defs/opener-name"
+      },
+      "required": [
+        "Fact",
+        "Not done",
+        "Next",
+        "Correction",
+        "Say again"
+      ],
+      "properties": {
+        "Fact": {
+          "type": "object",
+          "required": [
+            "means"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "means": {
+              "const": "what was observed, with its value"
+            }
+          }
+        },
+        "Not done": {
+          "type": "object",
+          "required": [
+            "means"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "means": {
+              "const": "what was left out or not checked, and why; nothing when nothing was left out"
+            }
+          }
+        },
+        "Next": {
+          "type": "object",
+          "required": [
+            "means"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "means": {
+              "const": "the sender's own next act, or who acts next and on what condition"
+            }
+          }
+        },
+        "Correction": {
+          "type": "object",
+          "required": [
+            "means"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "means": {
+              "const": "the wrong value and its replacement in the hail named by re"
+            }
+          }
+        },
+        "Say again": {
+          "type": "object",
+          "required": [
+            "means"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "means": {
+              "const": "the wanted part of the hail named by re: a source number, body line number or header name"
+            }
+          }
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/opener"
+      }
+    },
+    "markers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "INFORMATION",
+        "ADVICE",
+        "WARNING",
+        "QUESTION",
+        "ANSWER",
+        "REQUEST",
+        "STOP",
+        "RECEIVED",
+        "WILCO",
+        "DECLINED",
+        "DONE",
+        "START",
+        "END",
+        "CLAIM",
+        "RELEASE",
+        "FORCED END",
+        "AWAY",
+        "BACK",
+        "DECISION"
+      ],
+      "properties": {
+        "INFORMATION": {
+          "$ref": "#/$defs/row"
+        },
+        "ADVICE": {
+          "$ref": "#/$defs/row"
+        },
+        "WARNING": {
+          "$ref": "#/$defs/row"
+        },
+        "QUESTION": {
+          "$ref": "#/$defs/row"
+        },
+        "ANSWER": {
+          "$ref": "#/$defs/row"
+        },
+        "REQUEST": {
+          "$ref": "#/$defs/row"
+        },
+        "STOP": {
+          "$ref": "#/$defs/row"
+        },
+        "RECEIVED": {
+          "$ref": "#/$defs/row"
+        },
+        "WILCO": {
+          "$ref": "#/$defs/row"
+        },
+        "DECLINED": {
+          "$ref": "#/$defs/row"
+        },
+        "DONE": {
+          "$ref": "#/$defs/row"
+        },
+        "START": {
+          "$ref": "#/$defs/row"
+        },
+        "END": {
+          "$ref": "#/$defs/row"
+        },
+        "CLAIM": {
+          "$ref": "#/$defs/row"
+        },
+        "RELEASE": {
+          "$ref": "#/$defs/row"
+        },
+        "FORCED END": {
+          "$ref": "#/$defs/row"
+        },
+        "AWAY": {
+          "$ref": "#/$defs/row"
+        },
+        "BACK": {
+          "$ref": "#/$defs/row"
+        },
+        "DECISION": {
+          "$ref": "#/$defs/row"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "opener-name": {
+      "type": "string",
+      "pattern": "^[A-Z][a-z]*( [a-z]+){0,2}$",
+      "not": {
+        "enum": [
+          "Do",
+          "Limit"
+        ]
+      }
+    },
+    "opener": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "means"
+      ],
+      "properties": {
+        "means": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lines",
+        "allow",
+        "require"
+      ],
+      "properties": {
+        "lines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allow": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/opener-name"
+          }
+        },
+        "require": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/opener-name"
+          }
+        }
+      }
+    }
+  }
+}

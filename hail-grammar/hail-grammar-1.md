@@ -261,4 +261,43 @@ No threshold or optimal line budget is inferred from it.
 
 ## 10. Schema and cases
 
-The companion schema checks data shapes. The procedure above also checks relations and meaning.
+[grammar.schema.json](grammar.schema.json) is JSON Schema draft 2020-12. Parse TOML to its JSON
+object model, then apply the schema without coercion: a boolean is not an integer. The schema closes
+all objects and checks metadata, types, names, nonempty definitions, common names and exact meanings,
+all marker rows, nonnegative budgets and unique lists. Its references are all local; no network is
+needed. TOML decoding is F1, schema shape is F2, and common-set schema failures are reported at F3
+with the common-specific codes. Reserved Do/Limit names use g-reserved, not a second g-shape line.
+
+Beside the schema, the reader checks opener references, required-allowed membership, capacity and
+pairwise meaning distinctions. The schema cannot hold the last rule: two different strings can
+mean the same. The synonymous-opener case deliberately passes the schema and is refused by F7.
+Body meanings, preservation, sentence completeness and body sufficiency also cannot be certified by
+schema validation. No custom executable is embedded in a grammar.
+
+The companion case suite in the vector repository at `hail-grammar/` supplies complete inputs,
+expected fault lines and hand traces. Cases exercise both sides of budgets, missing requirements,
+unknown/disallowed/empty openers, multiple faults, common meanings, semantic duplicates and writer
+duties. Running by hand means executing F1–F7 and B1–B7 in order, recording the specific comparisons
+and the complete emitted lines. It is not a run of the superseded prototype. Filing consequences
+are hail/1's and tested in its current-edition suite.
+
+## 11. Sources
+
+These are the draft's one source list. Single words and procedures informed the design; no standard's
+wording is copied. The research available for this draft was a supplied record and its critical read,
+not a new retrieval of the linked works. The held data-link claims remain held under §8.
+
+- Standard Marine Communication Phrases, resolution A.918(22), for distinct markers, correction,
+  repetition and batched maintenance of a common set.
+- [SERA.14045](https://regulatorylibrary.caa.co.uk/923-2012/Content/Regs/03440_SERA14045_Transmitting_technique.htm),
+  for stable meanings of procedure words.
+- [SERA.14075](https://regulatorylibrary.caa.co.uk/923-2012/Content/Regs/03620_SERA14075_Exchange_of_communications.htm),
+  for correcting a stated value and requesting a named part again.
+- [JSON Schema validation, draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-validation),
+  for closed data shapes, properties and bounds; semantics remain this draft's.
+- TOML, for the grammar file's data notation.
+- The retained 26 November baseline and blind rewrite trial, for whole-exchange measurement and the
+  observed limits of short bodies. They supply observations, not normative wording or public identities.
+
+Stage A specifies and hand-runs these cases. Stage B implements after 1 December and takes the shadow
+measure. No claim of independent implementation readiness is made by this writer's own hand run.
