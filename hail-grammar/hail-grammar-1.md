@@ -202,7 +202,18 @@ original supplied to the check. No rule silently deletes a word to fit a budget.
 
 ## 8. Starting files and later work
 
-Starting files and the questions left to use are specified below.
+[swe.toml](swe.toml) starts software engineering; [brand-comms.toml](brand-comms.toml) starts brand and
+communications. Both are edition 0, `start = true`. Their names describe their work; they make no
+claim about a registered name. Each REQUEST takes at most three body lines, excluding its ask and
+sources. Use may change that budget by a new grammar edition. QUESTION allows five to accommodate
+the existing Owner choice form. DONE starts at three lines with no required opener; this is a trial
+choice, not a settled requirement for all later grammars.
+
+The common meanings are identical in both files. Propose offers a course, while Next commits the
+sender's next act or identifies who acts next under a condition. Verdict expresses a review judgment;
+Fact expresses observation. In brand-comms, State expresses a publication stage and Basis identifies
+materials a piece uses. They are related subjects, not alternative names for one meaning.
+No word list constrains Verdict or State; their declared meanings still apply.
 
 ## 9. Measurement
 

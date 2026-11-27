@@ -1,0 +1,122 @@
+#:schema ./grammar.schema.json
+# A start for software engineering. Budgets and vocabulary grow by use.
+hail-grammar = 1
+name = "swe"
+edition = 0
+start = true
+
+[openers."Fact"]
+means = "what was observed, with its value"
+
+[openers."Not done"]
+means = "what was left out or not checked, and why; nothing when nothing was left out"
+
+[openers."Next"]
+means = "the sender's own next act, or who acts next and on what condition"
+
+[openers."Correction"]
+means = "the wrong value and its replacement in the hail named by re"
+
+[openers."Say again"]
+means = "the wanted part of the hail named by re: a source number, body line number or header name"
+
+[openers."Propose"]
+means = "a course offered for the reader to choose, not a committed next act"
+
+[openers."Verdict"]
+means = "the sender’s review judgment about a named work product"
+
+[markers."INFORMATION"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."ADVICE"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."WARNING"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = ["Fact"]
+
+[markers."QUESTION"]
+lines = 5
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."ANSWER"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."REQUEST"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."STOP"]
+lines = 2
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = ["Fact"]
+
+[markers."RECEIVED"]
+lines = 1
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."WILCO"]
+lines = 1
+allow = ["Next"]
+require = []
+
+[markers."DECLINED"]
+lines = 1
+allow = ["Not done"]
+require = ["Not done"]
+
+[markers."DONE"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."START"]
+lines = 1
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."END"]
+lines = 0
+allow = []
+require = []
+
+[markers."CLAIM"]
+lines = 0
+allow = []
+require = []
+
+[markers."RELEASE"]
+lines = 0
+allow = []
+require = []
+
+[markers."FORCED END"]
+lines = 1
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."AWAY"]
+lines = 1
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."BACK"]
+lines = 1
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
+
+[markers."DECISION"]
+lines = 3
+allow = ["Fact", "Not done", "Next", "Correction", "Say again", "Propose", "Verdict"]
+require = []
