@@ -448,6 +448,12 @@ not permission to fall back to `hail.toml`.
 | Source hashes | boolean `source-hashes`, default false; when true each source carries sha256 | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
 | Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source follows §3, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
 
+The grammar defaults to `"none"`. A record naming none is bound by hail/1 alone. A sender chooses no
+grammar: it uses the destination record's settings, with no per-hail selector or fallback. An unknown,
+unreadable or invalid selected grammar refuses new filing, rather than silently becoming none. A
+loaded grammar is pinned by source commit and its own edition; earlier files remain readable at their
+pins. The draft grammar procedure lives in [hail-grammar/1](../hail-grammar/hail-grammar-1.md).
+
 These values define the settings once; carriers do not change their meaning. Source names need only
 be listed here: any regular file in a listed repository may be cited, not just a place or record folder.
 The roster mapping assigns short names to existing origins and creates no push, file or disclosure right.
