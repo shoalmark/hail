@@ -261,7 +261,7 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 | WARNING | a risk to weigh now | nothing unless `receipt: received` requests RECEIVED; an urgent Owner concern uses that request for signed seen (§10b) |
 | QUESTION | needs an answer | ANSWER; a `for: owner` QUESTION: the gate's ANSWER with `disposition` (§10b); an Owner-ask: the Owner's DECISION (§10b). RECEIVED comes first only if requested and the answer must wait |
 | ANSWER | answers a QUESTION | nothing |
-| REQUEST | asks the reader to act within its own grants | either DECLINED, which ends it, or WILCO followed by DONE or DECLINED "can't act" with a reason. RECEIVED comes first only if requested and the decision must wait |
+| REQUEST | asks the reader to act within its own grants | either DECLINED, which ends it, or WILCO followed by DONE or DECLINED "can't act". RECEIVED comes first only if requested and the decision must wait |
 | STOP | stop one named item, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED comes first only if requested and stopping takes time |
 
 **Receipts:**
@@ -624,7 +624,8 @@ sealanes/1. Without readable matching bytes and a usable scope the act check can
 failure. Other bots do not gain this exception merely by sharing the kind.
 
 **3. Every act names its brief.** A non-control bot hail carries `brief: <id> <sha256>` when enforcing. A STOP or
-REQUEST also carries `subject`, and each item must be within the brief. A use the Owner approves once carries `decision:
+REQUEST also carries `subject`, and each item must be within the brief. These are authorization
+fields for enforce mode, not required content of an ordinary request. A use the Owner approves once carries `decision:
 <id> <sha256>` as well: the sha256 covers the DECISION's canonical bytes, without its signature block. The signature is
 checked separately. This hash is not a source hash (§3); the approval adds no grant and replaces no brief limit on the
 subject or targets.
@@ -1094,7 +1095,7 @@ QUESTION with an ANSWER whose `disposition` (§3) names what it did:
   raising bot (point 3). The ANSWER's source names the Owner-ask;
 - **`answered`:** it answers the need with standing evidence (point 4). The ANSWER's source names that standing
   authority; or
-- **`rejected`:** it rejects the need. The ANSWER's body gives its reason, and its source list names evidence where there is any, or is empty.
+- **`rejected`:** it rejects the need. Its body may explain the rejection; its source list may name evidence.
 
 A bot between the raising bot and its gate that settles the need with standing evidence answers the same way, with
 `disposition: answered`. An ANSWER to a `for: owner` QUESTION MUST carry `disposition`.
@@ -1196,7 +1197,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   state. A surface that can't take a signature points the Owner to one that can.
 
 **7. The five answers.**
-- Every card offers five: **yes, or an option**; **no**, with a reason; **own words**; **later**, until a time; and
+- Every card offers five: **yes, or an option**; **no**; **own words**; **later**, until a time; and
   **talk** ("I'll come to your session"). Each is signed in one gesture.
 - **Yes, or an option,** ends the ask, and may be acted on.
 - **No** ends it, and MUST NOT be acted on.
@@ -1259,7 +1260,7 @@ an ended or released session does not give a consumed decision a second use.
   not, it sends its gate a WARNING naming the DECISION and waits for a new ask.
 - A later session that finds a use claim but no DONE MUST NOT repeat the act. It checks the outcome, or sends WARNING
   `outcome: unknown`, with `re` naming the DECISION, and waits.
-- The act ends with DONE or DECLINED "can't act", with a reason, and is shown in the Owner's digest.
+- The act ends with DONE or DECLINED "can't act", and is shown in the Owner's digest.
 - A decision asked by a decider that needs execution by a bot still needs a lawful delivery and return route. A bot's
   reply to the decider follows §8; it grants no new act or unsolicited reach.
 
@@ -1480,7 +1481,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 18. The filed DECISION has exactly the signed bytes and enters the asking team's record through a lawful filer.
 19. The acting bot verifies the answer itself and still needs its current grants.
 20. Closing, later and talk show the same state everywhere; a surface unable to sign points to one that can.
-21. A gate ANSWER has `disposition`; its source and reason match relayed, answered or rejected.
+21. A gate ANSWER has `disposition`; its source binding matches relayed or answered; rejected needs no prose reason.
 22. A once DECISION cannot serve as standing evidence.
 23. No and words need no prose reason under hail/1; words ends the ask and permits no act.
 24. A `hail` signature fails on a DECISION; `hail-decision` fails on another hail; `git` fails on both.
@@ -1653,7 +1654,7 @@ No modified frame is presented with an old signature. A frame alone never proves
 ## 13. Open
 
 This is the complete list of points still open or deferred by this edition, with what happens meanwhile. A planned
-feature creates no right. The separate change map records implementation gaps with the lines they affect.
+feature creates no right. The public change list records the sections this draft changes.
 
 | Point | Meanwhile | What waits |
 |---|---|---|
