@@ -27,7 +27,7 @@ restrictions refuses hail acts until the pin moves; a bot reader never resolves.
 | `records.<team>` | record | table | defaults in §8 | only `repositories`, `source-hashes` and `grammar` are allowed; types, lookup and carrier rules are defined once in §8 |
 | `teams` | team | table keyed by `<team>` | `{}` | hail reader refuses malformed names and, with the whole roster, an undeclared team |
 | `teams.<team>` | team | table of the team keys below | omitted means all defaults | hail reader refuses unknown children or a non-table |
-| `teams.<team>.signing-required` | team | boolean | `true` | false or a non-boolean is refused: a governing roster requires signing; a missing key blocks sending |
+| `teams.<team>.signing-required` | team | boolean | `true` | false or a non-boolean is refused; omission means true because a governing roster requires signing (hail/1 §9) |
 | `teams.<team>.mode` | team | string, `"shadow"` or `"enforce"` | `"shadow"` | hail reader refuses another value, and refuses deployment `enforce` while §13's six cases are open; isolated conformance fixtures may use enforce |
 | `teams.<team>.sealing` | team | table keyed by `<channel>` | `{}` | hail reader refuses bad names or non-table; a sender must identify its actual channel before applying a policy |
 | `teams.<team>.sealing.<channel>` | team | string, `"plain"` or `"sealed"` | when absent: plain for git and local socket, sealed for every other channel | hail reader refuses another value; sender refuses or holds a hail if required sealing cannot be done. A per-hail opt-in can seal a plain channel, never unseal a sealed one |

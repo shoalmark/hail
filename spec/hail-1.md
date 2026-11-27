@@ -688,7 +688,7 @@ and its namespace below. A missing required signature refuses filing; it does no
 that the bytes have hail form.
 
 A roster cannot turn its signing off while it governs the record. The former team flag is now fixed
-true. Without a roster, an owner's `signing-key` is that owner's public key for settings changes, and
+true; omission means true, and false or a non-boolean is refused. Without a roster, an owner's `signing-key` is that owner's public key for settings changes, and
 `keys` binds the owner's bots to their public signing keys. The transition that turns signing on
 includes these keys. Another owner's key, a bot's key or an unsigned commit cannot turn that owner off,
 including by removing its table, removing a key, setting record-wide signing off or replacing the
