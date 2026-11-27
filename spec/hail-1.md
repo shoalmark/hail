@@ -536,6 +536,11 @@ which team holds the tracker. A forwarded hail keeps the original file unchanged
 summary is its own text. WARNING uses `hail.warn`, and a reply uses its return grant or the person-reply
 rule below. No inferred lead route gates the auditor's findings or narrows a decider's granted reach.
 
+**Carrying a hail.** A REQUEST to carry, publish or file another hail does not turn that hail into a
+REQUEST. The reader checks the carried hail's own `from`, `marker` and `to` under its own applicable
+rights and signature rules, and also checks the carrier's request and filing right. A permitted outer
+REQUEST cannot smuggle a STOP or a message to an otherwise unreachable bot. The source stays unchanged.
+
 **Deciders.** `from: person.<id>` is signed by that decider's `keys.signing` (§9). Its `hail.message` and `hail.answer`
 grants reach the bots of the grant's teams, leads included, and the coordinator; `hail.brief` reaches those teams' bots.
 The grant's `in` narrows its scope, and no `to` is added to a decider's grant. It holds `hail.owner` by rule, direct or
