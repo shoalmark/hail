@@ -834,7 +834,8 @@ later edition must define the move. No empty repository resets claims, duplicate
   teams share, which team holds it is sealanes/1 §4.2's, where its number's `ids` range decides;
 - `ask:<repository-name>:<ask-id>` for an ask; the tracker tool supplies its stable ask id;
 - `thread:<hail-id>` for a hail thread, using its first hail's id;
-- `plan:<team>` for the team's plan, held by the lead.
+- `plan:<team>` for the named team's plan, held by its lead. The exact team key is required;
+  bare `plan:` and an inferred sender team are refused. The same team-qualified form applies in `subject`.
 
 A thread's matter is the `matter` its first hail names; with no `matter`, it is `thread:<first-hail-id>`. That filed
 first hail fixes the binding. A CLAIM on a tracker covers the threads whose first hail names that tracker. A reference
