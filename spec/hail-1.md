@@ -1406,6 +1406,7 @@ this section. The line's location must agree with its separate location field.
 | h-citation | unresolved citation; body line n or ask |
 | h-repository | unlisted repository name; source n |
 | h-source-commit | incomplete committed reference; source n |
+| h-source-form | otherwise malformed source value; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1457,12 +1458,19 @@ The new form and source diagnostics use these repair forms, substituting the act
 | uncited source | `source n: source is not cited; cite #n in the body or ask, or remove the source and renumber.` |
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
-| absent commit in a reference | `source n: committed file reference is incomplete; write R@ followed by its committed revision.` |
+| otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
+| any other malformed source value | `source n: V is not a well-formed source value; write name:path@commit using a listed name, a relative path of nonempty /-separated segments containing only ASCII letters, digits, ., _ or - (no . or .. segments), and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
 | missing path | `source n: P is absent at the named commit; commit the file first and write that revision.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
-Here R is the supplied repository name and path (`name:path`), P is the supplied path, and H is
-the hash of the supplied committed bytes. Do not replace these known values with generic names.
+The two malformed-value rows are exclusive: use h-source-commit only for an otherwise well-formed
+`name:path` lacking `@commit`, and h-source-form for every other malformed value, including a
+malformed optional hash suffix. Here R is the supplied repository name and path, V is the complete
+supplied source value, and P is the supplied path. Escape each on one physical diagnostic line.
+In those two repairs, `name:path@commit` and `sha256 H` are literal forms to print; H is a placeholder
+for the committed file's hash, not a hash inferred from a malformed value. The optional suffix has
+one space before `sha256` and one before H. In the required-or-wrong-hash row, substitute the hash
+of the supplied committed bytes for H. Do not replace known R, V, P or that hash with generic names.
 
 If an old pointer line is the sole attempted header delimiter, report its replacement as the single
 missing-sources fault above; do not repeat the same repair as a retired-key fault. When a sources
