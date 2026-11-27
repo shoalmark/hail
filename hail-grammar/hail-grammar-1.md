@@ -215,6 +215,11 @@ Fact expresses observation. In brand-comms, State expresses a publication stage 
 materials a piece uses. They are related subjects, not alternative names for one meaning.
 No word list constrains Verdict or State; their declared meanings still apply.
 
+**Later, not grammar fields of this edition:** a REQUEST required to name its reason; a DONE required
+to point to its result; word lists after an opener; values an answer must repeat; and a separate
+length for one opener. Unknown fields trying to express these are refused by the closed file form.
+A writer can already include such information voluntarily; a grammar file cannot require it here.
+
 ## 9. Measurement
 
 The next stage measures complete exchanges, not body length alone.
