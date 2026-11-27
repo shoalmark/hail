@@ -9,8 +9,7 @@ pins, locks, change control, removal and putting back follow sealanes/1 §§2–
 - **Informative:** A six-day trial on two teams measures what hail/1 costs and where it fails.
 
 **Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails under one
-Owner, who keeps the final word. It fixes a message's frame, header, markers and receipts. Content stays behind sources
-named by sha256. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
+Owner, who keeps the final word. It fixes a message's frame, header, markers and receipts. Sources name committed files. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
 DECISION approves no act the bot does not already hold. Hails take the nearest transport that reaches the reader, are
 signed when §9 requires it, may be sealed to their readers and the Owner's oversight keys, and are filed and never
 amended. The record tracks sessions and their claims, one session of each bot to a matter. The rules have not been shown
@@ -81,7 +80,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
   travel is §7's business.
 - **A bot's hail carries no authority.** Authority comes from the roster and the signed records its rules accept; a
   bot's hail can only point at them (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
-- **Sources, not copies.** Content lives in git, or in a file named by its sha256. A hail cannot drift from the record.
+- **Sources, not copies.** Sources name committed files; short values stay in the body. A hail cannot drift from the record.
 - **Small on purpose.** A body of at most five lines, with one ask on REQUEST or QUESTION only. Anything longer goes
   behind a source.
 - **No secrets.** A hail MUST NOT carry a secret, such as a credential, a private key, a token or a password: not in its
@@ -212,10 +211,24 @@ matches `from`. Hash and commit hex is lower case. A source path has non-empty `
 ASCII letters, digits, `.`, `_`, `-`, with no `.` or `..` segment and no leading or trailing `/`. It holds
 no `@`, `:` or space. Every filed hail has such a path; the filing check refuses another.
 
-**Source values.** A value names a repository file and its revision. The source's file bytes include any
-signature block. A `SHA256SUMS` file is an ordinary source: this edition does not expand it into a second
-reference list. List each file needed as evidence as its own source. A forge state is text without ` · `;
-a mailbox id uses ASCII letters, digits, `_` and `-`.
+**Source values.** Each value is `name:path@commit`, optionally followed by ` sha256 <hex>`.
+The commit is 7 to 64 lower-case hex digits and must resolve uniquely in the named repository; no branch,
+head, tag or workbench name substitutes for a commit. The commit fixes the file's bytes. A source is
+committed before a hail names it, and available on the shared remote before the hail is sent. A short
+value that is the point, such as 8, a verdict or a short commit id, stays in the body.
+
+The optional sha256 is 64 lower-case hex digits and, when present, must equal the hash of the committed
+file bytes, including any signature block; checkout conversion is irrelevant. It is required only
+where the record's settings require it. Protocol references to checking a source's hash mean checking
+its pinned bytes, plus the sha256 if present or required; they add no second mandatory hash. The
+`decision:` hash has a different purpose and still covers only canonical decision bytes.
+
+A reader checks that the repository name is listed in the record's settings, the commit exists and
+resolves uniquely, and the path names a regular file there. No path component may be a link or submodule.
+Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
+An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
+listed repository. A `SHA256SUMS` file is an ordinary source and is not expanded into a second list.
+A forge state is text without ` · `; a mailbox id uses ASCII letters, digits, `_` and `-`.
 
 `re` is an id list if any `, `-separated part has id form; then every part must have it. A free description contains no
 such part, and never a spelling of `none` in another case. An id's minute that differs from its written time in UTC
@@ -717,7 +730,7 @@ checked", and no reader acts on it.
 A `min-class` outside K1–K3 is refused, as is one with no eligible non-R oversight key. The minimum must also have at
 least two eligible keys, with a surviving key as above. `hail check` cannot judge whether the sender chose the right
 record class; `hail send` checks the selected record class and refuses an unknown one. No file behind a source is
-sealed by this edition; sensitive content that must not sit readable on the forge stays in a workbench (§13).
+sealed by this edition; sensitive content that must not sit readable on the forge stays outside the hail and its sources (§13).
 
 ## 10. The record
 
@@ -732,7 +745,7 @@ filer files the ask and the Owner's DECISION in that team's declared record. A m
 without a record, refuses this route. A cross-team matter is read with the whole roster.
 
 A bot without a file grant keeps each outgoing hail's exact bytes at `out/hail/<id>.txt`; the filer files it. Content
-stays in `out/to-<bot>/`. A fully isolated workbench may answer by its hand-back file, with an outbox optional. Outboxes
+stays in `out/to-<bot>/`. A fully isolated workbench hands its bytes to its filer; its hand-back has no effect until filed. Outboxes
 are not a second authority store. Every bot also keeps ids, canonical bytes and responses in history that later sessions
 can read, before it answers or acts; filing first meets this. A filed hail MUST NOT be amended. A correction is a new
 hail with `supersedes`. A sealed hail is filed as its sealed span.
@@ -1083,7 +1096,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   - `from: owner <device>`, where the device is `desktop` (§9); and an id `owner-<yyyymmdd>T<hhmm>Z-<key>` (§3);
   - `to:` the ask's `from`: the bot or person that asked;
   - `re:` the ask's id;
-  - source #1 the ask's filed file, signature included, with its sha256;
+  - source #1 the ask's filed file, signature included, with its pinned file reference;
   - `answer:` is `yes`, `no`, `option <label>`, `words`, `later <time>` or `talk`, one for each answer above. `option
     <label>` names one of the ask's option lines by its label (point 3), and `later <time>` gives the time in
     `written-against`'s time form;
@@ -1163,7 +1176,7 @@ supersedes the old one, and names it in `supersedes`.
 
 **11. Delivery back.**
 - **The signing tool keeps a DECISION until it is filed.** It files it through the asking team's filer, within that
-  team's push grants (§10), and retries. To hand it over, it hails that filer with an INFORMATION, `from: owner
+  team's push grants (§10), and retries. First it commits the signed file on a source branch of a listed repository; that is not yet a filing. To hand it over, it hails that filer with an INFORMATION, `from: owner
   <device>`, whose source names the DECISION, and the filer files the DECISION like any hail. That INFORMATION is a
   hail: it is signed in the namespace `hail` with the key of the device its `from` names (§9), and carries no authority
   of its own. The DECISION's signature is what counts. After 10 minutes unfiled, the signing tool shows "signed, not
@@ -1237,7 +1250,7 @@ the checks not made and authorises no act. Allowed-signers data is derived in me
 | sender, reach, return grant, signing flag, keys, edition and pin | sealanes/1 state in force, trusted bytes, reader kind (whole, resolving or slice), default-branch head and chain to a counted state; for a resolver, the organisation state, pin and lock |
 | live versus record | live: the checking reader's state at its head; record: the entering commit and state that counted there; new action: current state as well |
 | future written time | explicit reference time: the arrival clock, or entering commit's committer time; never the checker's own clock |
-| sources and stale context | named committed or workbench bytes; each SHA256SUMS list and all its files at the written-against revision, with repository tree entries proving paths and regular files; commit availability and scan patterns/policy; supplied lookup results, never fetched by the check |
+| sources and stale context | named committed bytes and repository tree entries proving paths and regular files; commit availability and scan policy; supplied lookup results, never fetched by the check |
 | duplicate or reused id | the bot's readable history and team record, canonical bytes and earlier responses |
 | DECISION, expiry, change of mind, standing evidence, one use | the ask's filed file and original need, decision in force, relevant filings and committer times, Owner keys then, claims and results, and current grants for an act |
 | act check | brief and its hash, signed delivery, issuer's grant, prior briefs, kind definition for a principal, mode, fixed roster and clock snapshot, and exact final destination |
@@ -1261,13 +1274,13 @@ differing from the written minute is reported, not refused. The record-time chec
 catches a wrong clock, not a lying filer. Sealed content without its bound opening is not checked and is never acted on
 (§9a). The check cannot judge the sender's record-class choice or physical key custody.
 
-**`hail send <address> <path>`** takes a draft: header without `id`, written time or source hash, then the body and
-required `ask`. It makes the id and time from one clock reading, obtains and hashes source bytes, reads the state in
+**`hail send <address> <path>`** takes a draft: header without `id` or written time, then the body and
+required `ask`. It makes the id and time from one clock reading, obtains committed source bytes and adds a hash only when required or requested, reads the state in
 force, builds the final frame, checks it and its actual destination, signs, seals where required, and sends by §7.
 Checking, signing and sending are one step; a check of other bytes is no check of this send. It refuses:
 - a failed form, source, current grant, signature, session or required scope check; the session check is §10's sending
   rule, including live START, matter claims, receipts and the first-hail filing claim;
-- an absolute home path in the header, body, ask, or any file the source or its hash list names, on every destination:
+- an absolute home path in the header, body, ask, or any source file, on every destination:
   `/Users/<name>/`, `/home/<name>/`, `C:\Users\<name>\` or `C:/Users/<name>/` (the last two case-insensitive), or the
   sending user's own home directory however written. A `~/` path passes this test;
 - a private id in a public-bound hail, in those same bytes. Prefixes and destinations come from the team's extension. A
@@ -1278,9 +1291,9 @@ Checking, signing and sending are one step; a check of other bytes is no check o
   obtain or verify. A pattern miss never relaxes §1's no-secret rule;
 - required sealing it cannot perform, an unknown record class, a class below policy, or no eligible oversight setup.
 
-Both tools hash and scan every file reached through a `SHA256SUMS` list under §3, using the same home-path,
-private-id and versioned secret-pattern checks above. `hail check` takes the bytes, tree entries, destination and scan
-policy as explicit inputs; unavailable bytes or a bad list fails, and omitted inputs never give a full pass.
+Both tools scan each directly named source file with the same byte policies. `hail check` takes the
+committed bytes, tree entries, destination and scan policy as explicit inputs; it fetches nothing.
+An optional source hash, when supplied, is checked. Omitted inputs never give a full pass.
 
 There is no defined form of an Owner quote to verify automatically: this is not a `hail send` refusal. A bare quote
 still has no authority (§6.2). `hail check` is built first, then `hail send`; the build choice is open (§13). Until they
@@ -1370,10 +1383,9 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 71. An unreadable span gets no reply; a readable malformed header gets DECLINED only with a listed sender, id and a
     reply permitted by §8. Canonicalisation precedes finding a frame with trailing spaces.
 72. REQUEST and QUESTION need exactly one `ask`; every other marker forbids it; five body lines pass and six fail.
-73. A source hashes committed bytes, not converted checkout bytes; a file source includes signature blocks and a
-    `decision` hash excludes them. Repository tokens derive from declared origins; a workbench with a commit fails.
-74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider content name may use a hash list, never a
-    filed hail. A bad filing path is refused before it enters.
+73. A source fixes committed bytes, not converted checkout bytes; an optional file hash includes signature blocks
+    and a `decision` hash excludes them. A file must already be committed. A workbench source fails.
+74. Paths with `@`, `:`, spaces, empty, `.` or `..` segments fail; a wider name must be committed under a conforming path before it is cited. A bad filing path is refused before it enters.
 75. All listed home-path forms fail in every scanned location on private and public routes; `~/` passes that test.
 76. A bounded private-id match fails only for a public destination; malformed prefixes block every such send; an empty
     prefix list blocks none on that ground.
@@ -1501,7 +1513,7 @@ feature creates no right. The separate change map records implementation gaps wi
 | Hosted intake | digest reads only reachable outboxes and states that limit | a path covering all hosted and isolated bots |
 | Missing-shown notice component | digest says unconfirmed; raising bot and gate see it at catch-up; no stronger delivery claim | the dedicated notifier |
 | Tool build choice | follow the rules by hand; no build language is authorised by this text | tool implementation and reliance on the relay |
-| S2 for pointed-at files | no such file is sealed by this protocol; sensitive bytes stay in a workbench | sealing that content as a protocol form |
+| S2 for pointed-at files | no such file is sealed by this protocol; sensitive bytes stay outside the hail and its sources | sealing that content as a protocol form |
 | Advisory level and trial results | a trial grants no authority; force follows the roster only | any further advisory semantics and a real-time relay tier |
 | Hosted frame fidelity | send a source to the filed hail if the platform may alter its bytes | a transport claim of byte preservation |
 | Oversight software | use conforming formats and proven support; unsupported sealing holds or refuses | unverified chip or hybrid support |
@@ -1581,7 +1593,7 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   what was sealed to it. Key classes and rotation bound that risk.
 - **Plaintext** (§9a): a sealed body is not filed where anyone outside the recipients and Owner can read it. Sensitive
   content on a hosted endpoint stays behind a
-  source to a suitable workbench.
+  source in a suitably restricted listed repository.
 - **Cards and notices** (§10b): a card shows who (by address, any name beside it, a bot marked as a bot), why, where to
   clarify, options, answers and a source; originals stay behind it. A notice says only "an ask waits".
 - **Presence** (§10b): the last real Owner message's time stays locally and is reported to the relay; tool calls and bot
