@@ -159,7 +159,7 @@ nothing. This rule adds no return grant.
 | `re` | yes | `none`, one id, or ids separated by `, `. Free text only when the thing answered has no id. On a DECISION, exactly its ask's id; on a FORCED END with a live claim, the STOP's id |
 | `supersedes` | no | the sender's own earlier hail withdrawn by this one; on a DECISION, the decision in force it replaces |
 | `marker` | yes | one of §4; unknown markers follow §2 |
-| `written-against` | yes | zero or more `<repo>@<commit>` and forge states, separated by ` · `, and exactly one fresh time: `YYYY-MM-DDTHH:MM:SS+HH:MM` or a negative offset; `+HHMM` and `-HHMM` also pass. No `Z` or fraction. A valid calendar date, hour 00–23, minute and second 00–59. The offset is bounded as the time is, hour 00–23 and minute 00–59; a time whose offset is outside that is refused. `hail send` takes the time afresh; a retry keeps it. `hail@<commit>` may name the text used to write, never the text in force |
+| `written-against` | yes | zero or more `<repo>@<commit>` and forge states, separated by ` · `, and exactly one fresh time: `YYYY-MM-DDTHH:MM:SS+HH:MM` or a negative offset; `+HHMM` and `-HHMM` also pass. `Z` also passes and means UTC; fractions do not. A valid calendar date, hour 00–23, minute and second 00–59. The offset is bounded as the time is, hour 00–23 and minute 00–59; a time whose offset is outside that is refused. `hail send` takes the time afresh; a retry keeps it. `hail@<commit>` may name the text used to write, never the text in force |
 | `model` | no | two non-space words: the writing session's model and effort; no roster grant is inferred from them |
 | `decide-by` | on an Owner-ask only | the expiry time, in the time form above. A DONE time in an ordinary ask is prose; no tool times it (§5) |
 | `for` | on a bot's QUESTION needing the Owner | `owner`; forbidden on other hails |
@@ -1820,9 +1820,9 @@ wa-item          = repo-commit / forge-state / wa-time
 repo-commit      = (repo-token / %s"hail") "@" commit
 forge-state      = <non-empty text without sep>
 wa-time          = 4DIGIT "-" 2DIGIT "-" 2DIGIT %s"T"
-                   2DIGIT ":" 2DIGIT ":" 2DIGIT ("+" / "-")
-                   2DIGIT [":"] 2DIGIT
-                   ; valid Gregorian date and time, second <= 59; no Z/fraction
+                   2DIGIT ":" 2DIGIT ":" 2DIGIT (%s"Z" / (("+" / "-")
+                   2DIGIT [":"] 2DIGIT))
+                   ; valid Gregorian date and time, second <= 59; Z or numeric offset; no fraction
                    ; offset hour <= 23 and minute <= 59, as the time's
 model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
