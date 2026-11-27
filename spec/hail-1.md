@@ -92,6 +92,11 @@ table](ext-hail-keys.md) is part of this edition's normative text.
   is not a session's own file. A bot's **brief** is the task document the bot is given. Its scope block, at its top, is
   what the act check reads (§8a).
 
+**The body is enough to decide without opening a source.** This is a rule for writers. A source
+supports the body and does not carry a missing instruction or decisive value. No reader can check
+this sufficiency: passing form, source or grammar checks does not certify it. A reader missing what
+it needs asks for it in a new hail instead of guessing.
+
 ## 2. The frame
 
 ```text
