@@ -220,6 +220,12 @@ to point to its result; word lists after an opener; values an answer must repeat
 length for one opener. Unknown fields trying to express these are refused by the closed file form.
 A writer can already include such information voluntarily; a grammar file cannot require it here.
 
+**Not decided; use decides:** the eventual line budgets; whether Fact should split; which openers
+DONE should require; whether a marker should name its allowed answers; and whether hails should be
+capped by elements. The last two wait for the written data-link rules to be read word for word.
+The supplied research's data-link claims were held back by its critical read; they do not justify
+this draft's budgets or answer sets. This draft makes no empirical claim that three lines is optimal.
+
 ## 9. Measurement
 
 The next stage measures complete exchanges, not body length alone.
