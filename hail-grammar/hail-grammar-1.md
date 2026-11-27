@@ -228,7 +228,36 @@ this draft's budgets or answer sets. This draft makes no empirical claim that th
 
 ## 9. Measurement
 
-The next stage measures complete exchanges, not body length alone.
+Stage B takes the shadow measure; this draft states it and claims no new measured saving.
+Count totals per closed REQUEST: the request, every hail of its exchange through terminal DONE,
+DECLINED or withdrawal, including correction/repetition side threads, and every file first added
+for that request. Include a file made only to move words out of a body, even if no source ultimately
+cites it. Count a shared file once, attributing it to the earliest request for which it was first
+added; list the allocation. Existing files are excluded, but newly added versions and their cost
+are reported separately so rewriting a short initial file cannot hide cost. Report the closure
+rule, unmatched requests and unreadable sources, never silently drop them.
+
+For text, count Unicode scalar values in the exact canonical hails and committed file contents,
+including framing, headers, sources and final line ends. Count each hail id once; a retry's extra
+transport cost is reported separately. For each new file use its complete final content at closure,
+including content removed later in a separate churn total. Report bytes alongside characters for
+all files, and binary bytes separately; do not call undecodable bytes characters.
+
+Also count the full grammar text a bot reads in each session, including repeated common rules and
+any procedure text actually read. Report per-session and aggregate characters, bytes and sessions.
+Count hails containing Correction and hails containing Say again per hundred hails, separately and
+as a union; a hail containing both increments both separate counts but only once in the union.
+Use zero events over zero hails as undefined, never as a rate of zero.
+
+Compare with the 26 November baseline and a plain `write briefly` control. Use matched tasks and
+closure criteria, identify settings and grammar editions, and report failures, retries and unresolved
+work alongside medians, p90 and totals. The control has no grammar file and still follows hail/1.
+The supplied baseline has 179 closed requests, median 1,727 hail characters, p90 2,774 and a total
+333,201 hail characters. Files first added occurred in 75 requests and totalled 1,480,796 bytes.
+Its combined headline mixed hail characters with file bytes; it is not a character total. Preserve
+those units and recompute comparable totals from retained baseline files before asserting savings.
+The earlier blind rewrite trial reduced body text, but did not establish a reduction in total cost.
+No threshold or optimal line budget is inferred from it.
 
 ## 10. Schema and cases
 
