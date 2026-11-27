@@ -1393,6 +1393,12 @@ The new form and source diagnostics use these repair forms, substituting the act
 | missing path | `source n: path is absent at the named commit; commit the file first and write that revision.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
+If an old pointer line is the sole attempted header delimiter, report its replacement as the single
+missing-sources fault above; do not repeat the same repair as a retired-key fault. When a sources
+line is also present, print `header pointer: this edition has one source list; remove pointer and
+put any reference in the numbered sources.` A malformed source value skips lookup and hash checks
+for that value; well-formed sources and independent fields still get checked.
+
 Other form faults follow the same location/problem/repair convention, naming the required form from
 §3. A `to` address lacking its bot component says `header to: X is not a bot address; write a listed
 owner.bot or team.handle address.` An invalid written date says `header written-against: value is not
