@@ -61,12 +61,8 @@ gives no recipient key and substitutes for none of these checks.
 Sealing a decider's hail is open (§13): a decider's hail is not sealed, and a `seen-by` overseer reads it whole. No
 extension or core key is added for a decider or an overseer.
 
-The ordinary overdue clock remains per addressed bot. A FORCED END with a live claim needs a STOP still in force and
-uses §10's holder-only response rule. Its window starts at the later filing event of that STOP and the subject
-session's current uninterrupted claim on the item. The watcher interval remains the value at STOP filing; the two
-filing commit times are that later starting commit's and the end's. A reclaim or successor gets the full window.
-An unfiled retry meets those checks anew; an accepted end's retry is only a duplicate. Trigger acceptance is final for
-replay, using the STOP status and claim at that event. A retry itself changes no interval or starting event.
+FORCED END uses the watcher interval at STOP filing and the event, response, retry and replay rules
+in hail/1 §10.
 
 The public-text test uses the sending bot's team settings and the actual destination repository's origin, not the
 repository a source happens to name. If any actual destination is public under that policy, the public scan
