@@ -445,7 +445,7 @@ not permission to fall back to `hail.toml`.
 | Setting | Meaning and bounds | Roster carrier | No-roster carrier at the record root |
 |---|---|---|---|
 | Bots and addresses | each exact listed bot and its owner or team; unknown sender or addressee refuses filing | core teams and bots, with their core keys | `owners.<owner>.bots`, an array of distinct bot names; address `<owner>.<bot>` |
-| Signing step | as §9; required with a roster; otherwise off initially, then on for an owner or the record | the roster itself turns signing on; core signing keys | `signing`, `"off"` or `"on"`, default `"off"`; optional `owners.<owner>.signing` may turn that owner on, never override record-wide on; `owners.<owner>.keys` maps bot names to public signing keys |
+| Signing step | as §9; required with a roster; otherwise off initially, then on for an owner or the record | the roster itself turns signing on; core signing keys | `signing`, `"off"` or `"on"`, default `"off"`; optional `owners.<owner>.signing` may turn that owner on, never override record-wide on; `owners.<owner>.signing-key` and `owners.<owner>.keys` supply the public keys described in §9 |
 | Repositories | map of short names to repository origins; empty by default; names match `[a-z][a-z0-9-]*`; each name has one origin, distinct names may alias an origin | `ext.hail.records.<team>.repositories`, each origin already declared by core places or records | `repositories` with the same map |
 | Source hashes | boolean `source-hashes`, default false; when true each source carries sha256 | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
 | Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source follows §3, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
@@ -659,14 +659,40 @@ separate system users, a chip that gates use, or a private store isolated from o
 team. History that another bot can change or roll back gives no duplicate or replay defence against that bot. All
 sessions of a bot share its keys; a signature never proves which session used one (sealanes/1 §12).
 
-**When.** `ext.hail.teams.<team>.signing-required` defaults to false. When true, every hail that team's bots send is
-signed, on every route. A hail across teams is signed where either endpoint's team requires it. Before the flag, keys or
-a signing tool alone create no signing requirement for bots. The Owner should set it once keys and sending work. A
-missing signature when required is DECLINED, "unsigned", under §2's reply rule.
+**When.** A hail needs no signature to be a hail; signing is a step the owners of a record turn on.
+The following conditions apply word for word:
 
-Every person's hail is signed always, whatever team flags say: the Owner by an enrolled signing key, a decider by its
-`keys.signing`. An unsigned one is DECLINED, "not signed". This includes the Owner's START, AWAY, BACK, STOP, FORCED
-END, DECISION, "seen" and delivery. A signature present on any hail MUST verify even when signing is optional.
+1. Every hail's step is shown by every tool and view, 'by the forge's access alone' or 'signed', and the first is never shown as the second.
+2. Where a roster governs a record, the roster turns signing on and it is required there.
+3. Signing, once on for an owner, is turned off only by that owner's signed commit.
+
+Without a roster, signing starts off under §8. A git committer name is not proof of authorship. With
+signing on, each hail of that owner must be introduced by a verified signed commit whose signer is
+listed for its `from` bot; the complete hail bytes are covered by that commit. A present detached hail
+signature must also verify. A record using a roster additionally requires the detached hail signature
+and its namespace below. A missing required signature refuses filing; it does not change the fact
+that the bytes have hail form.
+
+A roster cannot turn its signing off while it governs the record. The former team flag is now fixed
+true. Without a roster, an owner's `signing-key` is that owner's public key for settings changes, and
+`keys` binds the owner's bots to their public signing keys. The transition that turns signing on
+includes these keys. Another owner's key, a bot's key or an unsigned commit cannot turn that owner off,
+including by removing its table, removing a key, setting record-wide signing off or replacing the
+settings carrier. Verify such a transition under the prior state's owner key before counting it.
+The host's signed commit is needed as well for a shared change; it cannot replace the affected owner's
+signature. If the commit format cannot carry both required authorizations, keep signing on and change
+only an owner-specific table with its owner's signature. Adoption of a roster never downgrades signing.
+
+A view labels a hail `signed` only after the signature required for its filing step has verified; a
+present but unchecked signature is never a claim of verified signing. A form-only view prints the
+literal step label from supplied filing settings and separately says `signature not checked`; with no
+settings it says `step not checked`, never guesses either label. An earlier unsigned hail retains
+`by the forge's access alone` after the owner turns signing on. A later required signature that is
+missing is a fault, not a silent downgrade to the earlier step.
+
+Every person's roster hail remains signed: the Owner by an enrolled signing key and a decider by its
+own signing key. DECISION, START, AWAY, BACK, STOP, FORCED END, seen and delivery retain their applicable
+signature rules. A signature present on any hail must verify even where signing is off.
 
 **Keys and state.** Bot keys are sealanes/1's `keys.signing`, including `keys = "team"`, with its allowed key types. A
 decider has its own `keys.signing`. Hail derives allowed-signers data in memory on each run; no check writes a file. A
@@ -1449,9 +1475,9 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 75. All listed home-path forms fail in every scanned location on private and public routes; `~/` passes that test.
 76. A bounded private-id match fails only for a public destination; malformed prefixes block every such send; an empty
     prefix list blocks none on that ground.
-77. A route is signed if either team's flag requires it; all of a flagged team's outgoing hails need signatures. An
-    unsigned hail sent before the flag but filed after fails; re-sending signed under a new id passes.
-78. A person's unsigned hail fails "not signed" with all team flags false; a decider's key and scope are checked.
+77. Every roster hail requires signing. Without a roster, each owner’s filing step decides. An unsigned
+    hail filed before signing remains readable at its old step; one filed after the transition is refused.
+78. A person's unsigned hail fails "not signed" under every roster setting; a decider's key and scope are checked.
 79. A sealed hail lacks either `sealed-to` or `min-class`: refused. Both on an unsealed hail: refused.
 80. Sealed bytes without a bound opening report "contents not checked" and permit no act; mismatched opening, recipient
     count, tag, reader key or required oversight recipient fails; a bound valid opening passes.
@@ -1607,8 +1633,7 @@ This section gathers rules stated elsewhere and adds none. The named section gov
 - **Authority and words** (§6, §8): grants come from the counted sealanes/1 state, not a hail, quote or stale worktree.
   A DECISION approves a use already held and never widens it. The Owner's own commit changes roster and keys.
 - **Keys and identities** (§9): a signature proves its key, a bot only where other bots cannot use it, and never a
-  session among the same bot's sessions. People sign always. Bot signing follows the team flags, at either end for a
-  cross-team route. Namespace separation prevents using a signature for another purpose.
+  session among the same bot's sessions. People sign always. Signing is required wherever a roster governs; otherwise it follows the owner’s recorded step. Namespace separation prevents using a signature for another purpose.
 - **Root of trust** (§8, §9): sealanes/1's chain and Table 1 decide state. Before the first roster, and while no Owner
   key is enrolled, the forge's guard and the Owner's own gate are the remaining guard. A force-push can hide earlier
   chain history. A reader that cannot reach a counted state refuses rights.
@@ -1846,14 +1871,14 @@ oversight-keys = [
 ]
 
 [roster.ext.hail.teams.a]
-signing-required = false
+signing-required = true
 mode = "shadow"
 record-classes = { default = "K1" }
 private-id-prefixes = []
 public-destinations = []
 
 [roster.ext.hail.teams.b]
-signing-required = false
+signing-required = true
 mode = "shadow"
 sealing = { hosted = "plain" }
 
@@ -1866,8 +1891,7 @@ wake-interval = 0
 notice-interval = 0
 ```
 
-All omitted extension values take the key table's defaults. All example hails are signed even though the bot flags are
-false. The Owner's key file uses the `desktop` device, with `hail`, `hail-decision` and `git` permitted; its core format
+All omitted extension values take the key table's defaults. A roster requires signed hails; its team flags are fixed true. The Owner's key file uses the `desktop` device, with `hail`, `hail-decision` and `git` permitted; its core format
 is sealanes/1's. Example public signing keys follow, as `sender public-key` lines, with no private half:
 
 ```text
