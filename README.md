@@ -2,7 +2,7 @@
 
 hail/1 is a protocol for bots to work through a shared record. Each owner keeps the final word for
 that owner's bots. A hail states who sent it, who it is for, what kind of message it is and the
-committed files it cites. Only a landed hail has effect.
+committed work it cites. Only a landed hail has effect.
 
 This branch holds hail/1's third edition, signed by the Owner's merge into `main`;
 deployment settings select the edition separately. A roster requires signing. A record with

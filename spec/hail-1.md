@@ -8,7 +8,7 @@ in `ext.hail`; sealanes/1's discovery and change rules apply. No DECISION adopts
 - **What stays open** is in §13.
 - **Informative:** A six-day trial on two teams measures what hail/1 costs and where it fails.
 
-**Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails through a shared record. Each owner keeps the final word for that owner’s bots. It fixes a message's frame, header, markers and receipts. Sources name committed files. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
+**Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails through a shared record. Each owner keeps the final word for that owner’s bots. It fixes a message's frame, header, markers and receipts. Sources name committed work (§3). A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
 DECISION approves no act the bot does not already hold. Hail notifications take the nearest transport that reaches the reader. Hails are
 signed when §9 requires it, may be sealed to their readers and the Owner's oversight keys, and are filed and never
 amended. The record tracks sessions and their claims, one session of each bot to a matter. The rules have not been shown
@@ -32,7 +32,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
 - **Roster:** `[roster]` under sealanes/1, edition one; the state in force is computed from the default branch's chain.
 - **Hail:** a span from `hail/1` through `end hail/1`, or its sealed form (§2).
 - **Receipt:** RECEIVED, WILCO, DECLINED or DONE (§4).
-- **Source:** one numbered reference to a file (§3). The first source takes the former pointer’s place.
+- **Source:** one numbered reference to committed work (§3). The first source takes the former pointer’s place.
 - **Matter:** a tracker, an ask, a hail thread or the team's plan; the claim unit of §10.
 - **Transport:** how bytes travel. It affects the overdue window, never authority (§7).
 - **Watcher:** a helper that pulls and rings the addressed bot (§10a).
@@ -219,9 +219,16 @@ matches `from`. Hash and commit hex is lower case. A source path has non-empty `
 ASCII letters, digits, `.`, `_`, `-`, with no `.` or `..` segment and no leading or trailing `/`. It holds
 no `@`, `:` or space. Every filed hail has such a path; the filing check refuses another.
 
-**Source values.** Each value is `name:path@commit`, optionally followed by ` sha256 <hex>`.
+**Source values.** A source uses a listed repository short name and an immutable commit id.
+The forms are defined below; Appendix A gives their lexical grammar.
+
+| Form | Work named |
+|---|---|
+| `name@commit` | the commit itself |
+| `name:path@commit` | a regular file at that commit |
+
 The commit is 7 to 64 lower-case hex digits and must resolve uniquely in the named repository; no branch,
-head, tag or workbench name substitutes for a commit. The commit fixes the file's bytes. A source is
+head, tag or workbench name substitutes for a commit. The commit fixes the work named. A source is
 committed before a hail names it, and available on the shared remote before the hail is sent. A short
 value that is the point, such as 8, a verdict or a short commit id, stays in the body.
 
@@ -231,8 +238,14 @@ where the record's settings require it. Protocol references to checking a source
 its pinned bytes, plus the sha256 if present or required; they add no second mandatory hash. The
 `decision:` hash has a different purpose and still covers only canonical decision bytes.
 
-A reader checks that the repository name is listed in the record's settings, the commit exists and
-resolves uniquely, and the path names a regular file there. No path component may be a link or submodule.
+A reader first checks the repository name against the settings, then resolves each supplied hex
+prefix against object ids in that repository. Resolution must be unique and the object itself must
+have type commit. Do not interpret a hex value as a ref name and do not peel tags to commits.
+Use plain git object lookup and type inspection (for example `git rev-parse --disambiguate=<hex>`
+and `git cat-file -t <full-id>`), with replacement objects disabled. No check parses a programming
+language, executes source code, invokes an external diff driver or applies text conversion.
+For `name@commit`, that commit is the source; it needs no path or invented result file.
+For a file source, the path must name a regular file there; no component may be a link or submodule.
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
 listed repository. A `SHA256SUMS` file is an ordinary source and is not expanded into a second list.
@@ -1407,6 +1420,7 @@ this section. The line's location must agree with its separate location field.
 | h-repository | unlisted repository name; source n |
 | h-source-commit | incomplete committed reference; source n |
 | h-source-form | otherwise malformed source value; source n |
+| h-source-object | hex id is ambiguous or resolves to a non-commit object; source n |
 | h-source-path | missing path at a named commit; source n |
 | h-source-hash-required | required sha256 absent; source n |
 | h-source-hash | differing sha256; source n |
@@ -1459,11 +1473,13 @@ The new form and source diagnostics use these repair forms, substituting the act
 | unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
 | unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
 | otherwise well-formed name:path with no @commit | `source n: committed file reference R is incomplete; write name:path@commit using R as name:path and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
-| any other malformed source value | `source n: V is not a well-formed source value; write name:path@commit using a listed name, a relative path of nonempty /-separated segments containing only ASCII letters, digits, ., _ or - (no . or .. segments), and 7 to 64 lower-case hex commit digits; optionally append sha256 H with H equal to the committed file's 64 lower-case hex hash.` |
+| any other malformed source value | `source n: V is not a well-formed source value; write name@commit or name:path@commit; use a listed name, a relative path of nonempty /-separated ASCII letter, digit, ., _ or - segments (not . or ..), and unique 7 to 64 lower-case hex commit ids; only name:path@commit may append sha256 H with H equal to the whole file's 64 lower-case hex hash.` |
+| ambiguous or non-commit object C | `source n: C does not uniquely name a commit object; write name@commit with a unique commit id, retaining any file path or range.` |
 | missing path | `source n: P is absent at the named commit; commit the file first and write that revision.` |
 | required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
 
-The two malformed-value rows are exclusive: use h-source-commit only for an otherwise well-formed
+The general malformed-value repair always prints all the forms listed in its row, in that order;
+there is no nearest-form guess. The two malformed-value rows are exclusive: use h-source-commit only for an otherwise well-formed
 `name:path` lacking `@commit`, and h-source-form for every other malformed value, including a
 malformed optional hash suffix. Here R is the supplied repository name and path, V is the complete
 supplied source value, and P is the supplied path. Escape each on one physical diagnostic line.
@@ -1978,7 +1994,9 @@ model-value      = 1*VCHAR SP 1*VCHAR
 sealed-to-value  = recipient *(%s", " recipient)
 recipient        = <public recipient encoding of the applicable age type>
 min-class-value  = %s"K1" / %s"K2" / %s"K3"
-source-value     = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
+source-value     = commit-source / file-source
+commit-source    = repo-token "@" commit
+file-source      = repo-token ":" path "@" commit [SP %s"sha256" SP sha256-hex]
 repo-token       = %x61-7A *(%x61-7A / DIGIT / "-")
                    ; a repository short name from the record settings
 path             = segment-name *("/" segment-name)
