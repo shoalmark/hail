@@ -22,6 +22,7 @@ restrictions refuses hail acts until the pin moves; a bot reader never resolves.
 | `extends` | team, all | table | required | every roster reader refuses missing table, wrong shape or a mismatch with the core roster |
 | `extends.spec` | team, all | string | required, `"sealanes/1"` | every roster reader refuses another spec or a missing value |
 | `extends.edition` | team, all | integer | required, `1` | every roster reader refuses another edition or a missing value |
+| `publishers` | decider | map of person ids to exact bot ids | `{}` | hail/1 §8 defines the publisher checks; no grant is created |
 | `records` | record | table keyed by team | `{}` | each team's record settings have the single definition in hail/1 §8; undeclared teams with a whole roster are refused |
 | `records.<team>` | record | table | defaults in §8 | only `repositories`, `source-hashes` and `grammar` are allowed; types, lookup and carrier rules are defined once in §8 |
 | `teams` | team | table keyed by `<team>` | `{}` | hail reader refuses malformed names and, with the whole roster, an undeclared team |

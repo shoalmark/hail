@@ -557,6 +557,13 @@ auditor. A hail may carry a take-up or hand-back, but the ask's own signed recor
 where the Owner and auditor can read them; a decider's hail is not sealed (§13), so its `seen-by` overseers read it
 whole.
 
+**Publishing a decider's source.** The record settings name one publisher bot for each decider at
+`ext.hail.publishers.<person-id>`. It is an exact bot of a team in that decider's scope and must already
+hold the needed file right. The bot publishes the decider's signed source unchanged and passes its
+committed reference to the destination filer. No person holds a push right through this protocol;
+a decider's signing right creates none. Missing publisher, wrong team, changed bytes or missing file
+right refuses this route. A named publisher does not replace the destination record's filer.
+
 **Replies to people.** A bot may answer a hail it received from a person with RECEIVED, ANSWER, WILCO, DECLINED or
 DONE, as §4 permits, with `re` naming that hail and `to` naming its sender, `person.<id>` or `owner`. No `to` grant
 naming the person is needed. A bot answering the Owner's own hail needs no `hail.owner`. The checker verifies the
