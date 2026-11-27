@@ -1424,7 +1424,7 @@ the filed bindings of all `re` ids and any explicit `matter`; free text supplies
 
 The time check refuses a written time more than two minutes after its reference, and accepts exactly two. Given no
 reference it checks the time's form only and reports that. It never refuses age alone. A re-send keeps its original
-bytes; before a new act, the reader still checks current rights, source, session claim and any DECISION. The id minute
+bytes; before a new act, the reader still checks current rights, session claim and any DECISION. The id minute
 differing from the written minute is reported, not refused. The record-time check trusts the filer's committer time; it
 catches a wrong clock, not a lying filer. Sealed content without its bound opening is not checked and is never acted on
 (§9a). The check cannot judge the sender's record-class choice or physical key custody.
@@ -1436,9 +1436,9 @@ only its landed reference by §7.
 Checking, signing and sending are one step; a check of other bytes is no check of this send. It refuses:
 - a failed form, source, current grant, signature, session or required scope check; the session check is §10's sending
   rule, including live START, matter claims, receipts and the first-hail filing claim;
-- an absolute home path in the header, body, ask, or any source file, on every destination:
-  `/Users/<name>/`, `/home/<name>/`, `C:\Users\<name>\` or `C:/Users/<name>/` (the last two case-insensitive), or the
-  sending user's own home directory however written. A `~/` path passes this test;
+- an absolute home-directory path in the header, body, ask or a source file: an absolute path under
+  a user directory on any supported platform, including drive-letter forms, or the sending user's
+  own home in any spelling. A tilde-relative path passes this particular test;
 - a private id in a public-bound hail, in those same bytes. Prefixes and destinations come from the team's extension. A
   match is a configured ASCII-letter prefix ending `-`, then one or more ASCII digits, with no letter, digit or hyphen
   on either side, or at a line edge. Matching is case-sensitive. A malformed prefix refuses every public-bound hail
@@ -1480,7 +1480,7 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 18. The filed DECISION has exactly the signed bytes and enters the asking team's record through a lawful filer.
 19. The acting bot verifies the answer itself and still needs its current grants.
 20. Closing, later and talk show the same state everywhere; a surface unable to sign points to one that can.
-21. A gate ANSWER has `disposition`; its source binding matches relayed or answered; rejected needs no prose reason.
+21. A gate ANSWER has `disposition`; its first source binds relayed or answered; rejected needs no prose reason.
 22. A once DECISION cannot serve as standing evidence.
 23. No and words need no prose reason under hail/1; words ends the ask and permits no act.
 24. A `hail` signature fails on a DECISION; `hail-decision` fails on another hail; `git` fails on both.
@@ -1502,10 +1502,10 @@ neither gives an invalid hail authority nor changes the current roster. Scope sh
 39. `scope: standing` on an ask other than `decide` is refused, not merely ignored as evidence.
 40. Two to five sequential options A–E on `decide` pass; one, six, a repeated label, a body line beside the options, or
     options on another kind fail.
-41. The hand-back INFORMATION names the raising QUESTION and hashes the filed DECISION file, signature included.
+41. The hand-back INFORMATION names the raising QUESTION and pins the complete filed DECISION, signature included.
 42. A person's hail signed with a different person's key is refused; the Owner's device is desktop only.
 43. A surface stores its `shown` line with ask id, hash, surface and time in its outbox, with no authority.
-44. A DECISION with wrong `re`, ask file hash or `to` is refused.
+44. A DECISION with wrong `re`, pinned ask file or `to` is refused.
 45. Each decider's message, answer and brief reaches its granted bots without a forced coordinator detour; its message
     and answer may also reach the coordinator, but no decider directs the auditor.
 46. A valid closing answer after later or talk needs no `supersedes` and is the first decision.
