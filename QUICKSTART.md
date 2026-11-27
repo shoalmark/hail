@@ -23,10 +23,13 @@ end hail/1
 ```
 
 The header ends at `sources: N`, then come N references numbered #1 through #9, then the body and,
-on REQUEST or QUESTION, exactly one ask. There is no pointer line or #0. A reference is
-`name:path@commit`, with an extra sha256 only when requested or required by the settings. A file is
-committed before it is cited. Every source is cited in the body or ask as #n; every citation has a source.
-A short value that is the point stays in the body. The body is enough to decide without opening sources;
+on REQUEST or QUESTION, exactly one ask. There is no pointer line or #0. Source forms are
+`name@commit`, `name:path@commit`, `name:path@commit:first-last`, that range followed by one label,
+`name@from..to`, and `name:path@from..to`. Only the whole-file form takes an optional sha256
+(required where settings say so). Commit the work before citing it. Every source is cited in the
+body or ask as #n; every citation has a source. Detail stays in the work, with no note written for
+citation. Folders, branches, tags and notes are no sources. Ids and branch names are short values
+in the body. The body is enough to decide without opening sources;
 no reader can certify that writer's duty. hail/1 has no body line budget; a selected grammar may set one.
 
 A REQUEST is declined, or accepted by WILCO and completed by DONE or DECLINED. A QUESTION gets ANSWER.

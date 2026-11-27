@@ -12,9 +12,12 @@ reference takes the former pointer's role, replacing its header line. Citations 
 never #0. Every source is cited in the body or ask, and every citation names a source. Earlier forms
 remain readable under their original edition; new filing does not guess an edition from a successful parse.
 
-Sources can name a commit directly, or a file by repository short name, path and commit. A file is committed first. The commit
-fixes its bytes; an additional sha256 is optional unless settings require it. Hash manifests are
-ordinary files rather than a second reference list. Short decisive values stay in the body. Time
+Sources name a commit, a file, a file's inclusive line range with an optional first-line label,
+or the change between two commits, optionally restricted to one file. Plain git object checks
+verify the fixed target; labels match bytes, never language constructs. Only the whole-file form
+takes sha256, optionally unless settings require it. Detail lives in the work: no file is written
+solely for citation. Folders, branches, tags and notes are no sources. Ids and branch names remain
+short values in the body. Time
 adds UTC Z alongside the two numeric-offset forms already accepted. The body has no hail/1 line budget
 or ordinary request/result content requirement; a grammar supplies those. Structured protocol forms remain.
 Bot and decider addresses and ids replace the earlier seat-only forms. New conditional headers include

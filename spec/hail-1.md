@@ -219,6 +219,14 @@ matches `from`. Hash and commit hex is lower case. A source path has non-empty `
 ASCII letters, digits, `.`, `_`, `-`, with no `.` or `..` segment and no leading or trailing `/`. It holds
 no `@`, `:` or space. Every filed hail has such a path; the filing check refuses another.
 
+**Where detail lives.** Detail lives in the work, not in a note about the work. A result is a
+commit; cite that commit. No file is written only so that a hail can cite it. A folder, branch,
+tag or note is no source. A tracker, ask, ruling, pull-request or run id, and a branch name, are
+short values that stay in the body. Protocol header ids keep their existing routing roles;
+they do not become sources. These writing duties add no interpretation of a file's purpose
+to the program's object checks. A note about work cannot acquire source status merely by being
+committed. The reader cannot infer that purpose from plain git and does not claim to check it.
+
 **Source values.** A source uses a listed repository short name and an immutable commit id.
 The forms are defined below; Appendix A gives their lexical grammar.
 
@@ -296,9 +304,15 @@ both endpoints: no rename inference, glob, pathspec magic or language analysis. 
 regular file at both ends names an empty file change and passes. The source does not assert
 that the content changed. A known non-regular path suppresses the absent-at-both fault.
 
+Branch, tag and note names, including `refs/heads/`, `refs/tags/` and `refs/notes/` references,
+fail source syntax (h-source-form); resolving a hex id to a tag object gives h-source-object,
+never automatic tag peeling. A folder path gives h-source-kind. A file's permitted directory
+components are not folder sources. These are the mechanical faults for excluded target kinds.
+
 Missing lookup inputs are reported as not checked; a known missing file or commit refuses filing.
 An unlisted name is refused, never interpreted as a local workbench. The file can be anywhere in a
-listed repository. A `SHA256SUMS` file is an ordinary source and is not expanded into a second list.
+listed repository. A `SHA256SUMS` file that is part of the work may be a file source; it is never written solely
+for citation or expanded into a second source list.
 A forge state is text without ` · `; a mailbox id uses ASCII letters, digits, `_` and `-`.
 
 `re` is an id list if any `, `-separated part has id form; then every part must have it. A free description contains no
@@ -1615,7 +1629,13 @@ Checking, signing and sending are one step; a check of other bytes is no check o
   obtain or verify. A pattern miss never relaxes §1's no-secret rule;
 - required sealing it cannot perform, an unknown record class, a class below policy, or no eligible oversight setup.
 
-Both tools scan each directly named source file with the same byte policies. `hail check` takes the
+Both tools scan the hail and each directly selected work object with the same byte policies.
+For a whole file or range, scan the whole committed file, even when only some lines are cited.
+For a commit source, scan its raw commit object. For a change, scan both raw endpoint commit
+objects and the old/new regular-file blobs in the endpoint tree difference; for a file change,
+restrict those blobs to the named path. Do not traverse earlier history or execute diff drivers.
+Tree entries used to find those blobs and the original parent graph are explicit inputs too.
+This scan is of the named work; it is no claim about secrets elsewhere in the repository. `hail check` takes the
 committed bytes, tree entries, destination and scan policy as explicit inputs; it fetches nothing.
 An optional source hash, when supplied, is checked. Omitted inputs never give a full pass.
 
@@ -2191,7 +2211,7 @@ sources: 0
 end hail/1
 ```
 
-A result with one source, already committed in the listed `work` repository. The value is in the body:
+A result with one commit source in the listed `work` repository. The value is in the body:
 
 ```text
 hail/1
@@ -2202,12 +2222,12 @@ re: none
 marker: INFORMATION
 written-against: 2026-11-27T10:02:00Z
 sources: 1
-#1 work:result.txt@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-The result is 8, recorded in #1.
+#1 work@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+The result is 8 in commit #1.
 end hail/1
 ```
 
-The repeated hex is illustrative; a source check needs the supplied committed tree and bytes, as
+The repeated hex is illustrative; a source check needs the supplied commit objects and any selected tree or file bytes, as
 the vectors provide. This frame requests no receipt. A later edition's reader chooses the earlier
 edition explicitly when reading an old pointer-line hail; it never rewrites its signed bytes.
 
