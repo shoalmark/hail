@@ -858,6 +858,21 @@ are not a second authority store. Every bot also keeps ids, canonical bytes and 
 can read, before it answers or acts; filing first meets this. A filed hail MUST NOT be amended. A correction is a new
 hail with `supersedes`. A sealed hail is filed as its sealed span.
 
+**Record operation without a roster.** The record disables line-end conversion on every platform:
+its `.gitattributes` contains `* -text`, and clients preserve committed hail bytes. Canonicalization
+for checking does not authorize rewriting a filed file. The forge runs a check after each push,
+reporting a malformed hail, a changed filed hail or a wrong filing path. Because it runs after the
+push, this check reports and cannot block it; the sender's pre-filing check is what refuses filing.
+The record can also hold its settings, attributes, explanatory README and that forge workflow; these
+are operational files, not work products and not hails. Bots never execute a file merely because it
+is in the record.
+
+A reader shows an owner every newly landed hail addressed to that owner's bots, whatever its marker,
+including ANSWER, DONE, RECEIVED and WILCO. New and owed are distinct lists; displaying an item marks
+only its local display cursor, never its protocol obligation. Catch-up reads both. A clone starts
+with no display cursor and shows the existing addressed record, or an explicitly chosen initial
+boundary. A quiet watcher fetches without starting a model; every view shows the hail's signing step.
+
 **Order.** A hail enters at the first commit on the remote default branch’s first-parent chain whose tree holds its file. A
 workbench or side-branch copy is not filed. Order never comes from the written time or the side branch's age. At a
 commit, first apply the state that counts there and any cap reduction. Then order its hails by their full
