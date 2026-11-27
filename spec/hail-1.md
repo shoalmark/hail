@@ -531,8 +531,11 @@ unknowns and patterns resolved by sealanes/1; a dropped grant grants nothing.
 | AWAY, BACK | the Owner's signed record and own commit, §10b.12 |
 
 A `hail.message` grant restricted to WARNING sends no WARNING: WARNING has its own act. A receipt creates no reply
-right. For every permitted bot-to-bot message, STOP or WARNING that §4 answers, the reverse `hail.answer` must exist;
-the hail roster check refuses a configuration lacking it for hail acts, without changing other namespaces. Return grants
+right. An ordinary bot hail that requires a reply needs the corresponding reverse `hail.answer` grant.
+The Owner's hails and every STOP are exempt from this reverse-grant denial. A missing return grant
+elsewhere in the roster cannot deny either of them. This exception gives no bot a new reply grant;
+a STOP still needs its sender's stop right, and a reader files its required response through the
+existing record route. Return grants
 name exact bots or sealanes/1's bot patterns, never a session. Control records need no return grant. A control record
 does not require its sender to claim the subject bot's work; the sender still needs a live START where its team has a
 record, except the stated startup filing exception.
