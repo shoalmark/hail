@@ -24,7 +24,7 @@ restrictions refuses hail acts until the pin moves; a bot reader never resolves.
 | `extends.edition` | team, all | integer | required, `1` | every roster reader refuses another edition or a missing value |
 | `publishers` | decider | map of person ids to exact bot ids | `{}` | hail/1 §8 defines the publisher checks; no grant is created |
 | `records` | record | table keyed by team | `{}` | each team's record settings have the single definition in hail/1 §8; undeclared teams with a whole roster are refused |
-| `records.<team>` | record | table | defaults in §8 | only `repositories`, `source-hashes` and `grammar` are allowed; types, lookup and carrier rules are defined once in §8 |
+| `records.<team>` | record | table | defaults in §8 | only `repositories` and `source-hashes` are allowed; types, lookup and carrier rules are defined once in §8 |
 | `teams` | team | table keyed by `<team>` | `{}` | hail reader refuses malformed names and, with the whole roster, an undeclared team |
 | `teams.<team>` | team | table of the team keys below | omitted means all defaults | hail reader refuses unknown children or a non-table |
 | `teams.<team>.signing-required` | team | boolean | `true` | false or a non-boolean is refused; omission means true because a governing roster requires signing (hail/1 §9) |

@@ -187,7 +187,7 @@ nothing. This rule adds no return grant.
 | `ask` | REQUEST and QUESTION only, exactly once | one non-empty line after the body; forbidden on all other markers |
 
 Every key whose Required column says `yes` is required. `ask` is a body-ending line, never a header pair. Keys scoped to
-one kind or marker MUST NOT appear on another, except where the table allows them. `pointer`, `grammar`, `roster`, `keys`, `acting-for` and
+one kind or marker MUST NOT appear on another, except where the table allows them. `pointer`, `roster`, `keys`, `acting-for` and
 `handover` are refused header keys: this edition refuses them, and refuses `kind: grant-change` and `from: owner pair`.
 A session handover is content, not a `handover` key. START's `matter` names its initial matter but claims nothing.
 Other hails may carry `matter` for routing; §10 requires it for ambiguous id lists, and for a REQUEST or QUESTION
@@ -533,7 +533,6 @@ not permission to fall back to `hail.toml`.
 | Signing step | as §9; required with a roster; otherwise off initially, then on for an owner or the record | the roster itself turns signing on; core signing keys | `signing`, `"off"` or `"on"`, default `"off"`; optional `owners.<owner>.signing` may turn that owner on, never override record-wide on; `owners.<owner>.signing-key` and `owners.<owner>.keys` supply the public keys described in §9 |
 | Repositories | map of short names to repository origins; empty by default; names match `[a-z][a-z0-9-]*`; each name has one origin, distinct names may alias an origin | `ext.hail.records.<team>.repositories`, each origin already declared by core places or records | `repositories` with the same map |
 | Source hashes | boolean `source-hashes`, default false; when true each whole-file source (`name:path@commit`) carries sha256; other forms never do | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
-| Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source uses §3's whole-file form, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
 
 These values define the settings once; carriers do not change their meaning. Source names need only
 be listed here: any regular file in a listed repository may be cited, not just a place or record folder.
@@ -557,7 +556,6 @@ edition = 3
 name = "shared-work"
 host = "a"
 signing = "off"
-grammar = "none"
 repositories = { work = "https://forge.example/work" }
 
 [owners.a]
@@ -1496,7 +1494,6 @@ this section. The line's location must agree with its separate location field.
 | h-address-listed | unknown bot address; header from or header to |
 | h-time | invalid calendar time; header written-against |
 | h-time-offset | invalid numeric offset; header written-against |
-| h-grammar-selector | sender grammar selector; header grammar |
 | h-plan-team | missing team in plan matter; header matter |
 | h-receipt-loop | receipt asks for another receipt; header receipt |
 | h-carried-stop | carried STOP lacks its stop right; source n containing the carried hail |
