@@ -272,7 +272,7 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 - **DECLINED:** will not. A writer may give a reason, for example:
   - `source differs: <hex>`;
   - `commit not found: <sha>`, after one pull;
-  - `malformed: <first failure>`;
+  - `malformed: <complete fix list>`;
   - `not in the roster`;
   - `reserved marker`;
   - `unknown form`;
@@ -1340,9 +1340,52 @@ digest, the watcher and presence hooks. No bot relies on the relay until these e
 
 **`hail check <file>`** is offline and pure. It reads only explicit inputs and writes nothing that outlives its run. It
 checks a hail or the roster state a hail relies on; sealanes/1 supplies the roster and keys change checks, not a
-matching DECISION. The same inputs give the same result. It exits non-zero on the first failure and reports the rule. A
+matching DECISION. The same inputs give the same result. It exits non-zero if any check fails and reports every fault it finds in one pass, never only the first. A
 full authority verdict requires the inputs for every applicable row below. A form-only run may omit them, but reports
 the checks not made and authorises no act. Allowed-signers data is derived in memory, never written.
+
+**Filing and reading.** A failed check refuses filing. A grammar never voids a filed hail: record
+readers report grammar faults under the grammar pinned at filing, keeping the landed record intact.
+Changing a grammar later neither rechecks old hails under new rules nor erases their effect. A form
+or authority failure keeps its own rules; grammar success never grants authority.
+
+**One fix list.** Each fault is one line: `location: what is wrong; what to write instead.` A location
+is `header <key>`, `body line <n>`, `ask`, or `source <n>`; setting and record checks name the field or
+event. Body numbers start at 1 after the sources. Give the actual bad value and a concrete repair or
+permitted replacement form, never just a code or a reference to this text. Where the reader cannot
+know the right value, say how to supply it; do not invent it. Grammar codes follow their location as
+`[code]`. No newline is embedded in one fault; escape a hostile value visibly.
+
+Run independent checks even after failure. An invalid frame, count or unreadable section prevents only
+checks that need that section. An invalid source label prevents citation matching for that source
+block, not independent header or body grammar checks. An unknown opener prevents its meaning check,
+not checks on other lines. Missing external inputs are separate not-checked reports, never a full
+pass. Do not emit a cascade of guessed faults. State which dependent checks could not run.
+
+Print header faults in their input order (missing required keys in the key-table order), source faults
+in number order, body faults in line order, then ask faults; settings precede the frame, record-event
+faults follow it. At one location use the order of this text's rules. Multiple independent faults at
+one location each have a line. The aim is one fix list and a next filing that goes through.
+
+The new form and source diagnostics use these repair forms, substituting the actual values:
+
+| Fault | Repair line |
+|---|---|
+| count outside the range | `header sources: count N is outside 0 through 9; write sources: 9 or fewer and retain only those source lines.` |
+| no source delimiter on an earlier form | `header sources: sources line is missing; replace the earlier-edition pointer line with sources: 0 or the required count.` |
+| nonconsecutive label | `source n: label #m is out of order; write #n and update its citations.` |
+| uncited source | `source n: source is not cited; cite #n in the body or ask, or remove the source and renumber.` |
+| unresolved citation | `body line n: citation #m has no source; write the value here or cite an existing #1 through #9.`; use `ask` for an ask citation |
+| unknown repository name | `source n: repository name X is not listed; use a listed name or have the record settings list X.` |
+| absent commit in a reference | `source n: committed file reference is incomplete; write name:path@ followed by its committed revision.` |
+| missing path | `source n: path is absent at the named commit; commit the file first and write that revision.` |
+| required or wrong hash | `source n: settings require sha256; append sha256 H.` or `source n: sha256 differs from committed bytes; write sha256 H.` |
+
+Other form faults follow the same location/problem/repair convention, naming the required form from
+§3. A `to` address lacking its bot component says `header to: X is not a bot address; write a listed
+owner.bot or team.handle address.` An invalid written date says `header written-against: value is not
+a calendar time; write a valid YYYY-MM-DDTHH:MM:SSZ time or numeric offset.` These are complete lines,
+not a stop-at-first-error priority list.
 
 | Check | Inputs beyond the hail |
 |---|---|
