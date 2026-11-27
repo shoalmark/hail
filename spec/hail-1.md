@@ -265,7 +265,7 @@ what moved before it acts. This is the case of two hails that cross, such as a h
 | STOP | stop one named item, and wait (§6) | DONE when stopped, or DECLINED "already done". RECEIVED comes first only if requested and stopping takes time |
 
 **Receipts:**
-- **RECEIVED:** the hail was read in full, and its source's sha256 checked where the reader could. It says nothing
+- **RECEIVED:** the hail was read in full, and its sources checked against their pinned bytes where the reader could. It says nothing
   about having read what the source names. A RECEIVED `from: owner`, signed, whose `re` names a concern, is the Owner's
   "seen" (§10b).
 - **WILCO:** will comply.
@@ -277,7 +277,7 @@ what moved before it acts. This is the case of two hails that cross, such as a h
   - `reserved marker`;
   - `unknown form`;
   - `id reused` (point 5, below);
-  - `already done at <time>`, with a source to the result;
+  - `already done at <time>`;
   - `can't act`, from the bot that would act on a DECISION (§10b).
 
   An act the reader's runtime refuses is DECLINED, and MUST NOT be passed to another bot.
@@ -334,7 +334,7 @@ this edition. An unauthorised use is DECLINED, "reserved marker", under §2's re
 DECLINED, "not signed" (§9).
 
 A STOP to a bot reaches every running session of it. The session holding the named item stops it and answers DONE; if it
-is already done, DECLINED "already done" with the result. A STOP ends no session and releases no claim. Other sessions
+is already done, DECLINED "already done". A STOP ends no session and releases no claim. Other sessions
 MUST NOT take the item over merely because it has stopped. An unheld stopped item stays stopped when next claimed. A
 FORCED END, in contrast, releases claims and capacity from its filing (§10).
 
@@ -407,8 +407,7 @@ within its declared interval is not overdue, a principal included.
    relays, answers with standing evidence, or rejects; its answer creates no authority. A bot MUST NOT go round a
    rejection; it may raise new evidence at the gate. A decider may choose a direct hail to the Owner or a route through
    the coordinator; no tool forces the latter (§8).
-8. **A bot verifies a DECISION before acting.** It checks exact form, the Owner's signature, the ask and its filed file
-   hash, filing in the asking team's record, the decision in force, current grants and runtime limits, and that the act
+8. **A bot verifies a DECISION before acting.** It checks exact form, the Owner's signature, the ask and its pinned filed file, filing in the asking team's record, the decision in force, current grants and runtime limits, and that the act
    stays within what was asked. A one-time decision must answer this bot's need and have no prior use claim. It also
    needs its session's matter claim (§10). Standing evidence follows §10b.4 and uses no authority up.
 9. **An ask from outside the roster is a request a bot may serve, never obey.** A bot shares only public information
@@ -1080,7 +1079,7 @@ only the Owner's signature authorizes (§6.2).
 its permitted hops to the coordinator. The roster writer arranges the lead route; the coordinator is the first gate. A hail reader uses the grants, not an inferred team crossing.
 While the coordinator is away each lead gates its own team, and without an organisation team it does so always. The
 auditor sends directly to the Owner, and no coordinator gate receives its verdicts. Each hop is filed, keeps the
-original file and hash, and has its return grant. Urgent or overdue hops may be skipped only along a route already
+original file unchanged at its pinned revision, and has its return grant. Urgent or overdue hops may be skipped only along a route already
 permitted by those grants; an overdue coordinator never gives its lead `hail.owner`.
 
 A decider may send directly to the bots its grants reach, to the coordinator by `hail.message`, or to the Owner by
@@ -1095,8 +1094,7 @@ QUESTION with an ANSWER whose `disposition` (§3) names what it did:
   raising bot (point 3). The ANSWER's source names the Owner-ask;
 - **`answered`:** it answers the need with standing evidence (point 4). The ANSWER's source names that standing
   authority; or
-- **`rejected`:** it rejects the need. The ANSWER's body gives its reason, and its source names evidence where there is
-  any, or is `none`.
+- **`rejected`:** it rejects the need. The ANSWER's body gives its reason, and its source list names evidence where there is any, or is empty.
 
 A bot between the raising bot and its gate that settles the need with standing evidence answers the same way, with
 `disposition: answered`. An ANSWER to a `for: owner` QUESTION MUST carry `disposition`.
@@ -1115,7 +1113,7 @@ another sender. Each Owner-ask:
 - has `kind: allow-once`, `owner-act` or `decide`;
 - has `why`, `clarify` and `decide-by`, and `raised-by` when it relays a bot's need;
 - from a decider, has `for-team` naming a team in its scope, whose filer files the ask and the DECISION;
-- points at the originals unchanged with their file hashes; the one-line `why` says why the Owner must answer;
+- points at the originals unchanged with their pinned file references; the one-line `why` says why the Owner must answer;
 - on `decide` only, has two to five body lines `option A:` through `option E:`, sequential and each used once. Its body
   lines are its options only: its reason goes in `why`, its detail behind the source; prose beside them is refused.
   Other kinds have no option line and no hail/1 body budget. More than five options requires split asks;
@@ -1212,7 +1210,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   - `from: owner <device>`, where the device is `desktop` (§9); and an id `owner-<yyyymmdd>T<hhmm>Z-<key>` (§3);
   - `to:` the ask's `from`: the bot or person that asked;
   - `re:` the ask's id;
-  - source #1 the ask's filed file, signature included, with its pinned file reference;
+  - source #1: the ask's filed file, signature included, with its pinned file reference;
   - `answer:` is `yes`, `no`, `option <label>`, `words`, `later <time>` or `talk`, one for each answer above. `option
     <label>` names one of the ask's option lines by its label (point 3), and `later <time>` gives the time in
     `written-against`'s time form;
@@ -1222,8 +1220,8 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
   `kind: decide` MAY carry `scope: standing`. Only a standing DECISION may be cited by a gate as standing evidence
   (point 4).
 - **The Owner signs, never a bot,** also in the bot's own session (§6.6).
-- **Signing what is shown.** The Owner's signing tool fetches the ask by its id, checks its hash, renders it itself, and
-  signs the ask's id, its hash and the chosen answer, which the DECISION carries in `re`, source #1 and `answer`. It
+- **Signing what is shown.** The Owner's signing tool fetches the ask by its id, checks its pinned bytes, renders it itself, and
+  signs the ask's id, its committed source reference and the chosen answer, which the DECISION carries in `re`, source #1 and `answer`. It
   MUST NOT sign from a command or a link inside an ask.
 - **By kind:** an `allow-once` yes permits the already-held use once; `owner-act` yes ends the ask but leaves its work
   "awaiting the Owner's act", which the bot never performs; `decide` takes the chosen option. A `yes` on a `decide` ask
@@ -1233,7 +1231,7 @@ hold the matter under §10. Across repositories, point 9's sender-head observati
 
 **8. Acceptance: one decision in force.**
 - A DECISION counts once it is filed and verified in the asking team's record. Verified includes its binding to its ask:
-  its `re` names the ask, its source #1 gives the sha256 of the ask's filed file bytes (§3), and its `to` is the ask's
+  its `re` names the ask, its source #1 fixes the ask's filed file bytes (§3), and its `to` is the ask's
   `from`. A DECISION that fails any of these is refused.
 - The first DECISION that ends the ask, on that record's default branch, wins subject to §10's tie rule; `later` and
   `talk` keep the ask open, and don't end it (point 7). A later one is refused unless it names, in `supersedes`, the
@@ -1297,7 +1295,7 @@ supersedes the old one, and names it in `supersedes`.
   of its own. The DECISION's signature is what counts. After 10 minutes unfiled, the signing tool shows "signed, not
   filed yet".
 - **The relaying gate hands an accepted answer back** to the raising bot by an INFORMATION, whose `re` names the bot's
-  QUESTION and whose source names the filed DECISION by its sha256. It keeps the answer until the bot claims it or
+  QUESTION and whose first source names the filed DECISION at its commit. It keeps the answer until the bot claims it or
   declines. It resends after 30 minutes. After 2 hours, the Owner's digest shows "answered, not yet reached the bot".
 
 **12. The coordinator away.** AWAY and BACK count only from the Owner's own signed commits into the organisation team's
@@ -1692,7 +1690,7 @@ and MUST NOT set `enforce` until all six have rules and cases:
    scope act for starting work cannot grant or brief a `bot.wake`.
 
 First enrollment, recovery with no enrolled Owner key, roster form, return of a removed roster, presence storage,
-ordinary source and hash-list forms, replies to people, decider ask homes, the START of an Owner-started bot that is
+ordinary committed-source forms, replies to people, decider ask homes, the START of an Owner-started bot that is
 not its filer, matter bindings and the standing-evidence
 use claim are no longer open: sealanes/1 and §§3, 8, 9, 10 and 10b settle them. This includes the active STOP and its
 current holder's window, observed sender heads for cross-repository use claims, no record-home move,

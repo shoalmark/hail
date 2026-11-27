@@ -69,7 +69,7 @@ An unfiled retry meets those checks anew; an accepted end's retry is only a dupl
 replay, using the STOP status and claim at that event. A retry itself changes no interval or starting event.
 
 The public-text test uses the sending bot's team settings and the actual destination repository's origin, not the
-repository a content pointer happens to name. If any actual destination is public under that policy, the public scan
+repository a source happens to name. If any actual destination is public under that policy, the public scan
 applies. No prefixes means no private-id refusal; it relaxes no rule on secrets. A person's hail is signed regardless of
 these flags; when a tool sends it through a team's record it applies that team's content and sealing policy as well.
 
