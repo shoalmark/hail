@@ -1,0 +1,79 @@
+# Third-edition draft changes
+
+This unsigned draft builds on the preceding draft. It is published only by the Owner's signed merge.
+The list is organized by the sections a reader must revisit, without private findings or identifiers.
+
+## Form, sources and time — sections 1–3, Appendix A
+
+The header ends with a source count, followed by zero to nine references numbered from one. The first
+reference takes the former pointer's role. The pointer header and citation zero are gone. Every source
+is cited in the body or ask, and every citation names a source. Earlier forms remain readable under
+their original edition; new filing does not guess an edition from a successful parse.
+
+Sources name files by repository short name, path and commit. A file is committed first. The commit
+fixes its bytes; an additional sha256 is optional unless settings require it. Hash manifests are
+ordinary files rather than a second reference list. Short decisive values stay in the body. Time
+accepts UTC Z and both supported numeric-offset forms. The body has no hail/1 line budget or ordinary
+request/result content requirement; a grammar supplies those. Structured protocol forms remain.
+
+## Receipts and effect — sections 4–7
+
+INFORMATION owes no RECEIVED by default. The explicit receipt request governs RECEIVED; required
+question, request and stop answers remain. A source becoming unavailable does not void a filed hail.
+The body must be sufficient to decide without opening sources, a writer duty no reader can certify.
+Nothing outside a landed hail has effect. Other channels carry only the record reference. Sending
+therefore follows filing on the remote default branch, rather than giving an unfiled message effect.
+
+## Settings and routes — section 8 and the extension table
+
+Record settings are defined once, carried by a governing roster or by root hail.toml without one.
+They identify bots and addresses, signing, repository short names and a grammar or none. A source can
+name any regular file in a listed repository. Unknown names are refused. No grammar is the default;
+the sender cannot select or override it. Across owners, a request remains declinable.
+
+Grants decide routes; the roster writer arranges lead crossings. A carried hail is checked using its
+own marker and addressees. A plan matter always names its team. A decider's signed source is published
+unchanged by a named bot with existing rights. Owner hails and every STOP are exempt from denial for
+a missing reverse grant; that exemption adds no general reply grant.
+
+## Signing — section 9
+
+Signature is not part of what makes bytes a hail. Every tool and view shows the filing step, either
+by the forge's access alone or signed. A roster requires signing. Without a roster, an owner can start
+without keys; turning signing off after it is on requires that owner's signed commit. Earlier unsigned
+hails keep their original step. Present signatures are checked, and signature requirements at filing
+cannot be evaded by an earlier send time.
+
+## Record and operation — sections 10–10b
+
+Every session reads what its bot owes at start. A no-roster reader also shows every new addressed hail,
+including answers and receipts that owe nothing. The record disables line-end conversion. Its forge
+check runs after each push, reports faults and cannot block a push; filing checks run before it.
+This edition defines no repository move. Preparation for a necessary move first ends every STOP and
+owed REQUEST by the Owner's act; it supplies no migration right or reset of history.
+
+## Checking, examples and entry pages — sections 11–16, appendices
+
+A failed check refuses filing and gives every independent fault in one actionable line each. Dependent
+checks with unreadable inputs are reported rather than guessed. A grammar never voids a filed hail.
+The examples and introductory pages now show the current form. Old signed and sealed fixture bytes
+remain in the pinned compatibility corpus, separate from current-edition tests. References have one list.
+
+## Body grammar companion
+
+hail-grammar/1 is a testable draft with a closed JSON Schema. Grammar files hold line budgets, opener
+meanings and per-marker allowed/required openers, plus identification metadata. The five common openers
+have fixed meanings; only a batched edition change can change them. Semantic duplicates are refused by
+a reader's meaning review, beyond the schema's shape checks.
+
+The two edition-zero starting grammars cover software engineering and brand and communications.
+REQUEST begins at three body lines. Negations, restrictions and literal values survive shortening;
+STOP and WARNING use complete sentences. A bound stays in the line stating the work, with no Limit or
+Do opener. Richer content requirements, word lists, repeated answer values and per-opener lengths wait.
+Budgets, a possible Fact split, DONE requirements, allowed-answer sets and element caps remain open;
+the data-link proposals wait for their written rules to be read word for word.
+
+The next stage measures entire closed exchanges and newly added files, grammar text read per session,
+and correction/repetition hails per hundred. It compares the retained baseline and a plain brevity
+control with explicit units. This stage supplies the design and hand-run cases, not implementation or
+new shadow-use results. Independent critical review and a second implementation precede publication.

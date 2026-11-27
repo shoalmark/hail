@@ -1758,6 +1758,18 @@ This section gathers rules stated elsewhere and adds none. The named section gov
   are kept for their stated overseers and auditor. Outsiders get public information unless a valid disclosure permits
   more, with raw personal data excluded (§6.9).
 
+## 16. References
+
+This is this specification's one reference list. The text uses these formats and procedures in its
+own words and copies no standard's prose. A named source does not add a second settings authority.
+
+- sealanes/1, edition one: roster state, grants, identities, pins, filing rights and change control.
+- RFC 5234 and RFC 7405: ABNF notation and case-sensitive strings in Appendix A.
+- Unicode 13.0.0: the pinned NFC normalization tables used for canonical bytes.
+- The SSH signature and allowed-signers formats: detached hail signatures and namespace separation.
+- age version 1 and the stated recipient stanza formats: sealing under §9a.
+- TOML: record settings notation. The grammar companion has its own single source list.
+
 ## Appendix A. The frame's grammar in ABNF (informative)
 
 This restates §§2–3, 8a, 9a and 10b in ABNF (RFC 5234, with RFC 7405 case-sensitive strings). The prose governs.
@@ -2077,24 +2089,4 @@ Every open point is in §13.
 
 ## Changes
 
-- **Third edition:** the roster is sealanes/1 edition one. Bot ids, people, kinds, grants, places, pins, keys and
-  change control follow it. Team principals split into the coordinator, auditor and leads; the coordinator is the first
-  Owner gate, with direct decider access and Owner-only AWAY/BACK. No stand-in, phone pair, permission-change DECISION,
-  end marker or app condition remains.
-- **Changed forms before first adoption (§2):** the bot term and scope `bot` field; decider sender and id; START, END,
-  CLAIM, RELEASE, FORCED END, AWAY and BACK with session fields; `why`, `clarify`, `for-team`, `sealed-to` and
-  `min-class`; exact conditional keys, options A–E, source file hashes and repository tokens; one signature, desktop
-  only; retired
-  `roster`, `keys`, `acting-for`, `handover`, `grant-change` and `owner pair`. Grammar and examples follow each change.
-  This list claims no global adoption fact; §2's growth limit still binds.
-- **Standing second-edition work:** pure checks with named inputs, per-team signing and mode, safe opaque forms, no act
-  on own words, explicit use-claim ties, standing-evidence claims, STOP with unreadable history, owed-list exits,
-  prose-only DONE times, sealed opening checks, portable watcher lifecycle and the tool release before trial.
-- **Record and reply fixes:** holder-only STOP responses and a final filing check for FORCED END; explicit sending
-  session checks and first-hail claims; SHA256SUMS resolution and scans; sealing a decider's hail left open (§13);
-  replies to people, scoped `for-team` ask homes and first-hail matter bindings. FORCED END needs an active STOP and the
-  current holder's full window. Cross-repository uses keep observed sender heads; record moves are not defined.
-  Replies spanning matters, and free-text orders and questions, require an explicit matter. The six scope cases remain
-  in shadow.
-- The detailed first-edition change map, every second-edition disposition and the third-edition design map are in
-  [changes.md](changes.md). The single normative roster-extension table is [ext-hail-keys.md](ext-hail-keys.md).
+The public list is [changes.md](changes.md), organized by section. It is the only change list.
