@@ -79,7 +79,7 @@ table](ext-hail-keys.md) is part of this edition's normative text.
   travel is §7's business.
 - **A bot's hail carries no authority.** Authority comes from the roster and the signed records its rules accept; a
   bot's hail can only point at them (§6). The Owner's signed DECISION is that record, filed as a hail (§10b).
-- **Sources, not copies.** Sources name committed files; short values stay in the body. A hail cannot drift from the record.
+- **Sources, not copies.** Sources name committed work; short values stay in the body. A hail cannot drift from the record.
 - **Body content belongs to a grammar.** hail/1 sets no body line budget, opener, required reason,
   required result or subject for an ordinary REQUEST. A record with no grammar can ask to add 4 and 4
   without a source or subject. A DONE needs no result source. A grammar may tighten hail/1, never loosen
