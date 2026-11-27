@@ -697,12 +697,16 @@ The host's signed commit is needed as well for a shared change; it cannot replac
 signature. If the commit format cannot carry both required authorizations, keep signing on and change
 only an owner-specific table with its owner's signature. Adoption of a roster never downgrades signing.
 
-A view labels a hail `signed` only after the signature required for its filing step has verified; a
-present but unchecked signature is never a claim of verified signing. A form-only view prints the
-literal step label from supplied filing settings and separately says `signature not checked`; with no
-settings it says `step not checked`, never guesses either label. An earlier unsigned hail retains
-`by the forge's access alone` after the owner turns signing on. A later required signature that is
-missing is a fault, not a silent downgrade to the earlier step.
+The required signing step is shown separately from its verification result. Only successful
+verification is displayed as `signed`. An unchecked signature is shown as `not checked`; a missing
+or failed required signature is shown as a refusal, never as verified signing. Use `signing required`
+for the policy requirement, alongside `signed`, `not checked` or `refused` for its result. This does
+not label a failed or unchecked required step `by the forge's access alone`.
+
+A form-only view with supplied filing settings shows the required step and `not checked` when it
+has not verified signatures. With no settings it says `step not checked`, never guesses either
+step. An earlier unsigned hail retains `by the forge's access alone` after the owner turns signing
+on. A later required signature that is missing is a fault, not a downgrade to the earlier step.
 
 Every person's roster hail remains signed: the Owner by an enrolled signing key and a decider by its
 own signing key. DECISION, START, AWAY, BACK, STOP, FORCED END, seen and delivery retain their applicable
