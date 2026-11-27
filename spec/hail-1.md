@@ -1,15 +1,14 @@
 # ⌜hail/1⌟
 
-**Status:** hail/1, third edition. This text does not by itself put a deployment in force. This edition takes force
-where the state in force under sealanes/1, edition one, names `spec = "hail/1"` and `edition = 3` in `ext.hail`, with
-`extends = { spec = "sealanes/1", edition = 1 }`. Only the Owner's own signed commit changes that state. Discovery,
-pins, locks, change control, removal and putting back follow sealanes/1 §§2–3, whole. No DECISION adopts a roster.
+**Status:** hail/1, third-edition draft, unsigned. Publication requires the Owner's signed merge.
+A deployment selects this edition in its record's settings (§8). Where a roster governs, the counted
+state names `spec = "hail/1"`, `edition = 3`, and `extends = { spec = "sealanes/1", edition = 1 }`
+in `ext.hail`; sealanes/1's discovery and change rules apply. No DECISION adopts a roster.
 - **The decisions are chosen** (§0) and written into the sections they govern.
 - **What stays open** is in §13.
 - **Informative:** A six-day trial on two teams measures what hail/1 costs and where it fails.
 
-**Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails under one
-Owner, who keeps the final word. It fixes a message's frame, header, markers and receipts. Sources name committed files. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
+**Abstract (informative).** hail/1 is a protocol by which bots and the people named in their roster send hails through a shared record. Each owner keeps the final word for that owner’s bots. It fixes a message's frame, header, markers and receipts. Sources name committed files. A bot's hail carries no authority: the reader reads rights from sealanes/1 and checks signed answers. A
 DECISION approves no act the bot does not already hold. Hails take the nearest transport that reaches the reader, are
 signed when §9 requires it, may be sealed to their readers and the Owner's oversight keys, and are filed and never
 amended. The record tracks sessions and their claims, one session of each bot to a matter. The rules have not been shown
@@ -22,7 +21,8 @@ and the body differ, the body governs. Appendix D is normative for the reference
 table](ext-hail-keys.md) is part of this edition's normative text.
 
 **Terminology:**
-- **Bot:** a lasting teammate in one team, named by its id `<team>.<handle>` in sealanes/1. A bot outlives its sessions.
+- **Bot:** a lasting teammate listed in record settings, addressed as `<team>.<handle>` with a roster or
+  `<owner>.<bot>` without one. A bot outlives its sessions.
 - **Session:** one run of a bot, with that bot's identities, keys and grants. Its opaque id is never roster data.
 - **Team:** a group of bots with one principal or lead, its places and, where declared, its record folder.
 - **Principal:** the organisation team's coordinator or the audit team's auditor, as sealanes/1 §5.5 defines them.
@@ -433,7 +433,60 @@ Owner-ask relay of §10b, which rides the record. Any notice from the Owner-ask 
 
 ## 8. Who may hail whom
 
-**Adoption.** This edition adopts sealanes/1, edition one. Hail's tools enforce `hail.message`, `hail.answer`,
+**Record settings: one definition, two carriers.** A record's settings are its bots and their addresses;
+its signing step; the repositories its hails may refer to, each under a short name; and its grammar or
+none. They are read at the filing event for a record check, and at the current counted state for a new
+act. Later settings do not rewrite old hails. A governing roster wins where both carriers are present;
+`hail.toml` then supplies no second authority or fallback. An unreadable governing roster is a refusal,
+not permission to fall back to `hail.toml`.
+
+| Setting | Meaning and bounds | Roster carrier | No-roster carrier at the record root |
+|---|---|---|---|
+| Bots and addresses | each exact listed bot and its owner or team; unknown sender or addressee refuses filing | core teams and bots, with their core keys | `owners.<owner>.bots`, an array of distinct bot names; address `<owner>.<bot>` |
+| Signing step | as §9; required with a roster; otherwise off initially, then on for an owner or the record | the roster itself turns signing on; core signing keys | `signing`, `"off"` or `"on"`, default `"off"`; optional `owners.<owner>.signing` may turn that owner on, never override record-wide on; `owners.<owner>.keys` maps bot names to public signing keys |
+| Repositories | map of short names to repository origins; empty by default; names match `[a-z][a-z0-9-]*`; each name has one origin, distinct names may alias an origin | `ext.hail.records.<team>.repositories`, each origin already declared by core places or records | `repositories` with the same map |
+| Source hashes | boolean `source-hashes`, default false; when true each source carries sha256 | `ext.hail.records.<team>.source-hashes` | `source-hashes` |
+| Grammar | `"none"`, or `{ source = "name:path@commit", edition = N }`, N a nonnegative integer; grammar source follows §3, and its loaded edition must equal N | `ext.hail.records.<team>.grammar` | `grammar` |
+
+These values define the settings once; carriers do not change their meaning. Source names need only
+be listed here: any regular file in a listed repository may be cited, not just a place or record folder.
+The roster mapping assigns short names to existing origins and creates no push, file or disclosure right.
+`written-against` uses the same short names; the reserved text label `hail` may identify the specification.
+A source named `hail:...` still needs a listed repository, and naming it grants nothing.
+
+Without a roster, `hail.toml` is UTF-8 TOML with `hail = 1`, `edition = 3`, a nonempty `name`, a `host`
+owner name and the settings above. Owner and bot names use the roster's lower-case name form. The host
+can be neutral with an empty bot list. The record's owners are the keys of `owners`; the host must be
+one of them. Unknown keys, duplicate addresses, malformed origins or wrong value types refuse the
+settings. Bots default to no intervals; their polling settings are operational, not authority. The
+host manages shared settings and forge access; each owner's tables are that owner's to change. With
+signing on, changes to an owner's tables need that owner's verified signed commit, and shared changes
+need the host's verified signed commit; when signing is off, forge access is the guard. A guest keeps
+a full clone. No forge access or unsigned name proves who wrote a hail.
+
+```toml
+hail = 1
+edition = 3
+name = "shared-work"
+host = "a"
+signing = "off"
+grammar = "none"
+repositories = { work = "https://forge.example/work" }
+
+[owners.a]
+bots = ["lead"]
+[owners.b]
+bots = ["lead"]
+```
+
+Without a roster all listed bots may hail one another. A request across owners is always declinable;
+a STOP from another owner has no authority over a bot. It may stop only its own owner's work with that
+owner's authorization. Roster grants, principals, deciders, session claims, caps, Owner-ask authority and
+sealing policies are available only where their governing roster supplies them. They are not inferred
+from a `hail.toml`. The common form, sources, filing, catch-up and signing-step display still bind.
+A record begun without a roster stays readable after adopting one under its earlier settings.
+
+**Roster adoption.** A record governed by a roster adopts sealanes/1, edition one. Hail's tools enforce `hail.message`, `hail.answer`,
 `hail.brief`, `hail.stop`, `hail.warn` and `hail.owner`, exactly the acts of its §5.1. No extension gives a grant. The
 roster holds the Owner, people, teams, kinds, bots, identities, public keys, grants, places, record folders, filers and
 session caps. Only hail settings live in `ext.hail`; every key, scope, type, default and refusal is in [the one key
@@ -790,9 +843,9 @@ again. Missing evidence requires the retained history, never an empty record. Ex
 history-failure replies remain (§4, §6.3).
 
 **Matters and waiting work.** A matter has one stable reference, not a copy of its text:
-- `tracker:<repository-token>:<tracker-id>` for a tracker, with the sealanes/1 tracker id; in a tracker folder that
+- `tracker:<repository-name>:<tracker-id>` for a tracker, with the sealanes/1 tracker id; in a tracker folder that
   teams share, which team holds it is sealanes/1 §4.2's, where its number's `ids` range decides;
-- `ask:<repository-token>:<ask-id>` for an ask; the tracker tool supplies its stable ask id;
+- `ask:<repository-name>:<ask-id>` for an ask; the tracker tool supplies its stable ask id;
 - `thread:<hail-id>` for a hail thread, using its first hail's id;
 - `plan:<team>` for the team's plan, held by the lead.
 
@@ -1749,8 +1802,7 @@ opaque-id        = 1*(ALPHA / DIGIT / "_" / "-")
 ## Appendix B. An example roster (informative)
 
 This is content for an illustrative sealanes/1 roster, not a roster in force. All teams use the private repository
-`https://forge.example/org/records`. Its source token is
-`r-6ac23d3f8c7f891fe3ca45a0871f75ec043c7d5758befb3151a6481c222dafa4`. An actual roster also needs the Owner's
+`https://forge.example/org/records`. Its source name is `records`, listed in each team’s record settings. An actual roster also needs the Owner's
 identities, trusted file hashes and complete kind definitions under sealanes/1; this appendix claims no adoption or
 executable roster fixture.
 
