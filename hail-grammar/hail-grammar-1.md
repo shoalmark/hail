@@ -100,7 +100,18 @@ require list and lines are well formed. This limits cascades while retaining ind
 
 ## 5. Common openers
 
-The common set and its meaning rules are specified here, not chosen by the file's publisher.
+Every grammar contains exactly these common opener names, byte for byte and case sensitive:
+`Fact`, `Not done`, `Next`, `Correction`, `Say again`. Their `means` values are the exact strings
+below, not a publisher's paraphrase. A grammar can add openers but cannot change a common meaning.
+A marker need not allow every common opener; the common set belongs to the grammar, not every row.
+
+Only the Owner changes this set by a new edition of hail-grammar, in batches. Earlier editions and
+the files pinned to them remain readable. A grammar's own new edition cannot change the common set.
+
+At F3, missing common opener O prints `grammar openers.O: [g-common-missing] common opener O is
+missing; add O with its edition-one meaning.` A changed meaning prints `grammar openers.O.means:
+[g-common-meaning] common meaning differs; write <exact meaning from the table>.` Unknown child keys
+are F2 shape faults; do not double-report them as changed meaning.
 
 ## 6. Meanings in a grammar
 
