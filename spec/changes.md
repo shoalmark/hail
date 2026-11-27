@@ -1,6 +1,6 @@
 # Third-edition draft changes
 
-This unsigned draft builds on the preceding draft. It is published only by the Owner's signed merge.
+Changes from the second edition. This unsigned draft is published only by the Owner's signed merge.
 The list is organized by the sections a reader must revisit, without private findings or identifiers.
 
 ## Form, sources and time — sections 1–3, Appendix A
@@ -15,6 +15,9 @@ fixes its bytes; an additional sha256 is optional unless settings require it. Ha
 ordinary files rather than a second reference list. Short decisive values stay in the body. Time
 accepts UTC Z and both supported numeric-offset forms. The body has no hail/1 line budget or ordinary
 request/result content requirement; a grammar supplies those. Structured protocol forms remain.
+Bot and decider addresses and ids replace the earlier seat-only forms. Conditional headers include
+why, clarify, for-team, sealed-to and min-class; Owner choice labels are exactly A through E.
+The roster, keys, acting-for and handover headers, grant-change kind and owner-pair sender are retired.
 
 ## Receipts and effect — sections 4–7
 
@@ -25,6 +28,12 @@ Nothing outside a landed hail has effect. Other channels carry only the record r
 therefore follows filing on the remote default branch, rather than giving an unfiled message effect.
 
 ## Settings and routes — section 8 and the extension table
+
+Roster-governed records adopt sealanes/1 edition one for bot ids, people, kinds, grants, places,
+pins, keys, session caps and change control. Hail adds extension settings, not core roster keys.
+The team principal roles are coordinator, auditor and leads; the coordinator is the first Owner
+gate. Deciders can approach the Owner directly within their declared scope, with for-team choosing
+the ask's record. Replies to people use their declared route. The stand-in role is removed.
 
 Record settings are defined once, carried by a governing roster or by root hail.toml without one.
 They identify bots and addresses, signing, repository short names and a grammar or none. A source can
@@ -42,9 +51,20 @@ Signature is not part of what makes bytes a hail. Every tool and view shows the 
 by the forge's access alone or signed. A roster requires signing. Without a roster, an owner can start
 without keys; turning signing off after it is on requires that owner's signed commit. Earlier unsigned
 hails keep their original step. Present signatures are checked, and signature requirements at filing
-cannot be evaded by an earlier send time.
+cannot be evaded by an earlier send time. Required signing is displayed separately from its
+verification result; only verified signing is labeled signed. Owner signing uses the desktop
+surface, with no phone-pair signature or companion-app condition.
 
 ## Record and operation — sections 10–10b
+
+START, END, CLAIM, RELEASE and FORCED END record session lifecycle and item ownership. START names
+waiting work and its initial matter; a claim, not START alone, makes the holder. Sending-session and
+first-hail claim checks bind work to the session. A live-claim FORCED END needs an active STOP and
+the current holder's full response window, checked at filing; replay keeps that accepted event.
+Cross-repository uses retain the observed sender heads. Replies spanning matters, and free-text
+requests or questions, require an explicit matter. Owner-only AWAY and BACK replace the earlier
+availability and stand-in arrangements. DECISION cannot change permissions: roster change control
+owns grants. The earlier prose end-marker form is removed.
 
 Every session reads what its bot owes at start. A no-roster reader also shows every new addressed hail,
 including answers and receipts that owe nothing. The record disables line-end conversion. Its forge
