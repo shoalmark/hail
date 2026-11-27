@@ -69,6 +69,10 @@ Unknown or mistyped containers suppress only dependent child checks. A grammar-d
 located at `grammar <field>`. Body faults use `body line n`; missing required openers use
 `header marker`, since the missing line has no position. Codes below are stable in this draft.
 
+F1 uses the literal location `grammar file`. F4 uses `grammar markers.<MARKER>.allow` or
+`grammar markers.<MARKER>.require`, naming the list being checked, with no array index.
+F5 and F6 use `grammar markers.<MARKER>.require`.
+
 Print `location: [code] problem; repair.` on one physical line. Substitute actual values for variables.
 Order grammar shape errors by UTF-8 field path, then common-set errors in common-set order, then
 marker references in the marker order above (allow before require, array order), then conflicts,
