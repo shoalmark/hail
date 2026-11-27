@@ -113,6 +113,48 @@ missing; add O with its edition-one meaning.` A changed meaning prints `grammar 
 [g-common-meaning] common meaning differs; write <exact meaning from the table>.` Unknown child keys
 are F2 shape faults; do not double-report them as changed meaning.
 
+| Opener | Exact means string |
+|---|---|
+| `Fact` | `what was observed, with its value` |
+| `Not done` | `what was left out or not checked, and why; nothing when nothing was left out` |
+| `Next` | `the sender's own next act, or who acts next and on what condition` |
+| `Correction` | `the wrong value and its replacement in the hail named by re` |
+| `Say again` | `the wanted part of the hail named by re: a source number, body line number or header name` |
+
+At B6, the reader checks the stated use against the declared meaning. This is a reading of the
+statement, not a claim to prove observations true. Fact states the observation and its value. Next
+states the sender's own next act, or identifies the next actor and the condition for that act.
+Not done states the omission and why, or states nothing was omitted. A mismatch prints
+`body line n: [g-use] O does not carry its declared meaning; write <the exact means string>.`
+
+Correction gives the wrong value and the right one, and `re` must be exactly one valid hail id naming
+the corrected hail. No `supersedes` is needed merely to correct a value; withdrawal still follows
+hail/1. A missing value pair prints `body line n: [g-correction] correction lacks the wrong or right
+value; name the wrong value and give its replacement.` A missing or non-single id prints
+`header re: [g-correction-re] correction names no single hail; write the corrected hail's id.`
+One re fault is printed per hail, even with several Correction lines. The value fault is distinct.
+Do not also print g-use for these two specific faults.
+
+Say again identifies exactly the wanted part by `source N` (1–9), `body line N` (positive integer),
+or `header key` (a hail/1 header key), of the one hail named by `re`. It may add why that part is wanted.
+It asks for a part of the earlier hail; it is not a citation in the current hail. If the received hail
+is supplied, check that the part exists there. Otherwise report that existence was not checked and
+do not guess. A missing or invalid part prints `body line n: [g-part] wanted part is not identified;
+write source N, body line N or header key of the received hail.` A nonexistent part prints
+`body line n: [g-part] named part does not exist; write an existing source number, body line or header name.`
+A missing or non-single re prints `header re: [g-repeat-re] repetition names no single hail; write the
+received hail's id.` Do not also emit g-use for a specific part/re fault.
+
+An ANSWER holds no question, even one without a question mark or hidden after a statement. It may
+quote a question as the object being answered if it asks the reader nothing. A question requesting
+information prints `body line n: [g-answer] ANSWER asks a question; state the answer here and file
+any new question as QUESTION.` A question in the body is a meaning check, not a punctuation test.
+If two lines ask questions, each has its own fault. hail/1 already forbids an ask line on ANSWER.
+
+For B6 faults on `re`, print them before body faults under hail/1's location order; within a body line,
+check the opener's specific meaning first and the ANSWER rule second. Without comparison evidence,
+report `meaning evidence not supplied` for checks that need it, rather than claiming a complete check.
+
 ## 6. Meanings in a grammar
 
 Meaning review is part of accepting a grammar, alongside its shape and references.
