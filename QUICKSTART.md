@@ -1,49 +1,47 @@
 # hail/1 on one page
 
-hail/1 is a protocol by which agent seats message each other, under one person, the Owner, who keeps the final word.
-This page is the short way in. [The spec](spec/hail-1.md) governs.
+This is the unsigned third-edition draft. [The specification](spec/hail-1.md) governs.
 
-**Status:** first edition, not yet in force. Its tools come next: `hail check` first, then `hail send` (§11). Until
-`hail send` signs, seats' hails go unsigned; the Owner's DECISIONs and "seen"s count only when signed (§9).
+A shared record takes its settings from a roster or, when it has no roster, from root `hail.toml`.
+Those settings list bots and their addresses, signing, repository short names.
+A roster always requires signing. Without one, the owners can start with the forge's access alone.
 
-## A hail
+Here is an ordinary request in a record with no roster and with signing off. Its settings
+list `a.lead` and `b.lead`. No source or subject is needed to ask for this work:
 
 ```text
 hail/1
-from: a.planner ‹session›
-to: a.builder-1
-id: a.planner-20261108T0812Z-k8chqr
+from: a.lead s1
+to: b.lead
+id: a.lead-20261127T1000Z-123abc
 re: none
 marker: REQUEST
-written-against: repo@‹commit› · 2026-11-08T09:12:40+01:00
-pointer: workbench:out/to-a.builder-1/lane-4.md sha256 ‹hex›
-Build lane 4 from the brief behind the pointer.
-ask: Either DECLINED, which ends it, or WILCO followed by DONE with the commit.
+written-against: 2026-11-27T10:00:00Z
+sources: 0
+ask: Add 4 and 4 and send the sum.
 end hail/1
 ```
 
-- **The frame:** `hail/1` to `end hail/1`. The header is `key: value` lines and ends with `pointer`. The body is at
-  most five lines, followed by one `ask:` line, on a REQUEST or a QUESTION only.
-- **Pointers, not copies:** the content lives in git, or in a file named by its sha256.
-- **Seven messages:** INFORMATION, ADVICE, WARNING, QUESTION, ANSWER, REQUEST, STOP.
-- **Four receipts:** RECEIVED, WILCO (will comply), DECLINED (will not), DONE.
-- **Once the act check enforces,** a REQUEST also carries `brief` and `subject` (§8a).
+The header ends at `sources: N`, then come N references numbered #1 through #9, then the body and,
+on REQUEST or QUESTION, exactly one ask. There is no pointer line or #0. Source forms are
+`name@commit`, `name:path@commit`, `name:path@commit:first-last`, that range followed by one label,
+`name@from..to`, and `name:path@from..to`. Only the whole-file form takes an optional sha256
+(required where settings say so). Commit the work before citing it. Every source is cited in the
+body or ask as #n; every citation has a source. Detail stays in the work, with no note written for
+citation. Folders, branches, tags and notes are no sources. Ids and branch names are short values
+in the body. The body is enough to decide without opening sources;
+no reader can certify that writer's duty. hail/1 sets no body line budget, opener or required reason.
 
-## The rules that matter most
+A REQUEST is declined, or accepted by WILCO and completed by DONE or DECLINED. A QUESTION gets ANSWER.
+INFORMATION needs no receipt. RECEIVED is owed only when the sender writes `receipt: received`; an
+actual answer satisfies it too. Receipts never request receipts. Across owners, a request is always
+declinable. A hail gives no new grant or runtime permission.
 
-1. **A seat's hail carries no authority.** The reader computes authority from a signed roster of grants. The Owner's
-   words count only as the Owner's signed answers.
-2. **The roster** says who may hail, answer and stop whom. An unlisted pair is refused.
-3. **Across teams,** every hail goes from a principal to a principal.
-4. **A filed hail is never amended:** a correction is a new hail with `supersedes`.
-5. **The nearest transport that reaches the reader:** the bytes are the same on every transport, which decides how
-   fast a hail arrives, never whether it counts.
-6. **A need only the Owner can meet** goes hop by hop to the principal, which relays it as an Owner-ask, answers it
-   from standing evidence, or rejects it. The principal hands the Owner's signed answer back to the seat. No seat
-   relies on this relay until hail's tools pass the spec's acceptance tests (§10b, point 15).
+Check before filing. A failed check gives the complete fix list, one actionable line per fault, and
+refuses the filing. File the exact bytes in the record,
+push the filing, then notify by the repository, filing commit, path and addressee alone. A local commit,
+side branch or chat message has no hail effect. Correct a landed hail by a new hail, never by editing it.
 
-No board is needed: hail works without one.
-
-**Read next:** the spec's §2 to §4 (the frame, the header, the markers), §6 (authority) and §8 (the roster).
-Appendix C has one hail per marker. [The article](https://shoalmark.tools/blog/hail-1.html) walks through it figure by
-figure.
+At every session start, read what is new and what your bot owes. An answer may be new without being owed.
+Every tool and view shows `by the forge's access alone` or `signed`; turning signing on later never
+relabels older hails. Turning it off for an owner requires that owner's signed commit.
